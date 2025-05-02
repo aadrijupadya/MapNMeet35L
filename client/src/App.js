@@ -10,8 +10,9 @@ function App() {
     }, []);
 
     return (
-        
-            {message}
+        <div>
+            {message}   
+        </div>
         
     );
 }
