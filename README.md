@@ -1,5 +1,6 @@
 # MapNMeet35L
-to start the app:
+
+ **to start the app:**
 
 cd client
 npm install
@@ -7,4 +8,8 @@ npm start
 
 cd ../server
 npm install
-node index.js
+node server.js
+
+**setting up the database**
+create a .env file in the server folder with the mongo db connection string
+install mongodb vs code extension?
