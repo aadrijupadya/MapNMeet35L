@@ -1,0 +1,42 @@
+.container {
+  padding: 24px;
+  max-width: 800px;
+  margin: 0 auto;
+  font-family: Arial, sans-serif;
+  background-color: #ffffff;
+}
+
+.title {
+  font-size: 32px;
+  font-weight: bold;
+  color: #1e3a8a;
+  margin-bottom: 24px;
+}
+
+.section {
+  margin-bottom: 24px;
+}
+
+.sectionTitle {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 8px;
+}
+
+.sectionContent {
+  font-size: 16px;
+  color: #374151;
+  line-height: 1.6;
+}
+
+.list {
+  padding-left: 20px;
+  margin-top: 8px;
+}
+
+.list li {
+  margin-bottom: 8px;
+  color: #374151;
+  font-size: 16px;
+}
