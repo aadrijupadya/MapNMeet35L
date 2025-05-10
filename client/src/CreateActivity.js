@@ -39,7 +39,6 @@ export default function CreateActivity() {
 
     useEffect(() => {
       const apiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
-      console.log('api key:' + apiKey)
 
       loadGoogleMapsScript(apiKey).then(() => {
         const map = new window.google.maps.Map(mapRef.current, {

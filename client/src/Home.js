@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import './Home.css';
 import logo from './assets/logo.png';
 import uclaBanner from './assets/Banner.png'; // your stitched UCLA image
+import { useNavigate } from 'react-router-dom';
 
 function Home() {
   const [showAbout, setShowAbout] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <div className="home-container">
@@ -27,9 +29,15 @@ function Home() {
 
         {/* Buttons Below the Mission Statement */}
         <div className="buttons">
-          <button onClick={() => setShowAbout(true)}>About</button>
-          <button onClick={() => alert("Navigate to Sign Up")}>Sign Up</button>
-          <button onClick={() => alert("Navigate to Login")}>Login</button>
+          <div>
+            <button onClick={() => navigate('/about')}>About</button>
+            <button onClick={() => navigate('/create-activity')}>Post an Activity!</button>
+            <button onClick={() => navigate('/map')}>Map</button>
+          </div>
+          <div>
+            <button onClick={() => navigate('/signup')}>Sign Up</button>
+            <button onClick={() => navigate('/login')}>Login</button>
+          </div>
         </div>
       </div>
 
