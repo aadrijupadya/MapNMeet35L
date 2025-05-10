@@ -18,7 +18,8 @@ function Home() {
       {/* Scrolling Image Banner */}
       <div className="banner-container">
         <div className="scrolling-banner">
-          <img src={uclaBanner} alt="UCLA Scrolling Banner" />
+          <img src={uclaBanner} alt="UCLA Scrolling Banner 1" />
+          <img src={uclaBanner} alt="UCLA Scrolling Banner 2" />
         </div>
         <div className="banner-overlay">
           <h1>MapNMeet provides a centralized and simplified way for students to connect and engage with others around campus.</h1>
