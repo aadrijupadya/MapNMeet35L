@@ -39,3 +39,15 @@
   margin-top: 10px;
   font-weight: bold;
 }
+
+.map-box {
+  height: 300px;
+  width: 100%;
+  margin: 12px 0;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+.map-instructions {
+  margin-top: 10px;
+  font-weight: 500;
+}

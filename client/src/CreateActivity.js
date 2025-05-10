@@ -1,0 +1,154 @@
+import React, { useEffect, useRef, useState } from 'react';
+import './CreateActivity.css';
+
+export default function CreateActivity() {
+  const mapRef = useRef(null);
+  const markerRef = useRef(null);
+  const [coordinates, setCoordinates] = useState(null);
+
+  const [form, setForm] = useState({
+    title: '',
+    description: '',
+    location: '',
+    time: '',
+    participantCount: '',
+    contactInfo: '',
+  });
+
+  const [status, setStatus] = useState('');
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+
+  function loadGoogleMapsScript(apiKey) {
+    return new Promise((resolve, reject) => {
+      if (window.google) return resolve(); // already loaded
+
+      const script = document.createElement('script');
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}`;
+      script.async = true;
+      script.defer = true;
+      script.onload = resolve;
+      script.onerror = reject;
+
+      document.head.appendChild(script);
+    });
+  }
+
+    useEffect(() => {
+      const apiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
+      console.log('api key:' + apiKey)
+
+      loadGoogleMapsScript(apiKey).then(() => {
+        const map = new window.google.maps.Map(mapRef.current, {
+          center: { lat: 34.0689, lng: -118.4452 },
+          zoom: 15,
+        });
+
+        map.addListener('click', (e) => {
+          const lat = e.latLng.lat();
+          const lng = e.latLng.lng();
+          setCoordinates({ lat, lng });
+
+          if (markerRef.current) {
+            markerRef.current.setPosition(e.latLng);
+          } else {
+            markerRef.current = new window.google.maps.Marker({
+              position: e.latLng,
+              map,
+            });
+          }
+        });
+      }).catch(err => {
+        console.error("Failed to load Google Maps script", err);
+      });
+  }, []);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!coordinates) {
+      setStatus('Please select a location on the map');
+      return;
+    }
+
+    try {
+      const res = await fetch('http://localhost:5000/api/activities', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...form,
+          location: JSON.stringify(coordinates), // Save as string or separate fields
+          participantCount: parseInt(form.participantCount),
+          time: new Date(form.time),
+        }),
+      });
+
+      if (res.ok) {
+        setStatus('Event created!');
+        setForm({
+          title: '',
+          description: '',
+          location: '',
+          time: '',
+          participantCount: '',
+          contactInfo: '',
+        });
+        setCoordinates(null);
+        if (markerRef.current) {
+          markerRef.current.setMap(null);
+          markerRef.current = null;
+        }
+      } else {
+        setStatus('Failed to create event');
+      }
+    } catch (err) {
+      setStatus('Error submitting form');
+      console.error(err);
+    }
+  };
+
+  return (
+    <div className="create-container">
+      <h2>Create New Activity</h2>
+      <form onSubmit={handleSubmit} className="create-form">
+        {['title', 'description', 'contactInfo'].map((field) => (
+          <input
+            key={field}
+            name={field}
+            placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+            value={form[field]}
+            onChange={handleChange}
+            required
+          />
+        ))}
+
+        <input
+          type="datetime-local"
+          name="time"
+          value={form.time}
+          onChange={handleChange}
+          required
+        />
+
+        <input
+          type="number"
+          name="participantCount"
+          placeholder="Participant Count"
+          value={form.participantCount}
+          onChange={handleChange}
+          required
+          min="1"
+        />
+
+        <div className="map-instructions">Click on the map to set location:</div>
+        <div ref={mapRef} className="map-box" />
+
+        <button type="submit">Submit</button>
+      </form>
+      {status && <p className="status">{status}</p>}
+    </div>
+  );
+}
