@@ -1,7 +1,11 @@
 /* eslint-disable prefer-arrow-callback */
-const mongoose = require('mongoose');
-const validator = require('validator');
-const bcrypt = require('bcrypt');
+
+// const mongoose = require('mongoose');
+// const validator = require('validator');
+// const bcrypt = require('bcrypt');
+import mongoose from 'mongoose';
+import validator from 'validator';
+import bcrypt from 'bcrypt';
 
 const userSchema = new mongoose.Schema(
     {
@@ -89,6 +93,4 @@ const userSchema = new mongoose.Schema(
 //     return await bcrypt.compare(candidatePassword, userPassword);
 // };
 
-const User = mongoose.model('User', userSchema);
-
-module.exports = User;
+export default mongoose.model('User', userSchema);

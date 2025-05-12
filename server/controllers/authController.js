@@ -1,10 +1,17 @@
-const axios = require('axios');
-const jwt = require('jsonwebtoken');
-const { promisify } = require('util');
-const oauth2Client = require('../utils/oauth2client');
-const catchAsync = require('./../utils/catchAsync'); // TODO 
-const AppError = require('./../utils/appError'); // TODO 
-const User = require('../models/UserModel'); // TODO 
+
+// const axios = require('axios');
+// const jwt = require('jsonwebtoken');
+// const { promisify } = require('util');
+// const oauth2Client = require('../utils/oauth2client');
+// const catchAsync = require('./../utils/catchAsync'); // TODO 
+// const AppError = require('./../utils/appError'); // TODO 
+// const User = require('../models/UserModel'); // TODO 
+import axios from 'axios';
+import jwt from 'jsonwebtoken';
+import { promisify } from 'util';
+import oauth2Client from '../utils/oauth2client.js';
+import catchAsync from './../utils/catchAsync.js';
+import User from '../models/UserModel.js';
 
 const signToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, { 
@@ -43,18 +50,44 @@ const createSendToken = (user, statusCode, res) => {
     });
 };
 /* GET Google Authentication API. */
-exports.googleAuth = catchAsync(async (req, res, next) => {
+// exports.googleAuth = catchAsync(async (req, res, next) => {
+//     const code = req.query.code;
+//     console.log("USER CREDENTIAL -> ", code);
+
+//     const googleRes = await oauth2Client.oauth2Client.getToken(code);
+    
+//     oauth2Client.oauth2Client.setCredentials(googleRes.tokens);
+
+//     const userRes = await axios.get(
+//         `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${googleRes.tokens.access_token}`
+// 	);
+	
+//     let user = await User.findOne({ email: userRes.data.email });
+   
+//     if (!user) {
+//         console.log('New User found');
+//         user = await User.create({
+//             name: userRes.data.name,
+//             email: userRes.data.email,
+//             image: userRes.data.picture,
+//         });
+//     }
+
+//     createSendToken(user, 201, res);
+// });
+
+export const googleAuth = catchAsync(async (req, res, next) => {
     const code = req.query.code;
     console.log("USER CREDENTIAL -> ", code);
 
-    const googleRes = await oauth2Client.oauth2Client.getToken(code);
+    const googleRes = await oauth2Client.getToken({code, redirect_uri: 'postmessage'});
     
-    oauth2Client.oauth2Client.setCredentials(googleRes.tokens);
+    oauth2Client.setCredentials(googleRes.tokens);
 
     const userRes = await axios.get(
         `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${googleRes.tokens.access_token}`
-	);
-	
+    );
+    
     let user = await User.findOne({ email: userRes.data.email });
    
     if (!user) {

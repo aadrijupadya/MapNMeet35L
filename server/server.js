@@ -5,28 +5,42 @@ import dotenv from 'dotenv';
 import activitiesRouter from './routes/activities.js';
 // import authController from './controllers/authController.js'; TODO: Fix this import
 // const authController = require('./controllers/authController');
-
+import { googleAuth } from './controllers/authController.js'; // include the .js extension
+import compression from 'compression';
 
 dotenv.config();
 
 const app = express();
-const port = 5000;
+const port = 8000;
 
-app.use(cors());
+// app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3000',
+  credentials: true
+}));
 app.use(express.json());
+app.use(compression());
 
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('MongoDB connection error:', err));
 
+
+// // Log incoming request headers for debugging
+app.use((req, res, next) => {
+  console.log('Request Headers:', req.headers); // Logs all headers
+  next();
+});
+
 app.use('/api/activities', activitiesRouter);
 
-app.listen(port, () => console.log(`Server running on port ${port}`));
-
-
 app.get('/api', (req, res) => {
-    res.json({ message: 'Hello from server!' });
+  console.log('Request received');
+  res.json({ message: 'Hello from server!' });
 });
 // TODO how to combine server.js and index.js?
 
-// app.get('/api/auth/google', authController.googleAuth);
+app.get('/api/auth/google', googleAuth);
+
+
+app.listen(port, () => console.log(`Server running on port ${port}`));
