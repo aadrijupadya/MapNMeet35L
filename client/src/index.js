@@ -15,3 +15,7 @@ root.render(
 // to log results (for example: reportWebVitals(console.log))
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();
+
+const protocol = window.location.protocol;  // "http:" or "https:"
+
+console.log(protocol);  // Logs "http:" or "https:"
