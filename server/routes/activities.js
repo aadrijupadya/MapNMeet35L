@@ -14,8 +14,13 @@ router.post('/', async (req, res) => {
 });
 
 router.get('/', async (req, res) => {
-  const activities = await Activity.find();
-  res.json(activities);
+  try {
+    const activities = await Activity.find();
+    res.json(activities);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch activities' });
+  }
 });
+
 
 export default router;
