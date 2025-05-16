@@ -7,30 +7,30 @@ import { googleAuth } from "./services/api";
 export default function Login() {
     const [user, setUser] = useState();
 
-    useEffect(() => {
-      async function fetchData() {
-        console.log(window.location.href); // Log full URL for debugging
+    // useEffect(() => {
+    //   async function fetchData() {
+    //     console.log(window.location.href); // Log full URL for debugging
 
-        const urlParams = new URLSearchParams(window.location.search);
-        console.log(urlParams);
-        const code = urlParams.get('code');
+    //     const urlParams = new URLSearchParams(window.location.search);
+    //     console.log(urlParams);
+    //     const code = urlParams.get('code');
 
-        try {
-          if (code) {
-            console.log(code);
-            const result = await googleAuth(code);
-            setUser(result.data.data.user);
-            alert("successfuly logged in");
-          } else {
-            throw new Error("Auth result error occured");
-          }
-        } catch (e) {
-          console.log(e);
-        }
-      }
-      fetchData();
+    //     try {
+    //       if (code) {
+    //         console.log(code);
+    //         const result = await googleAuth(code);
+    //         setUser(result.data.data.user);
+    //         alert("successfuly logged in");
+    //       } else {
+    //         throw new Error("Auth result error occured");
+    //       }
+    //     } catch (e) {
+    //       console.log(e);
+    //     }
+    //   }
+    //   fetchData();
       
-    }, []);
+    // }, []);
 
 
     return (

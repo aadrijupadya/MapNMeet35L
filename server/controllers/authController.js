@@ -80,7 +80,8 @@ export const googleAuth = catchAsync(async (req, res, next) => {
     const code = req.query.code;
     console.log("USER CREDENTIAL -> ", code);
 
-    const googleRes = await oauth2Client.getToken({code, redirect_uri: 'postmessage'});
+    // const googleRes = await oauth2Client.getToken({code, redirect_uri: 'postmessage'});
+    const googleRes = await oauth2Client.getToken(code)
     
     oauth2Client.setCredentials(googleRes.tokens);
 

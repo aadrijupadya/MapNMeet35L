@@ -22,10 +22,10 @@ export default (props) => {
 	};
 
 	const googleLogin = useGoogleLogin({
-		// onSuccess: responseGoogle,
-		// onError: responseGoogle,
+		onSuccess: responseGoogle,
+		onError: responseGoogle,
 		flow: "auth-code",
-		redirectUri: "http://localhost:3000/login"
+		// redirectUri: "http://localhost:3000/login"
 	});
 
 	return (
