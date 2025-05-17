@@ -4,7 +4,6 @@ import './Activities.css';
 export default function Activities() {
   console.log('Activities component mounted'); // Debug 1 - Should appear immediately
 
-  // Sample event data with proper numeric values for sorting
   const initialEvents = [
     {
       id: 1,
@@ -38,7 +37,6 @@ export default function Activities() {
   const [events, setEvents] = useState(initialEvents);
   const [activeSort, setActiveSort] = useState('recent');
 
-  // Format date for display
   const formatDate = (date) => {
     return date.toLocaleString('en-US', {
       weekday: 'short',
@@ -49,34 +47,21 @@ export default function Activities() {
     });
   };
 
-  // Sort function with debug logs
   const sortEvents = (type) => {
     console.group(`Sorting by ${type}`);
     console.log('Original order:', initialEvents.map(e => e.id));
     
-    const sortedEvents = [...initialEvents]; // Always start from original
+    const sortedEvents = [...initialEvents];
     
     switch(type) {
       case 'recent':
-        sortedEvents.sort((a, b) => {
-          const result = b.date - a.date;
-          console.log(`Comparing ${a.id}(${a.date}) and ${b.id}(${b.date}):`, result);
-          return result;
-        });
+        sortedEvents.sort((a, b) => b.date - a.date);
         break;
       case 'closest':
-        sortedEvents.sort((a, b) => {
-          const result = a.distance - b.distance;
-          console.log(`Comparing ${a.id}(${a.distance}mi) and ${b.id}(${b.distance}mi):`, result);
-          return result;
-        });
+        sortedEvents.sort((a, b) => a.distance - b.distance);
         break;
       case 'participants':
-        sortedEvents.sort((a, b) => {
-          const result = b.participants.max - a.participants.max;
-          console.log(`Comparing ${a.id}(${a.participants.max}) and ${b.id}(${b.participants.max}):`, result);
-          return result;
-        });
+        sortedEvents.sort((a, b) => b.participants.max - a.participants.max);
         break;
       default:
         break;
@@ -85,7 +70,6 @@ export default function Activities() {
     console.log('New order:', sortedEvents.map(e => e.id));
     console.groupEnd();
     
-    // Visual feedback in UI
     document.getElementById('sort-feedback').textContent = `Sorted by ${type}`;
     setTimeout(() => {
       document.getElementById('sort-feedback').textContent = '';
@@ -95,7 +79,6 @@ export default function Activities() {
     setEvents(sortedEvents);
   };
 
-  // Emergency debug function
   window.debugActivities = () => {
     console.log('--- DEBUG ACTIVITIES ---');
     console.log('Current state:', { events, activeSort });
@@ -105,7 +88,10 @@ export default function Activities() {
 
   return (
     <div className="activities-page">
-      {/* Debug element */}
+      {/* ➕ Create Activity Button */}
+      <a href="/create-activity" className="create-button">+</a>
+
+      {/* Sort Feedback */}
       <div id="sort-feedback" style={{
         position: 'fixed',
         top: '10px',
@@ -113,44 +99,22 @@ export default function Activities() {
         background: '#FFB400',
         padding: '5px',
         borderRadius: '4px',
-        display: 'none' /* Will show via JS */
+        display: 'none'
       }}></div>
 
+      {/* Map Area */}
       <div className="map-container">
         <div className="map-placeholder">
           Map will be implemented here
         </div>
       </div>
-      
+
+      {/* Events Area */}
       <div className="events-container">
         <div className="sort-options">
-          <button 
-            onClick={() => {
-              console.log('Most Recent button clicked'); // Debug 2
-              sortEvents('recent');
-            }}
-            className={activeSort === 'recent' ? 'active' : ''}
-          >
-            Most Recent
-          </button>
-          <button 
-            onClick={() => {
-              console.log('Closest button clicked'); // Debug 3
-              sortEvents('closest');
-            }}
-            className={activeSort === 'closest' ? 'active' : ''}
-          >
-            Closest
-          </button>
-          <button 
-            onClick={() => {
-              console.log('Most Participants button clicked'); // Debug 4
-              sortEvents('participants');
-            }}
-            className={activeSort === 'participants' ? 'active' : ''}
-          >
-            Most Participants
-          </button>
+          <button onClick={() => sortEvents('recent')} className={activeSort === 'recent' ? 'active' : ''}>Most Recent</button>
+          <button onClick={() => sortEvents('closest')} className={activeSort === 'closest' ? 'active' : ''}>Closest</button>
+          <button onClick={() => sortEvents('participants')} className={activeSort === 'participants' ? 'active' : ''}>Most Participants</button>
         </div>
 
         {events.map(event => (
