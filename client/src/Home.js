@@ -95,7 +95,7 @@ function Home(props) {
 
       {/* Footer */}
       <footer className="footer">
-        <p>© 2025 MapNMeet | Designed by Aadrij Upadaya, Aaditya Raj, Antonio Quintero, Akhilesh Basetty, and Daniel Tritasavit</p>
+        <p>© 2025 MapNMeet | Designed by Aadrij Upadya, Aaditya Raj, Antonio Quintero, Akhilesh Basetty, and Daniel Tritasavit</p>
         <p>Contact: aadriju01@ucla.edu</p>
       </footer>
     </div>
