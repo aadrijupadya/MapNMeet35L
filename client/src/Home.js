@@ -4,7 +4,7 @@ import logo from './assets/logo.png';
 import uclaBanner from './assets/Banner.png'; // your stitched UCLA image
 import { useNavigate } from 'react-router-dom';
 import { useGoogleLogin, googleLogout } from "@react-oauth/google";
-import { googleAuth } from "./services/api";
+import axios from 'axios';
 
 function Home(props) {
   const [showAbout, setShowAbout] = useState(false);
@@ -35,7 +35,9 @@ function Home(props) {
   const responseGoogle = async (authResult) => {
 		try {
 			if (authResult["code"]) {
-				const result = await googleAuth(authResult.code);
+        const result = await axios.get(`http://localhost:8000/api/auth/google?code=${authResult.code}`, {
+          withCredentials: 'include',
+        }); 
 				props.updateUser(result.data.data.user);
 			} else {
 				console.log(authResult);
@@ -95,7 +97,6 @@ function Home(props) {
             <button onClick={() => navigate('/map')}>Map</button>
           </div>
           <div>
-            <button onClick={() => navigate('/signup')}>Sign Up</button>
               <button onClick={() => googleLogin()}>Login</button>
               <button onClick={() => handleLogout()}>Logout</button>
           </div>
