@@ -29,6 +29,7 @@ function App() {
           const data = await response.json();
           setUser(data.user);
         } else {
+          console.warn('Session validation failed with status:', response.status);
           setUser(null); // No valid session
         }
       } catch (err) {

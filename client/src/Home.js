@@ -3,7 +3,7 @@ import './Home.css';
 import logo from './assets/logo.png';
 import uclaBanner from './assets/Banner.png'; // your stitched UCLA image
 import { useNavigate } from 'react-router-dom';
-import { useGoogleLogin } from "@react-oauth/google";
+import { useGoogleLogin, googleLogout } from "@react-oauth/google";
 import { googleAuth } from "./services/api";
 
 function Home(props) {
@@ -11,6 +11,27 @@ function Home(props) {
   const navigate = useNavigate();
 
 
+  const handleLogout = async () => {
+    try {
+      // 1. Logout from Google (if using GIS or Firebase)
+      googleLogout(); // Only if you use Google OAuth
+  
+      // 2. Call backend to clear the HttpOnly cookie
+      await fetch('http://localhost:8000/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include', // important to send cookies
+      });
+  
+      // 3. Clear app state
+      props.updateUser(null);
+  
+      // 4. Optional: navigate to login
+      // navigate('/login');
+    } catch (error) {
+      console.error('Logout failed', error);
+    }
+  };
+ 
   const responseGoogle = async (authResult) => {
 		try {
 			if (authResult["code"]) {
@@ -21,7 +42,7 @@ function Home(props) {
 				throw new Error(authResult);
 			}
 		} catch (e) {
-			console.log(e);
+			alert(e.response.data.message)
 		}
 	};
 
@@ -76,6 +97,7 @@ function Home(props) {
           <div>
             <button onClick={() => navigate('/signup')}>Sign Up</button>
               <button onClick={() => googleLogin()}>Login</button>
+              <button onClick={() => handleLogout()}>Logout</button>
           </div>
         </div>
       </div>

@@ -47,5 +47,20 @@ app.get('/api/auth/google', googleAuth);
 
 app.get('/api/auth/validate', validateSession);
 
+// Backend logout endpoint
+app.post('/api/auth/logout', (req, res) => {
+  const cookieOptions = {
+    httpOnly: true,
+    path: '/',
+    secure: false,
+  };
+  if (process.env.NODE_ENV === 'production') {
+      cookieOptions.secure = true;
+      cookieOptions.sameSite = 'none';
+  }
+  res.clearCookie('jwt', cookieOptions);
+  res.status(200).json({ message: 'Logged out' });
+});
+
 
 app.listen(port, () => console.log(`Server running on port ${port}`));
