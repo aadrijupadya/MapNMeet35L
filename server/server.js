@@ -7,6 +7,8 @@ import activitiesRouter from './routes/activities.js';
 // const authController = require('./controllers/authController');
 import { googleAuth } from './controllers/authController.js'; // include the .js extension
 import compression from 'compression';
+import { validateSession } from './controllers/authController.js';
+import cookieParser from 'cookie-parser';
 
 dotenv.config();
 
@@ -20,6 +22,7 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(compression());
+app.use(cookieParser());
 
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('Connected to MongoDB'))
@@ -41,6 +44,8 @@ app.get('/api', (req, res) => {
 // TODO how to combine server.js and index.js?
 
 app.get('/api/auth/google', googleAuth);
+
+app.get('/api/auth/validate', validateSession);
 
 
 app.listen(port, () => console.log(`Server running on port ${port}`));

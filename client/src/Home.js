@@ -3,10 +3,34 @@ import './Home.css';
 import logo from './assets/logo.png';
 import uclaBanner from './assets/Banner.png'; // your stitched UCLA image
 import { useNavigate } from 'react-router-dom';
+import { useGoogleLogin } from "@react-oauth/google";
+import { googleAuth } from "./services/api";
 
-function Home() {
+function Home(props) {
   const [showAbout, setShowAbout] = useState(false);
   const navigate = useNavigate();
+
+
+  const responseGoogle = async (authResult) => {
+		try {
+			if (authResult["code"]) {
+				const result = await googleAuth(authResult.code);
+				props.updateUser(result.data.data.user);
+			} else {
+				console.log(authResult);
+				throw new Error(authResult);
+			}
+		} catch (e) {
+			console.log(e);
+		}
+	};
+
+	const googleLogin = useGoogleLogin({
+		onSuccess: responseGoogle,
+		onError: responseGoogle,
+		flow: "auth-code",
+		// redirectUri: "http://localhost:3000/login"
+	});
 
   return (
     <div className="home-container">
@@ -24,7 +48,22 @@ function Home() {
           <img src={uclaBanner} alt="UCLA Scrolling Banner 2" />
         </div>
         <div className="banner-overlay">
-          <h1>MapNMeet provides a centralized and simplified way for students to connect and engage with others around campus.</h1>
+          <div>
+                {props.user && props.user.image && (
+                <img
+                  src={props.user.image}
+                  alt="User Profile"
+                  style={{
+                  width: "100px",
+                  height: "100px",
+                  borderRadius: "50%",
+                  margin: "10px",
+                  }}
+                />
+                )}
+                <p>{props.user && props.user.name}</p>
+                <p>{props.user && props.user.email}</p>
+              </div>
         </div>
 
         {/* Buttons Below the Mission Statement */}
@@ -36,7 +75,7 @@ function Home() {
           </div>
           <div>
             <button onClick={() => navigate('/signup')}>Sign Up</button>
-            <button onClick={() => navigate('/login')}>Login</button>
+              <button onClick={() => googleLogin()}>Login</button>
           </div>
         </div>
       </div>

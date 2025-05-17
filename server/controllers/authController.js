@@ -12,6 +12,9 @@ import { promisify } from 'util';
 import oauth2Client from '../utils/oauth2client.js';
 import catchAsync from './../utils/catchAsync.js';
 import User from '../models/UserModel.js';
+import dotenv from 'dotenv';
+
+dotenv.config()
 
 const signToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, { 
@@ -22,7 +25,6 @@ const signToken = (id) => {
 const createSendToken = (user, statusCode, res) => {
     const token = signToken(user.id);
 
-    console.log(process.env.JWT_COOKIE_EXPIRES_IN);
     const cookieOptions = {
         expires: new Date(Date.now() + +process.env.JWT_COOKIE_EXPIRES_IN),
         httpOnly: true,
@@ -37,9 +39,8 @@ const createSendToken = (user, statusCode, res) => {
 
     user.password = undefined;
 
+    
     res.cookie('jwt', token, cookieOptions); // Little confused about this line, do we have do decode the cookie somewhere?
-
-    console.log(user);
 
     res.status(statusCode).json({
         message: 'success',
@@ -78,7 +79,6 @@ const createSendToken = (user, statusCode, res) => {
 
 export const googleAuth = catchAsync(async (req, res, next) => {
     const code = req.query.code;
-    console.log("USER CREDENTIAL -> ", code);
 
     // const googleRes = await oauth2Client.getToken({code, redirect_uri: 'postmessage'});
     const googleRes = await oauth2Client.getToken(code)
@@ -89,6 +89,11 @@ export const googleAuth = catchAsync(async (req, res, next) => {
         `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${googleRes.tokens.access_token}`
     );
     
+
+    if (!userRes.data.email.endsWith('@g.ucla.edu')) { // TODO work on this unauthorized flow for non UCLA users
+        return res.status(401).json({ message: 'Unauthorized: Email domain not allowed' });
+    }
+
     let user = await User.findOne({ email: userRes.data.email });
    
     if (!user) {
@@ -99,6 +104,23 @@ export const googleAuth = catchAsync(async (req, res, next) => {
             image: userRes.data.picture,
         });
     }
-
     createSendToken(user, 201, res);
 });
+
+
+
+export const validateSession = async (req, res) => {
+    // console.log("THE REQUEST IS", req)
+      const token = req.cookies.jwt
+      if (!token) {
+        return res.status(401).json({ message: 'Not logged in' });
+      }
+  
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const user = await User.findById(decoded.id);
+      if (!user) {
+        return res.status(401).json({ message: 'User not found' });
+      }
+  
+      res.status(200).json({ user });
+  };
