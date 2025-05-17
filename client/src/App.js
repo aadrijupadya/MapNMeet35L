@@ -8,6 +8,7 @@ import Login from './Login';
 import Signup from './Signup';
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
+import Activities from './Activities';
 
 function App() {
   const [user, setUser] = useState()
@@ -53,6 +54,7 @@ function App() {
         <Route path="/map" element={<Map />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/activities" element={<Activities />} />
       </Routes>
     </Router>
   );

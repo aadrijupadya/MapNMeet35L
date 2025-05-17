@@ -1,0 +1,128 @@
+/* Dark Mode Styles */
+.activities-page {
+  display: flex;
+  height: calc(100vh - 60px);
+  background-color: #121212;
+  color: #e0e0e0;
+}
+
+.map-container {
+  width: 50%;
+  background-color: #1e1e1e;
+  border: 1px solid #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #aaa;
+}
+
+.map-placeholder {
+  color: #777;
+}
+
+.events-container {
+  width: 50%;
+  padding: 20px;
+  overflow-y: auto;
+  background-color: #1a1a1a;
+}
+
+.sort-options {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.sort-options button {
+  padding: 8px 16px;
+  background-color: #333;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sort-options button.active {
+  background-color: #2ef;
+  color: #000;
+  font-weight: bold;
+}
+
+.sort-options button:hover {
+  background-color: #2ef;
+  color: #000;
+}
+
+.event-post {
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+  background-color: #252525;
+  transition: transform 0.2s ease;
+}
+
+.event-post:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.event-author {
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #2ef;
+}
+
+.event-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #fff;
+}
+
+.event-location {
+  margin-bottom: 3px;
+  font-size: 0.9rem;
+  color: #aaa;
+}
+
+.event-participants {
+  margin-bottom: 3px;
+  font-size: 0.9rem;
+  color: #aaa;
+}
+
+.event-time {
+  margin-bottom: 3px;
+  font-size: 0.9rem;
+  color: #777;
+}
+
+/* Scrollbar styling */
+.events-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.events-container::-webkit-scrollbar-track {
+  background: #252525;
+}
+
+.events-container::-webkit-scrollbar-thumb {
+  background-color: #2ef;
+  border-radius: 4px;
+}
+
+/* Status feedback element */
+#sort-feedback {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background: #2ef;
+  color: #000;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
