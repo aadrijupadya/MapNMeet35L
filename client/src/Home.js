@@ -3,25 +3,48 @@ import './Home.css';
 import logo from './assets/logo.png';
 import uclaBanner from './assets/Banner.png'; // your stitched UCLA image
 import { useNavigate } from 'react-router-dom';
-import { useGoogleLogin } from "@react-oauth/google";
-import { googleAuth } from "./services/api";
+import { useGoogleLogin, googleLogout } from "@react-oauth/google";
+import axios from 'axios';
 
 function Home(props) {
   const [showAbout, setShowAbout] = useState(false);
   const navigate = useNavigate();
 
 
+  const handleLogout = async () => {
+    try {
+      // 1. Logout from Google (if using GIS or Firebase)
+      googleLogout(); // Only if you use Google OAuth
+  
+      // 2. Call backend to clear the HttpOnly cookie
+      await fetch('http://localhost:8000/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include', // important to send cookies
+      });
+  
+      // 3. Clear app state
+      props.updateUser(null);
+  
+      // 4. Optional: navigate to login
+      // navigate('/login');
+    } catch (error) {
+      console.error('Logout failed', error);
+    }
+  };
+ 
   const responseGoogle = async (authResult) => {
 		try {
 			if (authResult["code"]) {
-				const result = await googleAuth(authResult.code);
+        const result = await axios.get(`http://localhost:8000/api/auth/google?code=${authResult.code}`, {
+          withCredentials: 'include',
+        }); 
 				props.updateUser(result.data.data.user);
 			} else {
 				console.log(authResult);
 				throw new Error(authResult);
 			}
 		} catch (e) {
-			console.log(e);
+			alert(e.response.data.message)
 		}
 	};
 
@@ -74,8 +97,8 @@ function Home(props) {
             <button onClick={() => navigate('/map')}>Map</button>
           </div>
           <div>
-            <button onClick={() => navigate('/signup')}>Sign Up</button>
               <button onClick={() => googleLogin()}>Login</button>
+              <button onClick={() => handleLogout()}>Logout</button>
           </div>
         </div>
       </div>
@@ -95,7 +118,7 @@ function Home(props) {
 
       {/* Footer */}
       <footer className="footer">
-        <p>© 2025 MapNMeet | Designed by Aadrij Upadaya, Aaditya Raj, Antonio Quintero, Akhilesh Basetty, and Daniel Tritasavit</p>
+        <p>© 2025 MapNMeet | Designed by Aadrij Upadya, Aaditya Raj, Antonio Quintero, Akhilesh Basetty, and Daniel Tritasavit</p>
         <p>Contact: aadriju01@ucla.edu</p>
       </footer>
     </div>

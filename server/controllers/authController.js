@@ -90,8 +90,8 @@ export const googleAuth = catchAsync(async (req, res, next) => {
     );
     
 
-    if (!userRes.data.email.endsWith('@g.ucla.edu')) { // TODO work on this unauthorized flow for non UCLA users
-        return res.status(401).json({ message: 'Unauthorized: Email domain not allowed' });
+    if (!userRes.data.email.endsWith('ucla.edu')) { // TODO work on this unauthorized flow for non UCLA users
+        return res.status(401).json({ message: 'Unauthorized: Email domain not allowed. Ensure you are using a UCLA email.' });
     }
 
     let user = await User.findOne({ email: userRes.data.email });

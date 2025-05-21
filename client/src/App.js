@@ -4,10 +4,7 @@ import Home from './Home'; // ✅ make sure the path is correct, e.g. './pages/H
 import About from './About'
 import CreateActivity from './CreateActivity';
 import Map from './Map';
-import Login from './Login';
-import Signup from './Signup';
 import { GoogleOAuthProvider } from "@react-oauth/google";
-
 import Activities from './Activities';
 
 function App() {
@@ -29,6 +26,7 @@ function App() {
           const data = await response.json();
           setUser(data.user);
         } else {
+          console.warn('Session validation failed with status:', response.status);
           setUser(null); // No valid session
         }
       } catch (err) {
@@ -52,8 +50,6 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/create-activity" element={<CreateActivity />} />
         <Route path="/map" element={<Map />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/login" element={<Login />} />
         <Route path="/activities" element={<Activities />} />
       </Routes>
     </Router>
