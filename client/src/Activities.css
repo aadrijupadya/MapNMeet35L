@@ -1,4 +1,3 @@
-/* Dark Mode Styles */
 .activities-page {
   display: flex;
   height: calc(100vh - 60px);
@@ -81,22 +80,53 @@
   color: #fff;
 }
 
-.event-location {
-  margin-bottom: 3px;
-  font-size: 0.9rem;
-  color: #aaa;
-}
-
-.event-participants {
-  margin-bottom: 3px;
-  font-size: 0.9rem;
-  color: #aaa;
-}
-
+.event-location,
+.event-participants,
 .event-time {
-  margin-bottom: 3px;
   font-size: 0.9rem;
-  color: #777;
+  color: #aaa;
+  margin-bottom: 3px;
+}
+
+/* Floating + button */
+.create-button {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  background-color: #2ef;
+  color: #000;
+  font-size: 2rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 50px;
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  z-index: 1000;
+}
+
+.create-button:hover {
+  background-color: #1bc;
+  transform: scale(1.05);
+}
+
+/* Sort feedback bubble */
+#sort-feedback {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background: #2ef;
+  color: #000;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: none;
 }
 
 /* Scrollbar styling */
@@ -111,18 +141,4 @@
 .events-container::-webkit-scrollbar-thumb {
   background-color: #2ef;
   border-radius: 4px;
-}
-
-/* Status feedback element */
-#sort-feedback {
-  position: fixed;
-  top: 10px;
-  right: 10px;
-  background: #2ef;
-  color: #000;
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-weight: bold;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-  z-index: 1000;
 }
