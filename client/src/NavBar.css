@@ -1,0 +1,56 @@
+/* Logo and top bar */
+.navbar-top {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 1001;
+}
+
+.logo-toggle {
+  height: 40px;
+  width: auto;
+  cursor: pointer;
+}
+
+/* Sidebar */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: -250px; /* hidden by default */
+  width: 250px;
+  height: 100vh;
+  background-color: var(--color-bg);
+  box-shadow: var(--shadow);
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  transition: left 0.3s ease;
+  z-index: 1002;
+}
+
+.sidebar.open {
+  left: 0;
+}
+
+/* Sidebar Links */
+.sidebar-links a{
+  display: flex;
+  flex-direction: column;
+  gap: 100px;
+}
+
+.sidebar-links a:hover {
+  color: var(--color-accent);
+}
+
+/* Optional: click-outside area */
+.sidebar-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 100vw;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+}

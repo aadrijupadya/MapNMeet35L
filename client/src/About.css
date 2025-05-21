@@ -1,0 +1,48 @@
+.container {
+  padding: 48px 24px;
+  max-width: 800px;
+  margin: 0 auto;
+  background-color: var(--color-bg-light);
+  font-family: var(--font-main);
+  color: var(--color-text);
+  text-align: center;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--color-accent);
+  margin-bottom: 40px;
+}
+
+.section {
+  margin-bottom: 48px;
+}
+
+.sectionTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 16px;
+}
+
+.sectionContent {
+  font-size: 1.1rem;
+  color: var(--color-text);
+  line-height: 1.8;
+  margin-bottom: 16px;
+}
+
+.list {
+  padding-left: 0;
+  list-style-position: inside;
+  margin-top: 12px;
+  text-align: left; /* Keeps lists aligned for readability */
+  display: inline-block; /* Centers block within centered container */
+}
+
+.list li {
+  margin-bottom: 12px;
+  color: var(--color-text);
+  font-size: 1.1rem;
+}

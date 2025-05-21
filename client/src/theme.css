@@ -1,43 +1,90 @@
-body, html {
+/* ======= THEME VARIABLES ======= */
+:root {
+  --font-main: 'Arial', sans-serif;
+
+  /* Colors */
+  --color-bg: #000000;
+  --color-bg-light: #1a1a1a;
+  --color-text: #ffffff;
+  --color-accent: #FFB400;
+  --color-muted: #aaaaaa;
+  --color-border: #333;
+  --color-blue: #2563eb;
+  --color-orange: #e09e00;
+
+  /* Sizes */
+  --header-height: 60px;
+  --radius: 8px;
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* ======= GLOBAL RESET ======= */
+* {
   margin: 0;
   padding: 0;
-  font-family: 'Arial', sans-serif;
+  box-sizing: border-box;
+}
+
+html, body {
+  font-family: var(--font-main);
+  background-color: var(--color-bg);
+  color: var(--color-text);
   height: 100%;
+  scroll-behavior: smooth;
 }
 
-.home-container {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+/* ======= GLOBAL UTILS ======= */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
 }
 
-/* Header */
+button, .btn {
+  padding: 12px 25px;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  border-radius: var(--radius);
+  transition: background-color 0.2s ease;
+}
+
+button:hover, .btn:hover {
+  background-color: var(--color-accent);
+  color: #000;
+}
+
+/* ======= HEADER ======= */
 .header {
   position: relative;
-  background-color: black;
+  background-color: var(--color-bg);
   display: flex;
   justify-content: center;
   align-items: flex-start;
   padding: 10px 0;
-  color: white;
-  height: 60px;
+  color: var(--color-text);
+  height: var(--header-height);
   z-index: 2;
   width: 100%;
 }
 
-/* Logo Wrapper */
 .logo-wrapper {
   position: absolute;
   top: -40px;
-  background-color: black;
-  border-radius: 8px;
+  background-color: var(--color-bg);
+  border-radius: var(--radius);
   padding: 10px;
   height: 200px;
   width: 200px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--shadow);
   z-index: 3;
 }
 
@@ -46,7 +93,7 @@ body, html {
   max-width: 100%;
 }
 
-/* Banner (flex-grow) */
+/* ======= BANNER ======= */
 .banner-container {
   position: relative;
   overflow: hidden;
@@ -73,7 +120,6 @@ body, html {
   100% { transform: translateX(-50%); }
 }
 
-/* Overlay Text */
 .banner-overlay {
   position: absolute;
   top: 25%;
@@ -83,14 +129,13 @@ body, html {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: var(--color-text);
   font-size: 1rem;
   font-weight: bold;
   text-align: center;
   text-shadow: 2px 2px 10px black;
 }
 
-/* Buttons Below the Mission Statement */
 .buttons {
   position: absolute;
   top: 70%;
@@ -101,32 +146,17 @@ body, html {
   justify-content: center;
 }
 
-.buttons button {
-  padding: 12px 25px;
-  background-color: orange;
-  color: black;
-  border: none;
-  cursor: pointer;
-  font-weight: bold;
-  font-size: 1.2rem;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.buttons button:hover {
-  background-color: #FFB400;
-}
-
-/* Footer */
+/* ======= FOOTER ======= */
 .footer {
   text-align: center;
   padding: 15px;
-  background-color: black;
-  color: white;
+  background-color: var(--color-bg);
+  color: var(--color-text);
   width: 100vw;
   margin-top: auto;
 }
 
-/* Modal */
+/* ======= MODAL ======= */
 .modal-backdrop {
   position: fixed;
   top: 0;
@@ -142,10 +172,11 @@ body, html {
 .modal {
   background: white;
   padding: 20px;
-  border-radius: 8px;
+  border-radius: var(--radius);
   width: 400px;
   max-width: 90%;
   position: relative;
+  color: black;
 }
 
 .close-button {
