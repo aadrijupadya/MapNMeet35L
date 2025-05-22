@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Home from './Home';
 import About from './About';
 import CreateActivity from './CreateActivity';
 import Map from './Map';
 import Activities from './Activities';
-import NavBar from './NavBar'; // ✅ import the new component
+import NavBar from './NavBar';
 import { GoogleOAuthProvider } from "@react-oauth/google";
-import './theme.css';     // global variables and styles
+import './theme.css';
 
 function App() {
   const [user, setUser] = useState();
@@ -18,16 +18,13 @@ function App() {
         const response = await fetch('http://localhost:8000/api/auth/validate', {
           method: 'GET',
           credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
         });
 
         if (response.ok) {
           const data = await response.json();
           setUser(data.user);
         } else {
-          console.warn('Session validation failed with status:', response.status);
           setUser(null);
         }
       } catch (err) {
@@ -39,13 +36,24 @@ function App() {
     checkSession();
   }, []);
 
-  const updateUser = (newUser) => {
-    setUser(newUser);
-  };
+  const updateUser = (newUser) => setUser(newUser);
 
   return (
     <Router>
-      <NavBar />
+      <Layout user={user} updateUser={updateUser} />
+    </Router>
+  );
+}
+
+function Layout({ user, updateUser }) {
+  const location = useLocation();
+
+  // Only show NavBar if not on the home page
+  const showNavBar = location.pathname !== '/';
+
+  return (
+    <>
+      {showNavBar && <NavBar />}
       <Routes>
         {user && (
           <>
@@ -58,14 +66,13 @@ function App() {
               }
             />
             <Route path="/about" element={<About />} />
-            <Route path="/create-activity" element={<CreateActivity creatorName={user.name} contact={user.contact}/>} />
+            <Route path="/create-activity" element={<CreateActivity creatorName={user.name} contact={user.contact} />} />
             <Route path="/map" element={<Map />} />
             <Route path="/activities" element={<Activities />} />
           </>
         )}
         {!user && (
-          <>
-            <Route
+          <Route
             path="/"
             element={
               <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
@@ -73,10 +80,9 @@ function App() {
               </GoogleOAuthProvider>
             }
           />
-        </>
         )}
-                </Routes>
-    </Router>
+      </Routes>
+    </>
   );
 }
 

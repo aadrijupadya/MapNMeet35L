@@ -1,17 +1,17 @@
 import React from 'react';
-import styles from './About.css';
+import './About.css';
 
 const Section = ({ title, children }) => (
-  <div className={styles.section}>
-    <h2 className={styles.sectionTitle}>{title}</h2>
-    <p className={styles.sectionContent}>{children}</p>
+  <div className="section">
+    <h2 className="sectionTitle">{title}</h2>
+    <div className="sectionContent">{children}</div>
   </div>
 );
 
 export default function About() {
   return (
-    <div className={styles.container}>
-      <h1 className={styles.title}>About MapNMeet</h1>
+    <div className="container">
+      <h1 className="title">About MapNMeet</h1>
 
       <Section title="Introduction">
         MapNMeet is a campus-based social networking app designed for UCLA students.
@@ -26,7 +26,7 @@ export default function About() {
       </Section>
 
       <Section title="Why MapNMeet">
-        <ul className={styles.list}>
+        <ul className="list">
           <li><strong>Community Building:</strong> Meet new people through shared interests.</li>
           <li><strong>Real-Time Discovery:</strong> Instantly find events near you.</li>
           <li><strong>Convenience:</strong> No more group chats or coordination headaches.</li>
@@ -39,7 +39,7 @@ export default function About() {
       </Section>
 
       <Section title="Features">
-        <ul className={styles.list}>
+        <ul className="list">
           <li><strong>User Authentication:</strong> Login with a UCLA email (.edu).</li>
           <li><strong>Post & Discover Activities:</strong> Add a title, description, location, time, and more.</li>
           <li><strong>Filter by Time & Location:</strong> Find events that match your schedule and proximity.</li>

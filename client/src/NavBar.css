@@ -1,4 +1,11 @@
-/* Logo and top bar */
+:root {
+  --sidebar-bg: #0f172a;
+  --sidebar-text: #cbd5e1;
+  --sidebar-accent: #3b82f6;
+  --sidebar-hover: #1e293b;
+  --sidebar-font: 'Segoe UI', sans-serif;
+}
+
 .navbar-top {
   position: fixed;
   top: 16px;
@@ -7,44 +14,66 @@
 }
 
 .logo-toggle {
-  height: 40px;
+  height: 36px;
   width: auto;
   cursor: pointer;
 }
 
-/* Sidebar */
 .sidebar {
   position: fixed;
   top: 0;
-  left: -250px; /* hidden by default */
+  left: -250px;
   width: 250px;
   height: 100vh;
-  background-color: var(--color-bg);
-  box-shadow: var(--shadow);
-  padding: 40px 20px;
+  background-color: var(--sidebar-bg);
+  color: var(--sidebar-text);
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 30px;
   transition: left 0.3s ease;
   z-index: 1002;
+  font-family: var(--sidebar-font);
 }
 
 .sidebar.open {
   left: 0;
 }
 
-/* Sidebar Links */
-.sidebar-links a{
+.sidebar-header {
+  font-size: 20px;
+  font-weight: bold;
+  color: white;
+  margin-bottom: 20px;
+}
+
+.sidebar-section {
   display: flex;
   flex-direction: column;
-  gap: 100px;
+  gap: 10px;
 }
 
-.sidebar-links a:hover {
-  color: var(--color-accent);
+.section-title {
+  font-size: 12px;
+  letter-spacing: 1px;
+  font-weight: 600;
+  color: #94a3b8;
+  margin-bottom: 10px;
 }
 
-/* Optional: click-outside area */
+.sidebar a {
+  color: var(--sidebar-text);
+  text-decoration: none;
+  padding: 8px 10px;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.sidebar a:hover {
+  background-color: var(--sidebar-hover);
+  color: white;
+}
+
 .sidebar-backdrop {
   position: fixed;
   top: 0;

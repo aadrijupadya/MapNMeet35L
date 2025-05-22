@@ -18,8 +18,10 @@ const NavBar = () => {
       </div>
 
       <div className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
-        <nav className="sidebar-links">
-          <Link to="/" onClick={() => setSidebarOpen(false)}>Home</Link>
+        <div className="sidebar-header">MapNMeet</div>
+
+        <nav className="sidebar-section">
+          <span className="section-title">MENU</span>
           <Link to="/about" onClick={() => setSidebarOpen(false)}>About</Link>
           <Link to="/create-activity" onClick={() => setSidebarOpen(false)}>Create Activity</Link>
           <Link to="/activities" onClick={() => setSidebarOpen(false)}>Activities</Link>

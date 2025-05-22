@@ -2,47 +2,46 @@
   padding: 48px 24px;
   max-width: 800px;
   margin: 0 auto;
-  background-color: var(--color-bg-light);
-  font-family: var(--font-main);
-  color: var(--color-text);
-  text-align: center;
+  background-color: #0f172a;
+  font-family: 'Segoe UI', sans-serif;
+  color: #cbd5e1;
+  text-align: left;
+  border-radius: 12px;
 }
 
 .title {
   font-size: 2rem;
   font-weight: bold;
-  color: var(--color-accent);
+  color: #3b82f6;
   margin-bottom: 40px;
+  text-align: center;
 }
 
 .section {
-  margin-bottom: 48px;
+  margin-bottom: 32px;
 }
 
 .sectionTitle {
   font-size: 1.5rem;
   font-weight: 600;
-  color: var(--color-text);
-  margin-bottom: 16px;
+  color: white;
+  margin-bottom: 12px;
 }
 
 .sectionContent {
   font-size: 1.1rem;
-  color: var(--color-text);
-  line-height: 1.8;
-  margin-bottom: 16px;
+  color: #cbd5e1;
+  line-height: 1.7;
 }
 
 .list {
-  padding-left: 0;
-  list-style-position: inside;
+  padding-left: 1.2rem;
   margin-top: 12px;
-  text-align: left; /* Keeps lists aligned for readability */
-  display: inline-block; /* Centers block within centered container */
+  list-style-type: disc;
 }
 
 .list li {
-  margin-bottom: 12px;
-  color: var(--color-text);
-  font-size: 1.1rem;
+  margin-bottom: 10px;
+  font-size: 1.05rem;
+  color: #cbd5e1;
 }

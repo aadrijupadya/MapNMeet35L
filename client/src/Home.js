@@ -39,6 +39,7 @@ function Home(props) {
           withCredentials: 'include',
         }); 
 				props.updateUser(result.data.data.user);
+        navigate('/activities')
 			} else {
 				console.log(authResult);
 				throw new Error(authResult);
