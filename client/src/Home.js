@@ -42,10 +42,10 @@ function Home(props) {
         navigate('/activities')
 			} else {
 				console.log(authResult);
-				throw new Error(authResult);
+				// throw new Error(authResult);
 			}
 		} catch (e) {
-			alert(e.response.data.message)
+			alert("Make sure you have started the server")
 		}
 	};
 

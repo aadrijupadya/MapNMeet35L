@@ -14,6 +14,7 @@ export default function CreateActivity(props) {
     description: '',
     location: '',
     time: '',
+    endTime: '',
     participantCount: '',
   });
 
@@ -84,8 +85,10 @@ export default function CreateActivity(props) {
           location: JSON.stringify(coordinates),
           participantCount: parseInt(form.participantCount),
           time: new Date(form.time),
-          creator: props.creatorName,
-          contact: props.contact
+          endTime: new Date(form.endTime),
+          creator: props.name,
+          contact: props.contact,
+          // creatorEmail: props.email
         }),
       });
 
@@ -100,6 +103,7 @@ export default function CreateActivity(props) {
           description: '',
           location: '',
           time: '',
+          endTime: '',
           participantCount: '',
           contactInfo: '',
         });
@@ -136,6 +140,14 @@ export default function CreateActivity(props) {
           type="datetime-local"
           name="time"
           value={form.time}
+          onChange={handleChange}
+          required
+        />
+
+        <input
+          type="datetime-local"
+          name="endTime"
+          value={form.endTime}
           onChange={handleChange}
           required
         />
