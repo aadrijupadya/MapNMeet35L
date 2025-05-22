@@ -110,7 +110,7 @@
 }
 
 .create-button:hover {
-  background-color: #1bc;
+  background-color: #adf;
   transform: scale(1.05);
 }
 
@@ -144,7 +144,7 @@
 }
 
 .event-post.highlighted {
-  border: 2px solid #FFB400;
+  border: 2px solid #adf;
   background-color: #2c2c2c;
   transform: scale(1.02);
   transition: all 0.2s ease;
