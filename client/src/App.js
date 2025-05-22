@@ -47,19 +47,35 @@ function App() {
     <Router>
       <NavBar />
       <Routes>
-        <Route
-          path="/"
-          element={
-            <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
-              <Home user={user} updateUser={updateUser} />
-            </GoogleOAuthProvider>
-          }
-        />
-        <Route path="/about" element={<About />} />
-        <Route path="/create-activity" element={<CreateActivity />} />
-        <Route path="/map" element={<Map />} />
-        <Route path="/activities" element={<Activities />} />
-      </Routes>
+        {user && (
+          <>
+            <Route
+              path="/"
+              element={
+                <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
+                  <Home user={user} updateUser={updateUser} />
+                </GoogleOAuthProvider>
+              }
+            />
+            <Route path="/about" element={<About />} />
+            <Route path="/create-activity" element={<CreateActivity creatorName={user.name} contact={user.contact}/>} />
+            <Route path="/map" element={<Map />} />
+            <Route path="/activities" element={<Activities />} />
+          </>
+        )}
+        {!user && (
+          <>
+            <Route
+            path="/"
+            element={
+              <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
+                <Home user={user} updateUser={updateUser} />
+              </GoogleOAuthProvider>
+            }
+          />
+        </>
+        )}
+                </Routes>
     </Router>
   );
 }

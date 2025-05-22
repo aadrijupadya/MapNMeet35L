@@ -6,7 +6,8 @@ const ActivitySchema = new mongoose.Schema({
   location: String,
   time: Date,
   participantCount: Number,
-  contactInfo: String,
+  contact: String,
+  creator: String,
   createdAt: { type: Date, default: Date.now },
 });
 

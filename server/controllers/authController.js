@@ -101,6 +101,7 @@ export const googleAuth = catchAsync(async (req, res, next) => {
         user = await User.create({
             name: userRes.data.name,
             email: userRes.data.email,
+            contact: userRes.data.email,
             image: userRes.data.picture,
         });
     }

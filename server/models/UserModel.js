@@ -24,6 +24,14 @@ const userSchema = new mongoose.Schema(
             validate: [validator.isEmail, 'Invalid Email'],
             lowercase: true,
         },
+        contact: {
+            type: String,
+            required: [true, 'User must have a contact method.'],
+            default: function () {
+                return this.email;
+            },
+            trim: true,
+        },
         bio: {
             type: String,
             maxlength: 280,

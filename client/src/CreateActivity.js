@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './CreateActivity.css';
 
-export default function CreateActivity() {
+export default function CreateActivity(props) {
   const mapRef = useRef(null);
   const markerRef = useRef(null);
   const [coordinates, setCoordinates] = useState(null);
@@ -12,7 +12,6 @@ export default function CreateActivity() {
     location: '',
     time: '',
     participantCount: '',
-    contactInfo: '',
   });
 
   const [status, setStatus] = useState('');
@@ -82,6 +81,8 @@ export default function CreateActivity() {
           location: JSON.stringify(coordinates), // Save as string or separate fields
           participantCount: parseInt(form.participantCount),
           time: new Date(form.time),
+          creator: props.creatorName,
+          contact: props.contact
         }),
       });
 
@@ -113,7 +114,7 @@ export default function CreateActivity() {
     <div className="create-container">
       <h2>Create New Activity</h2>
       <form onSubmit={handleSubmit} className="create-form">
-        {['title', 'description', 'contactInfo'].map((field) => (
+        {['title', 'description'].map((field) => (
           <input
             key={field}
             name={field}
