@@ -103,8 +103,8 @@ body, html {
 
 .buttons button {
   padding: 12px 25px;
-  background-color: orange;
-  color: black;
+  background-color: black;
+  color: white;
   border: none;
   cursor: pointer;
   font-weight: bold;
@@ -113,7 +113,8 @@ body, html {
 }
 
 .buttons button:hover {
-  background-color: #FFB400;
+  background-color: #acf;
+  color: black
 }
 
 /* Footer */
