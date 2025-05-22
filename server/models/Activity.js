@@ -4,6 +4,7 @@ const ActivitySchema = new mongoose.Schema({
   title: String,
   description: String,
   location: String,
+  locationName: String,
   time: Date,
   participantCount: Number,
   contact: String,

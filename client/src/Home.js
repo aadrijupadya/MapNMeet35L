@@ -91,15 +91,9 @@ function Home(props) {
 
         {/* Buttons Below the Mission Statement */}
         <div className="buttons">
-          <div>
-            <button onClick={() => navigate('/about')}>About</button>
-            <button onClick={() => navigate('/create-activity')}>Post an Activity!</button>
-            <button onClick={() => navigate('/map')}>Map</button>
-          </div>
-          <div>
+          
               <button onClick={() => googleLogin()}>Login</button>
-              <button onClick={() => handleLogout()}>Logout</button>
-          </div>
+
         </div>
       </div>
 

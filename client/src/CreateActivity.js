@@ -1,10 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './CreateActivity.css';
+import { Link } from 'react-router-dom';
 
 export default function CreateActivity(props) {
   const mapRef = useRef(null);
   const markerRef = useRef(null);
+  const successRef = useRef(null);
   const [coordinates, setCoordinates] = useState(null);
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const [form, setForm] = useState({
     title: '',
@@ -78,7 +81,7 @@ export default function CreateActivity(props) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...form,
-          location: JSON.stringify(coordinates), // Save as string or separate fields
+          location: JSON.stringify(coordinates),
           participantCount: parseInt(form.participantCount),
           time: new Date(form.time),
           creator: props.creatorName,
@@ -87,7 +90,11 @@ export default function CreateActivity(props) {
       });
 
       if (res.ok) {
-        setStatus('Event created!');
+        setStatus('Event created successfully!');
+        setIsSuccess(true);
+        setTimeout(() => {
+          successRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
         setForm({
           title: '',
           description: '',
@@ -146,8 +153,21 @@ export default function CreateActivity(props) {
         <div className="map-instructions">Click on the map to set location:</div>
         <div ref={mapRef} className="map-box" />
 
-        <button type="submit">Submit</button>
+        {isSuccess ? (
+          <Link 
+            to="/activities" 
+            className="return-button"
+            ref={successRef}
+          >
+            Return to Activities
+          </Link>
+        ) : (
+          <button type="submit" className="submit-button">
+            Submit
+          </button>
+        )}
       </form>
+
       {status && <p className="status">{status}</p>}
     </div>
   );
