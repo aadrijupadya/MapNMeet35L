@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './Activities.css';
+import { formToJSON } from 'axios';
 
 const loadGoogleMapsScript = (apiKey) => {
     return new Promise((resolve, reject) => {
@@ -26,6 +27,8 @@ const loadGoogleMapsScript = (apiKey) => {
 export default function Activities() {
     const mapRef = useRef(null);
     const mapInstance = useRef(null);
+    const markerRefs = useRef({});
+    const eventRefs = useRef({});
     const [events, setEvents] = useState([]);
     const [filteredEvents, setFilteredEvents] = useState([]);
     const [activeSort, setActiveSort] = useState('recent');
@@ -38,7 +41,6 @@ export default function Activities() {
         time: true
     });
     const [showFilters, setShowFilters] = useState(false);
-    const eventRefs = useRef({});
 
     useEffect(() => {
         const apiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
@@ -122,13 +124,17 @@ export default function Activities() {
                 console.warn('Invalid location:', activity.location);
                 return;
             }
+
             const marker = new window.google.maps.Marker({
                 position: { lat: coords.lat, lng: coords.lng },
                 map: mapInstance.current,
                 title: activity.title
             });
+
+            const id = activity._id || activity.id;
+            markerRefs.current[id] = marker;
+
             marker.addListener('click', () => {
-                const id = activity._id || activity.id;
                 setSelectedEventId(id);
                 setTimeout(() => {
                     const ref = eventRefs.current[id];
@@ -136,6 +142,31 @@ export default function Activities() {
                         ref.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }
                 }, 100);
+            });
+
+            const infoWindow = new window.google.maps.InfoWindow({
+              content: `
+                <div style="
+                  font-size: 12px;
+                  font-weight: bold;
+                  padding: 4px 8px;
+                  max-width: 150px;
+                  white-space: nowrap;
+                  background-color: blue;
+                  color: white;
+                  border-radius: 6px;
+                ">
+                  ${activity.title}
+                </div>
+              `
+            });
+            
+            marker.addListener('mouseover', () => {
+                infoWindow.open(mapInstance.current, marker);
+            });
+
+            marker.addListener('mouseout', () => {
+                infoWindow.close();
             });
         });
     };
@@ -166,7 +197,6 @@ export default function Activities() {
     };
 
     const handleSearchBlur = (e) => {
-        // Check if the click was outside the search container
         if (!e.currentTarget.contains(e.relatedTarget)) {
             setShowFilters(false);
         }
@@ -178,24 +208,23 @@ export default function Activities() {
             case 'recent':
                 sorted.sort((a, b) => new Date(b.time) - new Date(a.time));
                 break;
-            case 'upcoming':
+            case 'upcoming': {
                 const now = new Date();
                 sorted.sort((a, b) => {
                     const dateA = new Date(a.time);
                     const dateB = new Date(b.time);
-                    if (dateA > now && dateB > now) {
-                        return dateA - dateB;
-                    }
+                    if (dateA > now && dateB > now) return dateA - dateB;
                     if (dateA > now) return -1;
                     if (dateB > now) return 1;
                     return dateB - dateA;
                 });
                 break;
+            }
             case 'closest':
                 sorted.sort((a, b) => (a.distance || 9999) - (b.distance || 9999));
                 break;
             case 'participants':
-                sorted.sort((a, b) => ((b.participants && b.participants.max) || 0) - ((a.participants && a.participants.max) || 0));
+                sorted.sort((a, b) => ((b.participants?.max) || 0) - ((a.participants?.max) || 0));
                 break;
             default:
                 break;
@@ -212,115 +241,86 @@ export default function Activities() {
         }
     };
 
-    return ( <
-            div className = "activities-page" >
-            <
-            a href = "/create-activity"
-            className = "create-button" > + < /a> <
-            div id = "sort-feedback"
-            style = {
-                {
-                    position: 'fixed',
-                    top: '10px',
-                    right: '10px',
-                    background: '#FFB400',
-                    padding: '5px 10px',
-                    borderRadius: '4px',
-                    display: 'none'
-                }
-            }
-            /> <
-            div className = "map-container" >
-            <
-            div ref = { mapRef }
-            style = {
-                { height: '100%', width: '100%' }
-            }
-            /> < /
-            div > <
-            div className = "events-container" >
-            <
-            div className = "search-container"
-            onBlur = { handleSearchBlur }
-            tabIndex = "0" >
-            <
-            input type = "text"
-            placeholder = "Search activities..."
-            value = { searchQuery }
-            onChange = { handleSearchChange }
-            onFocus = { handleSearchFocus }
-            className = "search-input" /
-            >
-            {
-                showFilters && ( <
-                    div className = "search-filters" >
-                    <
-                    div className = "filter-header" > Search in: < /div> {
-                    Object.entries(searchFilters).map(([filter, isActive]) => ( <
-                        label key = { filter }
-                        className = "filter-option" >
-                        <
-                        input type = "checkbox"
-                        checked = { isActive }
-                        onChange = {
-                            () => toggleFilter(filter)
-                        }
-                        /> { filter.charAt(0).toUpperCase() + filter.slice(1) } < /
-                        label >
-                    ))
-                } <
-                /div>
-            )
-        } <
-        /div> <
-    div className = "sort-options" >
-        <
-        button onClick = {
-            () => sortEvents('recent')
-        }
-    className = { activeSort === 'recent' ? 'active' : '' } >
-        Most Recent <
-        /button> <
-    button onClick = {
-        () => sortEvents('upcoming')
-    }
-    className = { activeSort === 'upcoming' ? 'active' : '' } >
-        Upcoming <
-        /button> <
-    button onClick = {
-        () => sortEvents('closest')
-    }
-    className = { activeSort === 'closest' ? 'active' : '' } >
-        Closest <
-        /button> <
-    button onClick = {
-        () => sortEvents('participants')
-    }
-    className = { activeSort === 'participants' ? 'active' : '' } >
-        Most Participants < /button> </div > {
-            filteredEvents.map((event) => {
-                const id = event._id || event.id;
-                return ( <
-                    div key = { id }
-                    ref = {
-                        (el) => (eventRefs.current[id] = el)
-                    }
-                    className = { `event-post ${selectedEventId === id ? 'highlighted' : ''}` } >
-                    <
-                    div className = "event-author" > { event.author } < /div> <
-                    div className = "event-title" > { event.title } < /div> <
-                    div className = "event-location" > 📍{ event.locationName || 'Location selected' } { event.distance ? `(${event.distance} mi)` : '' } <
-                    /div> <
-                    div className = "event-participants" > 👥{
-                        event.participantCount ? `${event.participantCount} participants` : 'No participants set'
-                    } <
-                    /div> <
-                    div className = "event-time" > ⏰{ formatDate(event.time) } < /div> < /
-                    div >
-                );
-            })
-        } <
-        /div> < /
-    div >
-);
+    return (
+        <div className="activities-page">
+            <a href="/create-activity" className="create-button">+</a>
+            <div id="sort-feedback" style={{
+                position: 'fixed',
+                top: '10px',
+                right: '10px',
+                background: '#FFB400',
+                padding: '5px 10px',
+                borderRadius: '4px',
+                display: 'none'
+            }} />
+            <div className="map-container">
+                <div ref={mapRef} style={{ height: '100%', width: '100%' }} />
+            </div>
+            <div className="events-container">
+                <div className="search-container" onBlur={handleSearchBlur} tabIndex="0">
+                    <input
+                        type="text"
+                        placeholder="Search activities..."
+                        value={searchQuery}
+                        onChange={handleSearchChange}
+                        onFocus={handleSearchFocus}
+                        className="search-input"
+                    />
+                    {showFilters && (
+                        <div className="search-filters">
+                            <div className="filter-header">Search in:</div>
+                            {Object.entries(searchFilters).map(([filter, isActive]) => (
+                                <label key={filter} className="filter-option">
+                                    <input
+                                        type="checkbox"
+                                        checked={isActive}
+                                        onChange={() => toggleFilter(filter)}
+                                    />
+                                    {filter.charAt(0).toUpperCase() + filter.slice(1)}
+                                </label>
+                            ))}
+                        </div>
+                    )}
+                </div>
+                <div className="sort-options">
+                    <button onClick={() => sortEvents('recent')} className={activeSort === 'recent' ? 'active' : ''}>Most Recent</button>
+                    <button onClick={() => sortEvents('upcoming')} className={activeSort === 'upcoming' ? 'active' : ''}>Upcoming</button>
+                    <button onClick={() => sortEvents('closest')} className={activeSort === 'closest' ? 'active' : ''}>Closest</button>
+                    <button onClick={() => sortEvents('participants')} className={activeSort === 'participants' ? 'active' : ''}>Most Participants</button>
+                </div>
+                {filteredEvents.map((event) => {
+                    const id = event._id || event.id;
+                    return (
+                        <div
+                            key={id}
+                            ref={(el) => (eventRefs.current[id] = el)}
+                            className={`event-post ${selectedEventId === id ? 'highlighted' : ''}`}
+                            onClick={() => {
+                                setSelectedEventId(id);
+                                const marker = markerRefs.current[id];
+                                if (marker && mapInstance.current) {
+                                    mapInstance.current.panTo(marker.getPosition());
+                                    mapInstance.current.setZoom(17);
+                                }
+                            }}
+                        >
+                            <div className="event-author">{event.author}</div>
+                            <div className="event-title">{event.title}</div>
+                            <div className="event-location">📍{
+                                event.location ?  (() => {
+                                  try {                                  
+                                    const coords = JSON.parse(event.location) 
+                                    return `(${coords.lat.toFixed(2)}, ${coords.lng.toFixed(2)})`
+                                  } catch {
+                                    return event.location;
+                                    }})() : 'Location not available'
+                            }</div>
+                            <div className="event-participants">👥{event.participantCount ? `${event.participantCount} participants` : 'No participants set'}</div>
+                            <div className="event-time">⏰{formatDate(event.time)}</div>
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
 }

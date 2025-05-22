@@ -235,3 +235,16 @@
     transform: scale(1.02);
     transition: all 0.2s ease;
 }
+
+.gm-ui-hover-effect > span {
+  display: none !important;
+}
+
+.gm-style-iw {
+  padding: 0 !important;
+  margin: 0 !important;
+  max-width: none !important;
+  width: auto !important;
+  height: auto !important;
+  box-sizing: border-box !important;
+}
