@@ -56,7 +56,7 @@
 
 .search-input:focus {
     outline: none;
-    border-color: #FFB400;
+    border-color: var(--color-accent);
     box-shadow: 0 0 0 2px rgba(255, 180, 0, 0.2);
 }
 
@@ -79,7 +79,7 @@
 }
 
 .filter-header {
-    color: #FFB400;
+    color: var(--color-accent);
     font-weight: 600;
     margin-bottom: 10px;
     font-size: 14px;
@@ -97,11 +97,11 @@
 
 .filter-option input[type="checkbox"] {
     margin-right: 8px;
-    accent-color: #FFB400;
+    accent-color: var(--color-accent);
 }
 
 .filter-option:hover {
-    color: #FFB400;
+    color: var(--color-accent);
 }
 
 

@@ -212,14 +212,12 @@ export default function Activities() {
         }
     };
 
-    return ( <
-            div className = "activities-page" >
-            <
-            a href = "/create-activity"
-            className = "create-button" > + < /a> <
-            div id = "sort-feedback"
-            style = {
-                {
+    return (
+        <div className="activities-page">
+            <a href="/create-activity" className="create-button">+</a>
+            <div 
+                id="sort-feedback"
+                style={{
                     position: 'fixed',
                     top: '10px',
                     right: '10px',
@@ -227,100 +225,92 @@ export default function Activities() {
                     padding: '5px 10px',
                     borderRadius: '4px',
                     display: 'none'
-                }
-            }
-            /> <
-            div className = "map-container" >
-            <
-            div ref = { mapRef }
-            style = {
-                { height: '100%', width: '100%' }
-            }
-            /> < /
-            div > <
-            div className = "events-container" >
-            <
-            div className = "search-container"
-            onBlur = { handleSearchBlur }
-            tabIndex = "0" >
-            <
-            input type = "text"
-            placeholder = "Search activities..."
-            value = { searchQuery }
-            onChange = { handleSearchChange }
-            onFocus = { handleSearchFocus }
-            className = "search-input" /
-            >
-            {
-                showFilters && ( <
-                    div className = "search-filters" >
-                    <
-                    div className = "filter-header" > Search in: < /div> {
-                    Object.entries(searchFilters).map(([filter, isActive]) => ( <
-                        label key = { filter }
-                        className = "filter-option" >
-                        <
-                        input type = "checkbox"
-                        checked = { isActive }
-                        onChange = {
-                            () => toggleFilter(filter)
-                        }
-                        /> { filter.charAt(0).toUpperCase() + filter.slice(1) } < /
-                        label >
-                    ))
-                } <
-                /div>
-            )
-        } <
-        /div> <
-    div className = "sort-options" >
-        <
-        button onClick = {
-            () => sortEvents('recent')
-        }
-    className = { activeSort === 'recent' ? 'active' : '' } >
-        Most Recent <
-        /button> <
-    button onClick = {
-        () => sortEvents('upcoming')
-    }
-    className = { activeSort === 'upcoming' ? 'active' : '' } >
-        Upcoming <
-        /button> <
-    button onClick = {
-        () => sortEvents('closest')
-    }
-    className = { activeSort === 'closest' ? 'active' : '' } >
-        Closest <
-        /button> <
-    button onClick = {
-        () => sortEvents('participants')
-    }
-    className = { activeSort === 'participants' ? 'active' : '' } >
-        Most Participants < /button> </div > {
-            filteredEvents.map((event) => {
-                const id = event._id || event.id;
-                return ( <
-                    div key = { id }
-                    ref = {
-                        (el) => (eventRefs.current[id] = el)
-                    }
-                    className = { `event-post ${selectedEventId === id ? 'highlighted' : ''}` } >
-                    <
-                    div className = "event-author" > { event.author } < /div> <
-                    div className = "event-title" > { event.title } < /div> <
-                    div className = "event-location" > 📍{ event.locationName || 'Location selected' } { event.distance ? `(${event.distance} mi)` : '' } <
-                    /div> <
-                    div className = "event-participants" > 👥{
-                        event.participantCount ? `${event.participantCount} participants` : 'No participants set'
-                    } <
-                    /div> <
-                    div className = "event-time" > ⏰{ formatDate(event.time) } < /div> < /
-                    div >
-                );
-            })
-        } <
-        /div> < /
-    div >
-);
+                }}
+            />
+            <div className="map-container">
+                <div 
+                    ref={mapRef}
+                    style={{ height: '100%', width: '100%' }}
+                />
+            </div>
+            <div className="events-container">
+                <div 
+                    className="search-container"
+                    onBlur={handleSearchBlur}
+                    tabIndex="0"
+                >
+                    <input 
+                        type="text"
+                        placeholder="Search activities..."
+                        value={searchQuery}
+                        onChange={handleSearchChange}
+                        onFocus={handleSearchFocus}
+                        className="search-input"
+                    />
+                    {showFilters && (
+                        <div className="search-filters">
+                            <div className="filter-header">Search in:</div>
+                            {Object.entries(searchFilters).map(([filter, isActive]) => (
+                                <label key={filter} className="filter-option">
+                                    <input 
+                                        type="checkbox"
+                                        checked={isActive}
+                                        onChange={() => toggleFilter(filter)}
+                                    />
+                                    {filter.charAt(0).toUpperCase() + filter.slice(1)}
+                                </label>
+                            ))}
+                        </div>
+                    )}
+                </div>
+                <div className="sort-options">
+                    <button 
+                        onClick={() => sortEvents('recent')}
+                        className={activeSort === 'recent' ? 'active' : ''}
+                    >
+                        Most Recent
+                    </button>
+                    <button 
+                        onClick={() => sortEvents('upcoming')}
+                        className={activeSort === 'upcoming' ? 'active' : ''}
+                    >
+                        Upcoming
+                    </button>
+                    <button 
+                        onClick={() => sortEvents('closest')}
+                        className={activeSort === 'closest' ? 'active' : ''}
+                    >
+                        Closest
+                    </button>
+                    <button 
+                        onClick={() => sortEvents('participants')}
+                        className={activeSort === 'participants' ? 'active' : ''}
+                    >
+                        Most Participants
+                    </button>
+                </div>
+                {filteredEvents.map((event) => {
+                    const id = event._id || event.id;
+                    return (
+                        <div 
+                            key={id}
+                            ref={(el) => (eventRefs.current[id] = el)}
+                            className={`event-post ${selectedEventId === id ? 'highlighted' : ''}`}
+                        >
+                            <div className="event-author">{event.author}</div>
+                            <div className="event-title">{event.title}</div>
+                            <div className="event-location">
+                                📍{event.locationName || 'Location selected'} 
+                                {event.distance ? `(${event.distance} mi)` : ''}
+                            </div>
+                            <div className="event-participants">
+                                👥{event.participantCount ? `${event.participantCount} participants` : 'No participants set'}
+                            </div>
+                            <div className="event-time">⏰{formatDate(event.time)}</div>
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
 }
