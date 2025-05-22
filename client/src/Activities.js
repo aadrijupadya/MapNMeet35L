@@ -166,7 +166,6 @@ export default function Activities() {
     };
 
     const handleSearchBlur = (e) => {
-        // Check if the click was outside the search container
         if (!e.currentTarget.contains(e.relatedTarget)) {
             setShowFilters(false);
         }
@@ -215,30 +214,20 @@ export default function Activities() {
     return (
         <div className="activities-page">
             <a href="/create-activity" className="create-button">+</a>
-            <div 
-                id="sort-feedback"
-                style={{
-                    position: 'fixed',
-                    top: '10px',
-                    right: '10px',
-                    background: '#FFB400',
-                    padding: '5px 10px',
-                    borderRadius: '4px',
-                    display: 'none'
-                }}
-            />
+            <div id="sort-feedback" style={{
+                position: 'fixed',
+                top: '10px',
+                right: '10px',
+                background: '#FFB400',
+                padding: '5px 10px',
+                borderRadius: '4px',
+                display: 'none'
+            }} />
             <div className="map-container">
-                <div 
-                    ref={mapRef}
-                    style={{ height: '100%', width: '100%' }}
-                />
+                <div ref={mapRef} style={{ height: '100%', width: '100%' }} />
             </div>
             <div className="events-container">
-                <div 
-                    className="search-container"
-                    onBlur={handleSearchBlur}
-                    tabIndex="0"
-                >
+                <div className="search-container" onBlur={handleSearchBlur} tabIndex="0">
                     <input 
                         type="text"
                         placeholder="Search activities..."
@@ -307,6 +296,9 @@ export default function Activities() {
                                 👥{event.participantCount ? `${event.participantCount} participants` : 'No participants set'}
                             </div>
                             <div className="event-time">⏰{formatDate(event.time)}</div>
+                            {event.contact && (
+                                <div className="event-contact">📞Contact: {event.contact}</div>
+                            )}
                         </div>
                     );
                 })}
