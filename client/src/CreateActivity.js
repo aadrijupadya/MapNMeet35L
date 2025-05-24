@@ -86,8 +86,9 @@ export default function CreateActivity(props) {
           participantCount: parseInt(form.participantCount),
           time: new Date(form.time),
           endTime: new Date(form.endTime),
-          creator: props.name,
-          contact: props.contact,
+          createdBy: props.userId
+          // creator: props.name,
+          // contact: props.contact,
           // creatorEmail: props.email
         }),
       });

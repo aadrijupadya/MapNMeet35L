@@ -15,7 +15,7 @@ router.post('/', async (req, res) => {
 
 router.get('/', async (req, res) => {
   try {
-    const activities = await Activity.find();
+    const activities = await Activity.find().populate('joinees', 'name contact').populate('createdBy', '_id');
     res.json(activities);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch activities' });

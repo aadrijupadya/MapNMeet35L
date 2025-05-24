@@ -31,7 +31,13 @@ const ActivitySchema = new mongoose.Schema({
     type: Date,
     // Automatically set to one day after activityDate
     default: function () {
-      return new Date(this.endTime + 24 * 60 * 60 * 1000); // +1 day
+      if (this.endTime) {
+        return new Date(new Date(this.endTime).getTime() + 24 * 60 * 60 * 1000); // +1 day
+      } else if (this.createdAt) {
+        return new Date(new Date(this.createdAt).getTime() + 24 * 60 * 60 * 1000 * 14)
+      } else {
+        return Date.now + 24 * 60 * 60 * 1000
+      }
     },
     expires: 0 // expire exactly at `expiresAt`
   },

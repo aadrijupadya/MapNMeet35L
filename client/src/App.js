@@ -66,9 +66,9 @@ function Layout({ user, updateUser }) {
               }
             />
             <Route path="/about" element={<About />} />
-            <Route path="/create-activity" element={<CreateActivity name={user.name} contact={user.contact} />} />
+            <Route path="/create-activity" element={<CreateActivity userId={user._id} />} />
             <Route path="/map" element={<Map />} />
-            <Route path="/activities" element={<Activities />} />
+            <Route path="/activities" element={<Activities userId={user._id}/>} />
           </>
         )}
         {!user && (

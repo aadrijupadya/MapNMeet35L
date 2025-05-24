@@ -79,6 +79,12 @@ const userSchema = new mongoose.Schema(
             type: Boolean,
             default: true,
         },
+        activities: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Activity',
+            },
+        ],
     },
     {
         toJSON: { virtuals: true },

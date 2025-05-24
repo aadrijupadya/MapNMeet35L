@@ -24,7 +24,7 @@ const loadGoogleMapsScript = (apiKey) => {
     });
 };
 
-export default function Activities() {
+export default function Activities(props) {
     const mapRef = useRef(null);
     const mapInstance = useRef(null);
     const markerRefs = useRef({});
@@ -241,6 +241,22 @@ export default function Activities() {
         }
     };
 
+    const addParticipant = async (userId, activityId, remove) => {
+        const response = await fetch('http://localhost:8000/api/addParticipant', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ userId, activityId, remove }),
+        })
+
+        if (!response.ok) {
+            console.log(`Failed to add participant: ${response.error}`);
+        } else {
+            console.log("Participant added successfully")
+        }
+    };
+
     return (
         <div className="activities-page">
             <a href="/create-activity" className="create-button">+</a>
@@ -316,7 +332,35 @@ export default function Activities() {
                                     }})() : 'Location not available'
                             }</div>
                             <div className="event-participants">👥{event.participantCount ? `${event.participantCount} participants` : 'No participants set'}</div>
+                            <div className="event-joinees">
+                                {event.joinees && event.joinees.length > 0 ? (
+                                    <ul>
+                                        {event.joinees.map((joinee, index) => (
+                                            <li key={index}>
+                                                <span className="joinee-name">{joinee.name}</span>
+                                                <span className="joinee-contact"> ({joinee.contact})</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <div className="no-joinees">No participants yet</div>
+                                )}
+                            </div>
                             <div className="event-time">⏰{formatDate(event.time)}</div>
+                            <button
+                                className="add-participant-button"
+                                onClick={() => {
+                                    if (event.joinees.some(joinee => joinee._id === props.userId)) {
+                                        // Leave logic here
+                                        console.log("Leave event logic");
+                                    } else {
+                                        addParticipant(props.userId, id);
+                                    }
+                                }}
+                                disabled={props.userId === event.createdBy._id}
+                            >
+                                {event.joinees.some(joinee => joinee._id === props.userId) ? 'Leave' : 'Join'}
+                            </button>
                         </div>
                     );
                 })}
