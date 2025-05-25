@@ -350,16 +350,15 @@ export default function Activities(props) {
                             <button
                                 className="add-participant-button"
                                 onClick={() => {
-                                    if (event.joinees.some(joinee => joinee._id === props.userId)) {
-                                        // Leave logic here
+                                    if (event.joinees && event.joinees.some(joinee => joinee._id === props.userId)) {
                                         console.log("Leave event logic");
                                     } else {
                                         addParticipant(props.userId, id);
                                     }
                                 }}
-                                disabled={props.userId === event.createdBy._id}
+                                disabled={props.userId === event.createdBy?._id}
                             >
-                                {event.joinees.some(joinee => joinee._id === props.userId) ? 'Leave' : 'Join'}
+                                {event.joinees && event.joinees.some(joinee => joinee._id === props.userId) ? 'Leave' : 'Join'}
                             </button>
                         </div>
                     );
