@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import User from './models/User'; // Adjust the path as necessary
+import User from '../models/UserModel'; // Adjust the path as necessary
 import Activity from './models/Activity'; // Adjust the path as necessary
 
 // Assuming you have User and Activity schemas defined

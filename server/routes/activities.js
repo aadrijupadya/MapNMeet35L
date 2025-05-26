@@ -1,14 +1,43 @@
 import express from 'express';
 import Activity from '../models/Activity.js';
+import User from '../models/UserModel.js';
 
 const router = express.Router();
 
 router.post('/', async (req, res) => {
   try {
-    const activity = new Activity(req.body);
-    await activity.save();
-    res.status(201).json(activity);
+    // Check if user is authenticated
+    if (!req.cookies.jwt) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    // Verify the user exists
+    const userId = req.body.createdBy;
+    if (!userId) {
+      return res.status(400).json({ error: 'User ID is required' });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Create and save the activity
+    const activity = new Activity({
+      ...req.body,
+      createdBy: userId
+    });
+
+    const savedActivity = await activity.save();
+    
+    // Populate the createdBy field before sending response
+    const populatedActivity = await Activity.findById(savedActivity._id)
+      .populate('createdBy', 'name email')
+      .populate('joinees', 'name contact');
+
+    res.status(201).json(populatedActivity);
   } catch (err) {
+    console.error('Error creating activity:', err);
     res.status(400).json({ error: err.message });
   }
 });

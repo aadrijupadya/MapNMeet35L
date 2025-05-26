@@ -79,7 +79,10 @@ export default function CreateActivity(props) {
     try {
       const res = await fetch('http://localhost:8000/api/activities', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
         body: JSON.stringify({
           ...form,
           location: JSON.stringify(coordinates),
@@ -87,38 +90,37 @@ export default function CreateActivity(props) {
           time: new Date(form.time),
           endTime: new Date(form.endTime),
           createdBy: props.userId
-          // creator: props.name,
-          // contact: props.contact,
-          // creatorEmail: props.email
         }),
       });
 
-      if (res.ok) {
-        setStatus('Event created successfully!');
-        setIsSuccess(true);
-        setTimeout(() => {
-          successRef.current?.scrollIntoView({ behavior: 'smooth' });
-        }, 100);
-        setForm({
-          title: '',
-          description: '',
-          location: '',
-          time: '',
-          endTime: '',
-          participantCount: '',
-          contactInfo: '',
-        });
-        setCoordinates(null);
-        if (markerRef.current) {
-          markerRef.current.setMap(null);
-          markerRef.current = null;
-        }
-      } else {
-        setStatus('Failed to create event');
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to create activity');
+      }
+
+      setStatus('Event created successfully!');
+      setIsSuccess(true);
+      setTimeout(() => {
+        successRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+      setForm({
+        title: '',
+        description: '',
+        location: '',
+        time: '',
+        endTime: '',
+        participantCount: '',
+        contactInfo: '',
+      });
+      setCoordinates(null);
+      if (markerRef.current) {
+        markerRef.current.setMap(null);
+        markerRef.current = null;
       }
     } catch (err) {
-      setStatus('Error submitting form');
-      console.error(err);
+      console.error('Error creating activity:', err);
+      setStatus(err.message || 'Error submitting form');
     }
   };
 
