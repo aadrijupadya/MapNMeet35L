@@ -112,5 +112,4 @@ app.post('/api/auth/logout', (req, res) => {
   res.status(200).json({ message: 'Logged out' });
 });
 
-
 app.listen(port, () => console.log(`Server running on port ${port}`));

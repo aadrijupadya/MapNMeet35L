@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './Activities.css';
 import { formToJSON } from 'axios';
+import { useSearchParams } from 'react-router-dom';
+import { getAddressFromCoords } from './utils/geocoding';
 
 const loadGoogleMapsScript = (apiKey) => {
     return new Promise((resolve, reject) => {
@@ -41,6 +43,8 @@ export default function Activities(props) {
         time: true
     });
     const [showFilters, setShowFilters] = useState(false);
+    const [searchParams] = useSearchParams();
+    const [locationNames, setLocationNames] = useState({});
 
     useEffect(() => {
         const apiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
@@ -113,6 +117,51 @@ export default function Activities(props) {
         });
         setFilteredEvents(filtered);
     }, [searchQuery, searchFilters, events]);
+
+    useEffect(() => {
+        const eventId = searchParams.get('id');
+        if (eventId && events.length > 0) {
+            setSelectedEventId(eventId);
+            const event = events.find(e => e._id === eventId);
+            if (event) {
+                const ref = eventRefs.current[eventId];
+                if (ref && ref.scrollIntoView) {
+                    ref.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+                const marker = markerRefs.current[eventId];
+                if (marker && mapInstance.current) {
+                    mapInstance.current.panTo(marker.getPosition());
+                    mapInstance.current.setZoom(17);
+                }
+            }
+        }
+    }, [searchParams, events]);
+
+    useEffect(() => {
+        const fetchLocationNames = async () => {
+            const locationMap = {};
+            
+            for (const event of events) {
+                if (event.location) {
+                    try {
+                        const coords = JSON.parse(event.location);
+                        const address = await getAddressFromCoords(coords.lat, coords.lng);
+                        if (address) {
+                            locationMap[event._id] = address;
+                        }
+                    } catch (error) {
+                        console.error('Error parsing location for event:', event._id, error);
+                    }
+                }
+            }
+
+            setLocationNames(locationMap);
+        };
+
+        if (events.length > 0) {
+            fetchLocationNames();
+        }
+    }, [events]);
 
     const addMarkers = (activities) => {
         activities.forEach((activity) => {
@@ -242,18 +291,46 @@ export default function Activities(props) {
     };
 
     const addParticipant = async (userId, activityId, remove) => {
-        const response = await fetch('http://localhost:8000/api/addParticipant', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ userId, activityId, remove }),
-        })
+        try {
+            const response = await fetch('http://localhost:8000/api/addParticipant', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ userId, activityId, remove }),
+            });
 
-        if (!response.ok) {
-            console.log(`Failed to add participant: ${response.error}`);
-        } else {
-            console.log("Participant added successfully")
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to update participation');
+            }
+
+            const eventsResponse = await fetch('http://localhost:8000/api/activities');
+            const updatedEvents = await eventsResponse.json();
+            setEvents(updatedEvents);
+            setFilteredEvents(updatedEvents);
+
+            const feedback = document.getElementById('sort-feedback');
+            if (feedback) {
+                feedback.textContent = remove ? 'Left event successfully' : 'Joined event successfully';
+                feedback.style.display = 'block';
+                feedback.style.background = '#4CAF50';
+                setTimeout(() => {
+                    feedback.style.display = 'none';
+                }, 2000);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            const feedback = document.getElementById('sort-feedback');
+            if (feedback) {
+                feedback.textContent = error.message || 'Failed to update participation';
+                feedback.style.display = 'block';
+                feedback.style.background = '#f44336';
+                setTimeout(() => {
+                    feedback.style.display = 'none';
+                }, 2000);
+            }
         }
     };
 
@@ -320,18 +397,30 @@ export default function Activities(props) {
                                 }
                             }}
                         >
-                            <div className="event-author">{event.author}</div>
+                            <div className="event-creator">
+                                <span className="creator-label">Created by:</span>
+                                <span className="creator-name">
+                                    {event.createdBy?.name || event.creator || 'Anonymous'}
+                                </span>
+                                <span className="creator-email">
+                                    ({event.createdBy?.email || event.contact || 'No email'})
+                                </span>
+                            </div>
                             <div className="event-title">{event.title}</div>
-                            <div className="event-location">📍{
-                                event.location ?  (() => {
-                                  try {                                  
-                                    const coords = JSON.parse(event.location) 
-                                    return `(${coords.lat.toFixed(2)}, ${coords.lng.toFixed(2)})`
-                                  } catch {
-                                    return event.location;
-                                    }})() : 'Location not available'
+                            <div className="event-location" data-emoji="📍">{
+                                event.location ? (() => {
+                                    try {
+                                        const coords = JSON.parse(event.location);
+                                        const address = locationNames[id];
+                                        return address 
+                                            ? `${address} (${coords.lat.toFixed(2)}, ${coords.lng.toFixed(2)})`
+                                            : `(${coords.lat.toFixed(2)}, ${coords.lng.toFixed(2)})`;
+                                    } catch {
+                                        return 'Location not available';
+                                    }
+                                })() : 'Location not available'
                             }</div>
-                            <div className="event-participants">👥{event.participantCount ? `${event.participantCount} participants` : 'No participants set'}</div>
+                            <div className="event-participants" data-emoji="👥">{event.participantCount ? `${event.participantCount} participants` : 'No participants set'}</div>
                             <div className="event-joinees">
                                 {event.joinees && event.joinees.length > 0 ? (
                                     <ul>
@@ -346,14 +435,15 @@ export default function Activities(props) {
                                     <div className="no-joinees">No participants yet</div>
                                 )}
                             </div>
-                            <div className="event-time">⏰{formatDate(event.time)}</div>
+                            <div className="event-time" data-emoji="⏰">{formatDate(event.time)}</div>
                             <button
                                 className="add-participant-button"
-                                onClick={() => {
+                                onClick={(e) => {
+                                    e.stopPropagation();
                                     if (event.joinees && event.joinees.some(joinee => joinee._id === props.userId)) {
-                                        console.log("Leave event logic");
+                                        addParticipant(props.userId, id, true);
                                     } else {
-                                        addParticipant(props.userId, id);
+                                        addParticipant(props.userId, id, false);
                                     }
                                 }}
                                 disabled={props.userId === event.createdBy?._id}

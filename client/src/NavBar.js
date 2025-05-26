@@ -18,7 +18,10 @@ const NavBar = () => {
       </div>
 
       <div className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
-        <div className="sidebar-header">MapNMeet</div>
+        <div className="sidebar-header">
+          <img src={logo} alt="MapNMeet Logo" className="sidebar-logo" />
+          <span>MapNMeet</span>
+        </div>
 
         <nav className="sidebar-section">
           <span className="section-title">MENU</span>

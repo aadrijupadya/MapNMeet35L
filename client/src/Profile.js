@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Profile.css';
+import { getAddressFromCoords } from './utils/geocoding';
 
 export default function Profile({ user }) {
     const [userEvents, setUserEvents] = useState([]);
     const [rsvpdEvents, setRsvpdEvents] = useState([]);
     const [activeTab, setActiveTab] = useState('created'); // 'created' or 'rsvpd'
+    const [locationNames, setLocationNames] = useState({});
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -31,6 +33,34 @@ export default function Profile({ user }) {
             });
     }, [user, navigate]);
 
+    useEffect(() => {
+        // Fetch location names for all events
+        const fetchLocationNames = async () => {
+            const allEvents = [...userEvents, ...rsvpdEvents];
+            const locationMap = {};
+
+            for (const event of allEvents) {
+                if (event.location) {
+                    try {
+                        const coords = JSON.parse(event.location);
+                        const address = await getAddressFromCoords(coords.lat, coords.lng);
+                        if (address) {
+                            locationMap[event._id] = address;
+                        }
+                    } catch (error) {
+                        console.error('Error parsing location for event:', event._id, error);
+                    }
+                }
+            }
+
+            setLocationNames(locationMap);
+        };
+
+        if (userEvents.length > 0 || rsvpdEvents.length > 0) {
+            fetchLocationNames();
+        }
+    }, [userEvents, rsvpdEvents]);
+
     const formatDate = (date) => {
         return new Date(date).toLocaleString('en-US', {
             weekday: 'short',
@@ -50,7 +80,7 @@ export default function Profile({ user }) {
                 <div className="profile-info">
                     <h1>{user.name || 'Anonymous User'}</h1>
                     <p className="profile-email">{user.email}</p>
-                    {user.contact && <p className="profile-contact">📞 {user.contact}</p>}
+                    {user.contact && <p className="profile-contact">✉️ {user.contact}</p>}
                 </div>
             </div>
 
@@ -75,7 +105,19 @@ export default function Profile({ user }) {
                         <div key={event._id} className="event-card">
                             <h3>{event.title}</h3>
                             <p className="event-time">⏰ {formatDate(event.time)}</p>
-                            <p className="event-location">📍 {event.locationName || 'Location not specified'}</p>
+                            <p className="event-location">📍 {
+                                event.location ? (() => {
+                                    try {
+                                        const coords = JSON.parse(event.location);
+                                        const address = locationNames[event._id];
+                                        return address 
+                                            ? `${address} (${coords.lat.toFixed(2)}, ${coords.lng.toFixed(2)})`
+                                            : `(${coords.lat.toFixed(2)}, ${coords.lng.toFixed(2)})`;
+                                    } catch {
+                                        return 'Location not available';
+                                    }
+                                })() : 'Location not available'
+                            }</p>
                             <p className="event-participants">👥 {event.participantCount || 0} participants</p>
                             <button 
                                 className="view-event-btn"

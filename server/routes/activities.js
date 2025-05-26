@@ -15,12 +15,49 @@ router.post('/', async (req, res) => {
 
 router.get('/', async (req, res) => {
   try {
-    const activities = await Activity.find().populate('joinees', 'name contact').populate('createdBy', '_id');
+    const activities = await Activity.find()
+      .populate('joinees', 'name contact')
+      .populate({
+        path: 'createdBy',
+        select: 'name email',
+        model: 'User'
+      });
     res.json(activities);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch activities' });
   }
 });
 
+// Get activities created by a specific user
+router.get('/user/:userId', async (req, res) => {
+  try {
+    const activities = await Activity.find({ createdBy: req.params.userId })
+      .populate('joinees', 'name contact')
+      .populate({
+        path: 'createdBy',
+        select: 'name email',
+        model: 'User'
+      });
+    res.json(activities);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch user activities' });
+  }
+});
+
+// Get activities that a user has RSVP'd to
+router.get('/rsvpd/:userId', async (req, res) => {
+  try {
+    const activities = await Activity.find({ joinees: req.params.userId })
+      .populate('joinees', 'name contact')
+      .populate({
+        path: 'createdBy',
+        select: 'name email',
+        model: 'User'
+      });
+    res.json(activities);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch RSVP\'d activities' });
+  }
+});
 
 export default router;

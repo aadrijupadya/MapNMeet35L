@@ -166,6 +166,37 @@
     font-size: 0.9rem;
     color: var(--color-muted);
     margin-bottom: 3px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.event-location::before,
+.event-participants::before,
+.event-time::before {
+    content: attr(data-emoji);
+    font-size: 1.1rem;
+}
+
+.event-creator {
+    font-size: 0.9rem;
+    color: var(--color-muted);
+    margin-bottom: 8px;
+}
+
+.creator-label {
+    color: var(--color-accent);
+    margin-right: 4px;
+}
+
+.creator-name {
+    font-weight: 500;
+    color: var(--color-text);
+}
+
+.creator-email {
+    color: var(--color-muted);
+    margin-left: 4px;
 }
 
 

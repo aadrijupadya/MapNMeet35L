@@ -126,17 +126,21 @@ export default function CreateActivity(props) {
     <div className="create-container">
       <h2>Create New Activity</h2>
       <form onSubmit={handleSubmit} className="create-form">
-        {['title', 'description'].map((field) => (
-          <input
-            key={field}
-            name={field}
-            placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
-            value={form[field]}
-            onChange={handleChange}
-            required
-          />
-        ))}
-
+        <input
+          name="title"
+          placeholder="Title"
+          value={form.title}
+          onChange={handleChange}
+          required
+        />
+        <textarea
+          name="description"
+          placeholder="Description (Event info, location name, etc.)"
+          value={form.description}
+          onChange={handleChange}
+          required
+          rows="4"
+        />
         <input
           type="datetime-local"
           name="time"
