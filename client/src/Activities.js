@@ -7,20 +7,13 @@ import { getAddressFromCoords } from './utils/geocoding';
 const loadGoogleMapsScript = (apiKey) => {
     return new Promise((resolve, reject) => {
         if (window.google && window.google.maps) return resolve();
-        if (document.querySelector(`script[src*="maps.googleapis.com/maps/api/js"]`)) {
-            return resolve();
-        }
+        if (document.querySelector(`script[src*="maps.googleapis.com/maps/api/js"]`)) return resolve();
+        
         const script = document.createElement('script');
         script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}`;
         script.async = true;
         script.defer = true;
-        script.onload = () => {
-            if (window.google && window.google.maps) {
-                resolve();
-            } else {
-                reject(new Error('Google Maps API failed to load correctly.'));
-            }
-        };
+        script.onload = () => window.google?.maps ? resolve() : reject(new Error('Google Maps API failed to load'));
         script.onerror = reject;
         document.head.appendChild(script);
     });
@@ -45,11 +38,12 @@ export default function Activities(props) {
     const [showFilters, setShowFilters] = useState(false);
     const [searchParams] = useSearchParams();
     const [locationNames, setLocationNames] = useState({});
+    const [showMyEvents, setShowMyEvents] = useState(false);
 
     useEffect(() => {
         const apiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
         if (!apiKey) {
-            console.error('Google Maps API key is missing.');
+            console.error('Missing Google Maps API key');
             return;
         }
 
@@ -82,41 +76,43 @@ export default function Activities(props) {
                 });
                 return fetch('http://localhost:8000/api/activities');
             })
-            .then((res) => res.json())
-            .then((data) => {
+            .then(res => res.json())
+            .then(data => {
                 setEvents(data);
                 setFilteredEvents(data);
                 addMarkers(data);
             })
-            .catch((err) => {
-                console.error('Map or API error:', err);
-            });
+            .catch(err => console.error('Map or API error:', err));
     }, []);
 
     useEffect(() => {
         const filtered = events.filter(event => {
+            if (showMyEvents && props.userId) {
+                const isCreatedByUser = event.createdBy?._id === props.userId;
+                const isJoinedByUser = event.joinees?.some(joinee => joinee._id === props.userId);
+                if (!isCreatedByUser && !isJoinedByUser) return false;
+            }
+
             if (!searchQuery) return true;
 
             const searchLower = searchQuery.toLowerCase();
             const matches = [];
 
-            if (searchFilters.title && event.title) {
-                matches.push(event.title.toLowerCase().includes(searchLower));
-            }
-            if (searchFilters.description && event.description) {
-                matches.push(event.description.toLowerCase().includes(searchLower));
-            }
-            if (searchFilters.location && event.locationName) {
-                matches.push(event.locationName.toLowerCase().includes(searchLower));
-            }
-            if (searchFilters.time) {
-                matches.push(formatDate(event.time).toLowerCase().includes(searchLower));
-            }
+            if (searchFilters.title && event.title) matches.push(event.title.toLowerCase().includes(searchLower));
+            if (searchFilters.description && event.description) matches.push(event.description.toLowerCase().includes(searchLower));
+            if (searchFilters.location && event.locationName) matches.push(event.locationName.toLowerCase().includes(searchLower));
+            if (searchFilters.time) matches.push(formatDate(event.time).toLowerCase().includes(searchLower));
 
             return matches.some(match => match);
         });
         setFilteredEvents(filtered);
-    }, [searchQuery, searchFilters, events]);
+
+        if (mapInstance.current) {
+            Object.values(markerRefs.current).forEach(marker => marker.setMap(null));
+            markerRefs.current = {};
+            addMarkers(filtered);
+        }
+    }, [searchQuery, searchFilters, events, showMyEvents, props.userId]);
 
     useEffect(() => {
         const eventId = searchParams.get('id');
@@ -350,29 +346,39 @@ export default function Activities(props) {
                 <div ref={mapRef} style={{ height: '100%', width: '100%' }} />
             </div>
             <div className="events-container">
-                <div className="search-container" onBlur={handleSearchBlur} tabIndex="0">
-                    <input
-                        type="text"
-                        placeholder="Search activities..."
-                        value={searchQuery}
-                        onChange={handleSearchChange}
-                        onFocus={handleSearchFocus}
-                        className="search-input"
-                    />
-                    {showFilters && (
-                        <div className="search-filters">
-                            <div className="filter-header">Search in:</div>
-                            {Object.entries(searchFilters).map(([filter, isActive]) => (
-                                <label key={filter} className="filter-option">
-                                    <input
-                                        type="checkbox"
-                                        checked={isActive}
-                                        onChange={() => toggleFilter(filter)}
-                                    />
-                                    {filter.charAt(0).toUpperCase() + filter.slice(1)}
-                                </label>
-                            ))}
-                        </div>
+                <div className="filter-controls">
+                    <div className="search-container" onBlur={handleSearchBlur} tabIndex="0">
+                        <input
+                            type="text"
+                            placeholder="Search activities..."
+                            value={searchQuery}
+                            onChange={handleSearchChange}
+                            onFocus={handleSearchFocus}
+                            className="search-input"
+                        />
+                        {showFilters && (
+                            <div className="search-filters">
+                                <div className="filter-header">Search in:</div>
+                                {Object.entries(searchFilters).map(([filter, isActive]) => (
+                                    <label key={filter} className="filter-option">
+                                        <input
+                                            type="checkbox"
+                                            checked={isActive}
+                                            onChange={() => toggleFilter(filter)}
+                                        />
+                                        {filter.charAt(0).toUpperCase() + filter.slice(1)}
+                                    </label>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                    {props.userId && (
+                        <button 
+                            className={`my-events-toggle ${showMyEvents ? 'active' : ''}`}
+                            onClick={() => setShowMyEvents(!showMyEvents)}
+                        >
+                            {showMyEvents ? 'Show All Events' : 'Show My Events'}
+                        </button>
                     )}
                 </div>
                 <div className="sort-options">

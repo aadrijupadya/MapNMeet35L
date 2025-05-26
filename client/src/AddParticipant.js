@@ -1,62 +1,83 @@
 import mongoose from 'mongoose';
-import User from '../models/UserModel'; // Adjust the path as necessary
-import Activity from './models/Activity'; // Adjust the path as necessary
+import User from '../models/UserModel';
+import Activity from './models/Activity';
 
-// Assuming you have User and Activity schemas defined
 
 export default async function addParticipant(userId, activityId, remove) {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
     try {
-        // Fetch the activity to check joinees and participant count
-        const activity = await Activity.findById(activityId);
+        const activity = await Activity.findById(activityId).session(session);
 
         if (!activity) {
+            await session.abortTransaction();
+            session.endSession();
             throw new Error('ACTIVITY_NOT_FOUND');
+        }
+
+        // Verify user exists before proceeding
+        const user = await User.findById(userId).session(session);
+        if (!user) {
+            await session.abortTransaction();
+            session.endSession();
+            throw new Error('USER_NOT_FOUND');
         }
 
         if (!remove) {
             // Check if the joinees field length is equal to the participant count
             if (activity.joinees.length >= activity.participantCount) {
-            throw new Error('ACTIVITY_FULL');
+                await session.abortTransaction();
+                session.endSession();
+                throw new Error('ACTIVITY_FULL');
+            }
+
+            // Check if user is already a joinee
+            if (activity.joinees.includes(userId)) {
+                await session.abortTransaction();
+                session.endSession();
+                throw new Error('USER_ALREADY_JOINED');
             }
 
             // Add the userId to the activity's joinees array
             activity.joinees.addToSet(userId);
-
-            // Save the updated activity
-            await activity.save();
+            await activity.save({ session });
 
             // Update the user's activities field with the activity ID
-            const userUpdate = await User.findByIdAndUpdate(
-            userId,
-            { $addToSet: { activities: activityId } }, // $addToSet ensures no duplicates
-            { new: true } // Return the updated document
+            await User.findByIdAndUpdate(
+                userId,
+                { $addToSet: { activities: activityId } },
+                { session, new: true }
             );
-
-            if (!userUpdate) {
-            throw new Error('USER_NOT_FOUND');
-            }
         } else {
+            // Check if user is actually a joinee before removing
+            if (!activity.joinees.includes(userId)) {
+                await session.abortTransaction();
+                session.endSession();
+                throw new Error('USER_NOT_JOINED');
+            }
+
             // Remove the userId from the activity's joinees array
             activity.joinees.pull(userId);
-
-            // Save the updated activity
-            await activity.save();
+            await activity.save({ session });
 
             // Remove the activityId from the user's activities field
-            const userUpdate = await User.findByIdAndUpdate(
-            userId,
-            { $pull: { activities: activityId } }, // $pull removes the activityId
-            { new: true } // Return the updated document
+            await User.findByIdAndUpdate(
+                userId,
+                { $pull: { activities: activityId } },
+                { session, new: true }
             );
-
-            if (!userUpdate) {
-            throw new Error('USER_NOT_FOUND');
-            }
         }
 
+        await session.commitTransaction();
+        session.endSession();
         return { success: true };
+
     } catch (error) {
-        console.error(error);
+        // abort if failure
+        await session.abortTransaction();
+        session.endSession();
+        console.error('Transaction failed:', error);
         return { success: false, error: error.message };
     }
 }
