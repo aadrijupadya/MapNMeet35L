@@ -5,15 +5,15 @@ import { useSearchParams } from 'react-router-dom';
 import { getAddressFromCoords } from './utils/geocoding';
 
 const loadGoogleMapsScript = (apiKey) => {
+    if (window.google?.maps) return Promise.resolve();
+    if (document.querySelector(`script[src*="maps.googleapis.com/maps/api/js"]`)) return Promise.resolve();
+    
     return new Promise((resolve, reject) => {
-        if (window.google && window.google.maps) return resolve();
-        if (document.querySelector(`script[src*="maps.googleapis.com/maps/api/js"]`)) return resolve();
-        
         const script = document.createElement('script');
         script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}`;
         script.async = true;
         script.defer = true;
-        script.onload = () => window.google?.maps ? resolve() : reject(new Error('Google Maps API failed to load'));
+        script.onload = () => resolve();
         script.onerror = reject;
         document.head.appendChild(script);
     });
@@ -21,24 +21,25 @@ const loadGoogleMapsScript = (apiKey) => {
 
 export default function Activities(props) {
     const mapRef = useRef(null);
-    const mapInstance = useRef(null);
-    const markerRefs = useRef({});
-    const eventRefs = useRef({});
+    const map = useRef(null);
+    const markers = useRef({});
+    const eventCards = useRef({});
     const [events, setEvents] = useState([]);
     const [filteredEvents, setFilteredEvents] = useState([]);
-    const [activeSort, setActiveSort] = useState('recent');
-    const [selectedEventId, setSelectedEventId] = useState(null);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [searchFilters, setSearchFilters] = useState({
+    const [sortBy, setSortBy] = useState('recent');
+    const [activeEventId, setActiveEventId] = useState(null);
+    const [searchText, setSearchText] = useState('');
+    const [searchIn, setSearchIn] = useState({
         title: true,
         description: true,
         location: true,
         time: true
     });
-    const [showFilters, setShowFilters] = useState(false);
+    const [showSearchFilters, setShowSearchFilters] = useState(false);
     const [searchParams] = useSearchParams();
-    const [locationNames, setLocationNames] = useState({});
+    const [addresses, setAddresses] = useState({});
     const [showMyEvents, setShowMyEvents] = useState(false);
+    const [selectedEvent, setSelectedEvent] = useState(null);
 
     useEffect(() => {
         const apiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
@@ -49,7 +50,7 @@ export default function Activities(props) {
 
         loadGoogleMapsScript(apiKey)
             .then(() => {
-                mapInstance.current = new window.google.maps.Map(mapRef.current, {
+                map.current = new window.google.maps.Map(mapRef.current, {
                     center: { lat: 34.0689, lng: -118.4452 },
                     mapTypeControl: false,
                     zoom: 15,
@@ -82,7 +83,7 @@ export default function Activities(props) {
                 setFilteredEvents(data);
                 addMarkers(data);
             })
-            .catch(err => console.error('Map or API error:', err));
+            .catch(err => console.error('Error loading map or events:', err));
     }, []);
 
     useEffect(() => {
@@ -93,41 +94,36 @@ export default function Activities(props) {
                 if (!isCreatedByUser && !isJoinedByUser) return false;
             }
 
-            if (!searchQuery) return true;
+            if (!searchText) return true;
 
-            const searchLower = searchQuery.toLowerCase();
+            const searchLower = searchText.toLowerCase();
             const matches = [];
 
-            if (searchFilters.title && event.title) matches.push(event.title.toLowerCase().includes(searchLower));
-            if (searchFilters.description && event.description) matches.push(event.description.toLowerCase().includes(searchLower));
-            if (searchFilters.location && event.locationName) matches.push(event.locationName.toLowerCase().includes(searchLower));
-            if (searchFilters.time) matches.push(formatDate(event.time).toLowerCase().includes(searchLower));
+            if (searchIn.title && event.title) matches.push(event.title.toLowerCase().includes(searchLower));
+            if (searchIn.description && event.description) matches.push(event.description.toLowerCase().includes(searchLower));
+            if (searchIn.location && event.locationName) matches.push(event.locationName.toLowerCase().includes(searchLower));
+            if (searchIn.time) matches.push(formatDate(event.time).toLowerCase().includes(searchLower));
 
             return matches.some(match => match);
         });
         setFilteredEvents(filtered);
-
-        if (mapInstance.current) {
-            Object.values(markerRefs.current).forEach(marker => marker.setMap(null));
-            markerRefs.current = {};
-            addMarkers(filtered);
-        }
-    }, [searchQuery, searchFilters, events, showMyEvents, props.userId]);
+        updateMarkers(filtered);
+    }, [searchText, searchIn, events, showMyEvents, props.userId]);
 
     useEffect(() => {
         const eventId = searchParams.get('id');
         if (eventId && events.length > 0) {
-            setSelectedEventId(eventId);
+            setActiveEventId(eventId);
             const event = events.find(e => e._id === eventId);
             if (event) {
-                const ref = eventRefs.current[eventId];
-                if (ref && ref.scrollIntoView) {
-                    ref.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                const card = eventCards.current[eventId];
+                if (card && card.scrollIntoView) {
+                    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
-                const marker = markerRefs.current[eventId];
-                if (marker && mapInstance.current) {
-                    mapInstance.current.panTo(marker.getPosition());
-                    mapInstance.current.setZoom(17);
+                const marker = markers.current[eventId];
+                if (marker && map.current) {
+                    map.current.panTo(marker.getPosition());
+                    map.current.setZoom(17);
                 }
             }
         }
@@ -151,7 +147,7 @@ export default function Activities(props) {
                 }
             }
 
-            setLocationNames(locationMap);
+            setAddresses(locationMap);
         };
 
         if (events.length > 0) {
@@ -159,34 +155,42 @@ export default function Activities(props) {
         }
     }, [events]);
 
-    const addMarkers = (activities) => {
-        activities.forEach((activity) => {
-            if (!activity.location) return;
+    const updateMarkers = (events) => {
+        if (!map.current) return;
+
+        Object.values(markers.current).forEach(marker => marker.setMap(null));
+        markers.current = {};
+
+        addMarkers(events);
+    };
+
+    const addMarkers = (events) => {
+        events.forEach(event => {
+            if (!event.location) return;
+
             let coords;
             try {
-                coords = typeof activity.location === 'string' ? JSON.parse(activity.location) : activity.location;
+                coords = typeof event.location === 'string' ? JSON.parse(event.location) : event.location;
             } catch (e) {
-                console.warn('Invalid location:', activity.location);
+                console.warn('Invalid location for event:', event.title);
                 return;
             }
 
             const marker = new window.google.maps.Marker({
                 position: { lat: coords.lat, lng: coords.lng },
-                map: mapInstance.current,
-                title: activity.title
+                map: map.current,
+                title: event.title
             });
 
-            const id = activity._id || activity.id;
-            markerRefs.current[id] = marker;
+            const id = event._id || event.id;
+            markers.current[id] = marker;
 
             marker.addListener('click', () => {
-                setSelectedEventId(id);
-                setTimeout(() => {
-                    const ref = eventRefs.current[id];
-                    if (ref && ref.scrollIntoView) {
-                        ref.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
-                }, 100);
+                setActiveEventId(id);
+                const card = eventCards.current[id];
+                if (card && card.scrollIntoView) {
+                    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
             });
 
             const infoWindow = new window.google.maps.InfoWindow({
@@ -201,13 +205,13 @@ export default function Activities(props) {
                   color: white;
                   border-radius: 6px;
                 ">
-                  ${activity.title}
+                  ${event.title}
                 </div>
               `
             });
             
             marker.addListener('mouseover', () => {
-                infoWindow.open(mapInstance.current, marker);
+                infoWindow.open(map.current, marker);
             });
 
             marker.addListener('mouseout', () => {
@@ -227,23 +231,23 @@ export default function Activities(props) {
     };
 
     const handleSearchChange = (e) => {
-        setSearchQuery(e.target.value);
+        setSearchText(e.target.value);
     };
 
     const toggleFilter = (filter) => {
-        setSearchFilters(prev => ({
+        setSearchIn(prev => ({
             ...prev,
             [filter]: !prev[filter]
         }));
     };
 
     const handleSearchFocus = () => {
-        setShowFilters(true);
+        setShowSearchFilters(true);
     };
 
     const handleSearchBlur = (e) => {
         if (!e.currentTarget.contains(e.relatedTarget)) {
-            setShowFilters(false);
+            setShowSearchFilters(false);
         }
     };
 
@@ -275,7 +279,7 @@ export default function Activities(props) {
                 break;
         }
         setFilteredEvents(sorted);
-        setActiveSort(type);
+        setSortBy(type);
         const feedback = document.getElementById('sort-feedback');
         if (feedback) {
             feedback.textContent = `Sorted by ${type}`;
@@ -286,48 +290,57 @@ export default function Activities(props) {
         }
     };
 
-    const addParticipant = async (userId, activityId, remove) => {
+    const toggleEventParticipation = async (userId, eventId, leave = false) => {
         try {
-            const response = await fetch('http://localhost:8000/api/addParticipant', {
+            const res = await fetch('http://localhost:8000/api/addParticipant', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ userId, activityId, remove }),
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId, activityId: eventId, remove: leave }),
             });
 
-            const data = await response.json();
-
-            if (!response.ok) {
+            if (!res.ok) {
+                const data = await res.json();
                 throw new Error(data.error || 'Failed to update participation');
             }
 
-            const eventsResponse = await fetch('http://localhost:8000/api/activities');
-            const updatedEvents = await eventsResponse.json();
+            const eventsRes = await fetch('http://localhost:8000/api/activities');
+            const updatedEvents = await eventsRes.json();
             setEvents(updatedEvents);
             setFilteredEvents(updatedEvents);
 
             const feedback = document.getElementById('sort-feedback');
             if (feedback) {
-                feedback.textContent = remove ? 'Left event successfully' : 'Joined event successfully';
+                feedback.textContent = leave ? 'Left event' : 'Joined event';
                 feedback.style.display = 'block';
                 feedback.style.background = '#4CAF50';
-                setTimeout(() => {
-                    feedback.style.display = 'none';
-                }, 2000);
+                setTimeout(() => feedback.style.display = 'none', 2000);
             }
         } catch (error) {
             console.error('Error:', error);
             const feedback = document.getElementById('sort-feedback');
             if (feedback) {
-                feedback.textContent = error.message || 'Failed to update participation';
+                feedback.textContent = error.message || 'Something went wrong';
                 feedback.style.display = 'block';
                 feedback.style.background = '#f44336';
-                setTimeout(() => {
-                    feedback.style.display = 'none';
-                }, 2000);
+                setTimeout(() => feedback.style.display = 'none', 2000);
             }
         }
+    };
+
+    const handleEventClick = (event) => {
+        setSelectedEvent(event);
+        setActiveEventId(event._id || event.id);
+        
+        const marker = markers.current[event._id || event.id];
+        if (marker && map.current) {
+            map.current.panTo(marker.getPosition());
+            map.current.setZoom(17);
+        }
+    };
+
+    const closeModal = (e) => {
+        if (e) e.stopPropagation();
+        setSelectedEvent(null);
     };
 
     return (
@@ -351,15 +364,15 @@ export default function Activities(props) {
                         <input
                             type="text"
                             placeholder="Search activities..."
-                            value={searchQuery}
+                            value={searchText}
                             onChange={handleSearchChange}
                             onFocus={handleSearchFocus}
                             className="search-input"
                         />
-                        {showFilters && (
+                        {showSearchFilters && (
                             <div className="search-filters">
                                 <div className="filter-header">Search in:</div>
-                                {Object.entries(searchFilters).map(([filter, isActive]) => (
+                                {Object.entries(searchIn).map(([filter, isActive]) => (
                                     <label key={filter} className="filter-option">
                                         <input
                                             type="checkbox"
@@ -382,26 +395,19 @@ export default function Activities(props) {
                     )}
                 </div>
                 <div className="sort-options">
-                    <button onClick={() => sortEvents('recent')} className={activeSort === 'recent' ? 'active' : ''}>Most Recent</button>
-                    <button onClick={() => sortEvents('upcoming')} className={activeSort === 'upcoming' ? 'active' : ''}>Upcoming</button>
-                    <button onClick={() => sortEvents('closest')} className={activeSort === 'closest' ? 'active' : ''}>Closest</button>
-                    <button onClick={() => sortEvents('participants')} className={activeSort === 'participants' ? 'active' : ''}>Most Participants</button>
+                    <button onClick={() => sortEvents('recent')} className={sortBy === 'recent' ? 'active' : ''}>Most Recent</button>
+                    <button onClick={() => sortEvents('upcoming')} className={sortBy === 'upcoming' ? 'active' : ''}>Upcoming</button>
+                    <button onClick={() => sortEvents('closest')} className={sortBy === 'closest' ? 'active' : ''}>Closest</button>
+                    <button onClick={() => sortEvents('participants')} className={sortBy === 'participants' ? 'active' : ''}>Most Participants</button>
                 </div>
                 {filteredEvents.map((event) => {
                     const id = event._id || event.id;
                     return (
                         <div
                             key={id}
-                            ref={(el) => (eventRefs.current[id] = el)}
-                            className={`event-post ${selectedEventId === id ? 'highlighted' : ''}`}
-                            onClick={() => {
-                                setSelectedEventId(id);
-                                const marker = markerRefs.current[id];
-                                if (marker && mapInstance.current) {
-                                    mapInstance.current.panTo(marker.getPosition());
-                                    mapInstance.current.setZoom(17);
-                                }
-                            }}
+                            ref={(el) => (eventCards.current[id] = el)}
+                            className={`event-post ${activeEventId === id ? 'highlighted' : ''}`}
+                            onClick={() => handleEventClick(event)}
                         >
                             <div className="event-creator">
                                 <span className="creator-label">Created by:</span>
@@ -417,7 +423,7 @@ export default function Activities(props) {
                                 event.location ? (() => {
                                     try {
                                         const coords = JSON.parse(event.location);
-                                        const address = locationNames[id];
+                                        const address = addresses[id];
                                         return address 
                                             ? `${address} (${coords.lat.toFixed(2)}, ${coords.lng.toFixed(2)})`
                                             : `(${coords.lat.toFixed(2)}, ${coords.lng.toFixed(2)})`;
@@ -447,9 +453,9 @@ export default function Activities(props) {
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     if (event.joinees && event.joinees.some(joinee => joinee._id === props.userId)) {
-                                        addParticipant(props.userId, id, true);
+                                        toggleEventParticipation(props.userId, id, true);
                                     } else {
-                                        addParticipant(props.userId, id, false);
+                                        toggleEventParticipation(props.userId, id, false);
                                     }
                                 }}
                                 disabled={props.userId === event.createdBy?._id}
@@ -460,6 +466,100 @@ export default function Activities(props) {
                     );
                 })}
             </div>
+
+            {/* Event Details Modal */}
+            {selectedEvent && (
+                <div className="event-modal-overlay" onClick={closeModal}>
+                    <div className="event-modal" onClick={e => e.stopPropagation()}>
+                        <button className="close-modal" onClick={closeModal}>×</button>
+                        <div className="event-modal-content">
+                            <div className="event-modal-header">
+                                <h2>{selectedEvent.title}</h2>
+                                <div className="event-creator">
+                                    <span className="creator-label">Created by:</span>
+                                    <span className="creator-name">
+                                        {selectedEvent.createdBy?.name || selectedEvent.creator || 'Anonymous'}
+                                    </span>
+                                    <span className="creator-email">
+                                        ({selectedEvent.createdBy?.email || selectedEvent.contact || 'No email'})
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div className="event-modal-body">
+                                <div className="event-description">
+                                    <h3>Description</h3>
+                                    <p>{selectedEvent.description || 'No description provided'}</p>
+                                </div>
+                                
+                                <div className="event-details">
+                                    <div className="event-detail-item">
+                                        <span className="detail-label">📍 Location:</span>
+                                        <span className="detail-value">
+                                            {selectedEvent.location ? (() => {
+                                                try {
+                                                    const coords = JSON.parse(selectedEvent.location);
+                                                    const address = addresses[selectedEvent._id];
+                                                    return address 
+                                                        ? `${address} (${coords.lat.toFixed(2)}, ${coords.lng.toFixed(2)})`
+                                                        : `(${coords.lat.toFixed(2)}, ${coords.lng.toFixed(2)})`;
+                                                } catch {
+                                                    return 'Location not available';
+                                                }
+                                            })() : 'Location not available'}
+                                        </span>
+                                    </div>
+                                    
+                                    <div className="event-detail-item">
+                                        <span className="detail-label">⏰ Time:</span>
+                                        <span className="detail-value">{formatDate(selectedEvent.time)}</span>
+                                    </div>
+                                    
+                                    <div className="event-detail-item">
+                                        <span className="detail-label">👥 Participants:</span>
+                                        <span className="detail-value">
+                                            {selectedEvent.participantCount ? `${selectedEvent.participantCount} max participants` : 'No limit set'}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div className="event-joinees-section">
+                                    <h3>Current Participants</h3>
+                                    {selectedEvent.joinees && selectedEvent.joinees.length > 0 ? (
+                                        <ul className="joinees-list">
+                                            {selectedEvent.joinees.map((joinee, index) => (
+                                                <li key={index} className="joinee-item">
+                                                    <span className="joinee-name">{joinee.name}</span>
+                                                    <span className="joinee-contact">({joinee.contact})</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    ) : (
+                                        <p className="no-joinees">No participants yet</p>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="event-modal-footer">
+                                <button
+                                    className="join-button"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (selectedEvent.joinees && selectedEvent.joinees.some(joinee => joinee._id === props.userId)) {
+                                            toggleEventParticipation(props.userId, selectedEvent._id, true);
+                                        } else {
+                                            toggleEventParticipation(props.userId, selectedEvent._id, false);
+                                        }
+                                    }}
+                                    disabled={props.userId === selectedEvent.createdBy?._id}
+                                >
+                                    {selectedEvent.joinees && selectedEvent.joinees.some(joinee => joinee._id === props.userId) ? 'Leave Event' : 'Join Event'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
