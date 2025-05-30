@@ -104,8 +104,8 @@ export default function Profile({ user }) {
                     {(activeTab === 'created' ? userEvents : rsvpdEvents).map(event => (
                         <div key={event._id} className="event-card">
                             <h3>{event.title}</h3>
-                            <p className="event-time">⏰ {formatDate(event.time)}</p>
-                            <p className="event-location">📍 {
+                            <p className="event-time">{formatDate(event.time)}</p>
+                            <p className="event-location">{
                                 event.location ? (() => {
                                     try {
                                         const coords = JSON.parse(event.location);
@@ -118,7 +118,7 @@ export default function Profile({ user }) {
                                     }
                                 })() : 'Location not available'
                             }</p>
-                            <p className="event-participants">👥 {event.participantCount || 0} participants</p>
+                            <p className="event-participants">{event.participantCount || 0} participants</p>
                             <button 
                                 className="view-event-btn"
                                 onClick={() => navigate(`/activities?id=${event._id}`)}
