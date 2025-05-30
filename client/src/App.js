@@ -49,8 +49,8 @@ function App() {
 function Layout({ user, updateUser }) {
   const location = useLocation();
 
-  // Only show NavBar if not on the home page
-  const showNavBar = location.pathname !== '/';
+  // Show NavBar if not on the home page, or if on the home page and user is logged in
+  const showNavBar = location.pathname !== '/' || (location.pathname === '/' && user);
 
   return (
     <>

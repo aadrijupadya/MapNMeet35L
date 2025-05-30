@@ -25,8 +25,8 @@ const NavBar = () => {
 
         <nav className="sidebar-section">
           <span className="section-title">MENU</span>
+          <Link to="/" onClick={() => setSidebarOpen(false)}>Home</Link>
           <Link to="/about" onClick={() => setSidebarOpen(false)}>About</Link>
-          <Link to="/create-activity" onClick={() => setSidebarOpen(false)}>Create Activity</Link>
           <Link to="/activities" onClick={() => setSidebarOpen(false)}>Activities</Link>
           <Link to="/profile" onClick={() => setSidebarOpen(false)}>Profile</Link>
         </nav>

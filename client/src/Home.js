@@ -92,9 +92,20 @@ function Home(props) {
 
         {/* Buttons Below the Mission Statement */}
         <div className="buttons">
-          
+          {
+            props.user ? (
+              <button
+                onClick={async () => {
+                  await handleLogout();
+                  window.location.reload();
+                }}
+              >
+                Logout
+              </button>
+            ) : (
               <button onClick={() => googleLogin()}>Login</button>
-
+            )
+          }
         </div>
       </div>
 
