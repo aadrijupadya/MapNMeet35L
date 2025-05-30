@@ -2,6 +2,7 @@
     max-width: 1200px;
     margin: 2rem auto;
     padding: 0 1rem;
+    color: var(--color-text);
 }
 
 .profile-header {
@@ -10,16 +11,17 @@
     gap: 2rem;
     margin-bottom: 2rem;
     padding: 2rem;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background: var(--color-bg-light);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--color-border);
 }
 
 .profile-avatar {
     width: 100px;
     height: 100px;
-    background: #007bff;
-    color: white;
+    background: var(--color-accent);
+    color: #000;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -31,48 +33,51 @@
 .profile-info h1 {
     margin: 0;
     font-size: 2rem;
-    color: #333;
+    color: var(--color-text);
 }
 
 .profile-email, .profile-contact {
     margin: 0.5rem 0;
-    color: #666;
+    color: var(--color-muted);
     font-size: 1.1rem;
 }
 
 .profile-content {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background: var(--color-bg-light);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
     padding: 1.5rem;
+    border: 1px solid var(--color-border);
 }
 
 .profile-tabs {
     display: flex;
     gap: 1rem;
     margin-bottom: 2rem;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--color-border);
     padding-bottom: 1rem;
 }
 
 .profile-tabs button {
     padding: 0.75rem 1.5rem;
     border: none;
-    background: none;
+    background: var(--color-bg);
     font-size: 1rem;
-    color: #666;
+    color: var(--color-text);
     cursor: pointer;
-    border-radius: 6px;
+    border-radius: var(--radius);
     transition: all 0.2s;
 }
 
 .profile-tabs button:hover {
-    background: #f5f5f5;
+    background: var(--color-accent);
+    color: #000;
 }
 
 .profile-tabs button.active {
-    background: #007bff;
-    color: white;
+    background: var(--color-accent);
+    color: #000;
+    font-weight: bold;
 }
 
 .events-list {
@@ -82,24 +87,26 @@
 }
 
 .event-card {
-    background: #f8f9fa;
-    border-radius: 8px;
+    background: var(--color-bg);
+    border-radius: var(--radius);
     padding: 1.5rem;
     transition: transform 0.2s;
+    border: 1px solid var(--color-border);
 }
 
 .event-card:hover {
     transform: translateY(-2px);
+    box-shadow: var(--shadow);
 }
 
 .event-card h3 {
     margin: 0 0 1rem 0;
-    color: #333;
+    color: var(--color-text);
 }
 
 .event-time, .event-location, .event-participants {
     margin: 0.5rem 0;
-    color: #666;
+    color: var(--color-muted);
     font-size: 0.95rem;
 }
 
@@ -107,26 +114,29 @@
     width: 100%;
     padding: 0.75rem;
     margin-top: 1rem;
-    background: #007bff;
-    color: white;
+    background: var(--color-accent);
+    color: #000;
     border: none;
-    border-radius: 6px;
+    border-radius: var(--radius);
     cursor: pointer;
-    transition: background 0.2s;
+    transition: all 0.2s;
+    font-weight: bold;
 }
 
 .view-event-btn:hover {
-    background: #0056b3;
+    background: #adf;
+    transform: translateY(-1px);
 }
 
 .no-events {
     grid-column: 1 / -1;
     text-align: center;
     padding: 2rem;
-    color: #666;
+    color: var(--color-muted);
     font-size: 1.1rem;
-    background: #f8f9fa;
-    border-radius: 8px;
+    background: var(--color-bg);
+    border-radius: var(--radius);
+    border: 1px solid var(--color-border);
 }
 
 @media (max-width: 768px) {
