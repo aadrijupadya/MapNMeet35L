@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './Activities.css';
 import { formToJSON } from 'axios';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { getAddressFromCoords } from './utils/geocoding';
 
 const loadGoogleMapsScript = (apiKey) => {
@@ -40,6 +40,12 @@ export default function Activities(props) {
     const [addresses, setAddresses] = useState({});
     const [showMyEvents, setShowMyEvents] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState(null);
+
+    useEffect(() => {
+        console.log('Activities component props:', props);
+        console.log('User data:', props.user);
+        console.log('User ID:', props.userId);
+    }, [props]);
 
     useEffect(() => {
         const apiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
@@ -290,8 +296,47 @@ export default function Activities(props) {
         }
     };
 
+    const updateUserContact = async (userId) => {
+        try {
+            console.log('Updating contact for user:', userId);
+            console.log('User data from props:', props.user);
+            
+            if (!props.user?.email) {
+                console.error('No email found in user data');
+                return;
+            }
+
+            const res = await fetch('http://localhost:8000/api/updateContact', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    userId,
+                    contact: props.user.email
+                }),
+            });
+
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.error || 'Failed to update contact');
+            }
+
+            const result = await res.json();
+            console.log('Contact update result:', result);
+        } catch (error) {
+            console.error('Error updating contact:', error);
+        }
+    };
+
     const toggleEventParticipation = async (userId, eventId, leave = false) => {
         try {
+            console.log('Toggle participation:', { userId, eventId, leave });
+            console.log('Current user data:', props.user);
+
+            // First update the user's contact if they're joining
+            if (!leave) {
+                await updateUserContact(userId);
+            }
+
             const res = await fetch('http://localhost:8000/api/addParticipant', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

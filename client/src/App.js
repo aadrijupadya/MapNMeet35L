@@ -69,7 +69,7 @@ function Layout({ user, updateUser }) {
             <Route path="/about" element={<About />} />
             <Route path="/create-activity" element={<CreateActivity userId={user._id} />} />
             <Route path="/map" element={<Map />} />
-            <Route path="/activities" element={<Activities userId={user._id}/>} />
+            <Route path="/activities" element={<Activities user={user} userId={user._id} />} />
             <Route path="/profile" element={<Profile user={user} />} />
           </>
         )}
