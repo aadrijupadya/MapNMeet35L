@@ -3,6 +3,7 @@ import './Activities.css';
 import { formToJSON } from 'axios';
 import { useSearchParams, Link } from 'react-router-dom';
 import { getAddressFromCoords } from './utils/geocoding';
+import CreateActivity from './CreateActivity';
 
 const loadGoogleMapsScript = (apiKey) => {
     if (window.google?.maps) return Promise.resolve();
@@ -40,6 +41,12 @@ export default function Activities(props) {
     const [addresses, setAddresses] = useState({});
     const [showMyEvents, setShowMyEvents] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState(null);
+    const [clickedCoordinates, setClickedCoordinates] = useState(null);
+    const [createActivityOpen, setCreateActivityOpen] = useState(false);
+    const markerRef = useRef(null);
+    const markerColor = getComputedStyle(document.documentElement)
+        .getPropertyValue('--color-accent')
+        .trim();
 
     useEffect(() => {
         console.log('Activities component props:', props);
@@ -91,6 +98,31 @@ export default function Activities(props) {
                         { featureType: "water", elementType: "labels.text.stroke", stylers: [{ color: "#17263c" }] }
                     ],
                 });
+
+            
+
+                map.current.addListener('click', (e) => {
+                    if (createActivityOpen) {
+                        const pos = e.latLng;
+                        setClickedCoordinates({ lat: pos.lat(), lng: pos.lng() });
+                        
+                        if (markerRef.current) {
+                            markerRef.current.setPosition(pos);
+                        } else {
+
+                            markerRef.current = new window.google.maps.Marker({
+                            position: pos,
+                            map: map.current,
+                            icon: {
+                                path: 'M0-48c-9.941 0-18 8.059-18 18 0 14.178 18 30 18 30s18-15.822 18-30c0-9.941-8.059-18-18-18z',
+                                fillColor: markerColor,
+                                fillOpacity: 0.8,
+                                scale: 3
+                            }
+                        });
+                        }
+                    }
+                });
                 return fetch('http://localhost:8000/api/activities');
             })
             .then(res => res.json())
@@ -106,7 +138,7 @@ export default function Activities(props) {
                 addMarkers(data);
             })
             .catch(err => console.error('Error loading map or events:', err));
-    }, []);
+    }, [createActivityOpen]);
 
     useEffect(() => {
         const filtered = events.filter(event => {
@@ -513,7 +545,18 @@ export default function Activities(props) {
 
     return (
         <div className="activities-page">
-            <a href="/create-activity" className="create-button">+</a>
+            {createActivityOpen ? (
+                <CreateActivity 
+                    userId={props.userId}
+                    coordinates={clickedCoordinates}
+                    onClose={() => {
+                        setCreateActivityOpen(false);
+                        markerRef.current = null;
+                    }}
+                />
+            ) : (
+                <a onClick={() => setCreateActivityOpen(true)} className="create-button" >+</a>
+            )}
             <div id="sort-feedback" style={{
                 position: 'fixed',
                 top: '10px',
