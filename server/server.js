@@ -42,9 +42,10 @@ app.use('/api/activities', activitiesRouter);
 app.post('/api/addParticipant', async (req, res) => {
   const userID = req.body.userId
   const activityID = req.body.activityId
+  const remove = req.body.remove
 
   if (!userID || !activityID) {
-    console.log(userID, activityID )
+    console.log('Missing required fields:', { userID, activityID });
     return res.status(400).json({ error: 'userID and activityID are required' });
   }
 
@@ -53,36 +54,94 @@ app.post('/api/addParticipant', async (req, res) => {
     const activity = await Activity.findById(activityID);
 
     if (!activity) {
-      console.log("ACTIVITY_NOT_FOUND")
+      console.log("ACTIVITY_NOT_FOUND");
       return res.status(404).json({ error: 'ACTIVITY_NOT_FOUND' });
     }
 
-    // Check if the joinees field length is equal to the participant count
-    if (activity.joinees.length >= activity.participantCount) {
-      console.log("ACTIVITY_FULL")
-      return res.status(400).json({ error: 'ACTIVITY_FULL' });
+    // Check if user exists
+    const user = await User.findById(userID);
+    if (!user) {
+      console.log("USER_NOT_FOUND");
+      return res.status(404).json({ error: 'USER_NOT_FOUND' });
     }
 
-    // Add the userID to the activity's joinees array
-    activity.joinees.addToSet(userID);
+    if (remove) {
+      // Remove the user from the activity's joinees array
+      activity.joinees.pull(userID);
+      await activity.save();
 
-    // Save the updated activity
-    await activity.save();
+      // Remove the activity from the user's activities array
+      await User.findByIdAndUpdate(
+        userID,
+        { $pull: { activities: activityID } },
+        { new: true }
+      );
 
-    // Update the user's activities field with the activity ID
-    const userUpdate = await User.findByIdAndUpdate(
-      userID,
-      { $addToSet: { activities: activityID } }, // $addToSet ensures no duplicates
-      { new: true } // Return the updated document
-    );
+      console.log("Successfully removed user from activity");
+    } else {
+      // Check if user is already in the activity
+      if (activity.joinees.includes(userID)) {
+        console.log("USER_ALREADY_IN_ACTIVITY");
+        return res.status(400).json({ error: 'USER_ALREADY_IN_ACTIVITY' });
+      }
 
-    if (!userUpdate) {
-      return res.status(404).json({ error: 'USER_NOT_FOUND' });
+      // Only check for activity full when joining
+      if (activity.participantCount && activity.joinees.length >= activity.participantCount) {
+        console.log("ACTIVITY_FULL");
+        return res.status(400).json({ error: 'ACTIVITY_FULL' });
+      }
+
+      // Add the userID to the activity's joinees array
+      activity.joinees.addToSet(userID);
+      await activity.save();
+
+      // Update the user's activities field with the activity ID
+      await User.findByIdAndUpdate(
+        userID,
+        { $addToSet: { activities: activityID } },
+        { new: true }
+      );
+
+      console.log("Successfully added user to activity");
     }
 
     return res.status(200).json({ success: true });
   } catch (error) {
-    console.error(error);
+    console.error('Error in addParticipant:', error);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/updateContact', async (req, res) => {
+  const { userId, contact } = req.body;
+  console.log('Update contact request:', { userId, contact });
+
+  if (!userId || !contact) {
+    console.log('Missing required fields:', { userId, contact });
+    return res.status(400).json({ error: 'userId and contact are required' });
+  }
+
+  try {
+    console.log('Finding user:', userId);
+    const user = await User.findById(userId);
+    console.log('Found user:', user);
+
+    if (!user) {
+      console.log('User not found');
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    console.log('Updating user contact from', user.contact, 'to', contact);
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { contact },
+      { new: true }
+    );
+    console.log('Updated user:', updatedUser);
+
+    return res.status(200).json({ success: true, user: updatedUser });
+  } catch (error) {
+    console.error('Error updating contact:', error);
     return res.status(500).json({ error: error.message });
   }
 });

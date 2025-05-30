@@ -6,8 +6,10 @@ import { getAddressFromCoords } from './utils/geocoding';
 export default function Profile({ user }) {
     const [userEvents, setUserEvents] = useState([]);
     const [rsvpdEvents, setRsvpdEvents] = useState([]);
-    const [activeTab, setActiveTab] = useState('created'); // 'created' or 'rsvpd'
+    const [activeTab, setActiveTab] = useState('created');
     const [locationNames, setLocationNames] = useState({});
+    const [profilePic, setProfilePic] = useState(null);
+
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -16,12 +18,10 @@ export default function Profile({ user }) {
             return;
         }
 
-        // Fetch user's created events
         fetch(`http://localhost:8000/api/activities/user/${user._id}`)
             .then(res => res.json())
             .then(events => {
                 setUserEvents(events);
-                // Fetch user's RSVP'd events
                 return fetch(`http://localhost:8000/api/activities/rsvpd/${user._id}`);
             })
             .then(res => res.json())
@@ -34,7 +34,6 @@ export default function Profile({ user }) {
     }, [user, navigate]);
 
     useEffect(() => {
-        // Fetch location names for all events
         const fetchLocationNames = async () => {
             const allEvents = [...userEvents, ...rsvpdEvents];
             const locationMap = {};
@@ -71,12 +70,35 @@ export default function Profile({ user }) {
         });
     };
 
+    const handleProfilePicChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const imageUrl = URL.createObjectURL(file);
+            setProfilePic(imageUrl);
+        }
+    };
+
     return (
         <div className="profile-page">
             <div className="profile-header">
-                <div className="profile-avatar">
-                    {user.name ? user.name[0].toUpperCase() : 'U'}
+                <div className="profile-avatar-container">
+                    <div className="profile-avatar">
+                        {profilePic ? (
+                            <img src={profilePic} alt="Profile" className="profile-img" />
+                        ) : (
+                            <span>{user.name ? user.name[0].toUpperCase() : 'U'}</span>
+                        )}
+                    </div>
+                    <label htmlFor="profilePicUpload" className="upload-overlay">+</label>
+                    <input
+                        type="file"
+                        accept="image/*"
+                        id="profilePicUpload"
+                        onChange={handleProfilePicChange}
+                        className="upload-input"
+                    />
                 </div>
+
                 <div className="profile-info">
                     <h1>{user.name || 'Anonymous User'}</h1>
                     <p className="profile-email">{user.email}</p>
@@ -86,14 +108,14 @@ export default function Profile({ user }) {
 
             <div className="profile-content">
                 <div className="profile-tabs">
-                    <button 
-                        className={activeTab === 'created' ? 'active' : ''} 
+                    <button
+                        className={activeTab === 'created' ? 'active' : ''}
                         onClick={() => setActiveTab('created')}
                     >
                         Created Events ({userEvents.length})
                     </button>
-                    <button 
-                        className={activeTab === 'rsvpd' ? 'active' : ''} 
+                    <button
+                        className={activeTab === 'rsvpd' ? 'active' : ''}
                         onClick={() => setActiveTab('rsvpd')}
                     >
                         RSVP'd Events ({rsvpdEvents.length})
@@ -110,7 +132,7 @@ export default function Profile({ user }) {
                                     try {
                                         const coords = JSON.parse(event.location);
                                         const address = locationNames[event._id];
-                                        return address 
+                                        return address
                                             ? `${address} (${coords.lat.toFixed(2)}, ${coords.lng.toFixed(2)})`
                                             : `(${coords.lat.toFixed(2)}, ${coords.lng.toFixed(2)})`;
                                     } catch {
@@ -119,7 +141,7 @@ export default function Profile({ user }) {
                                 })() : 'Location not available'
                             }</p>
                             <p className="event-participants">{event.participantCount || 0} participants</p>
-                            <button 
+                            <button
                                 className="view-event-btn"
                                 onClick={() => navigate(`/activities?id=${event._id}`)}
                             >
@@ -136,4 +158,4 @@ export default function Profile({ user }) {
             </div>
         </div>
     );
-} 
+}
