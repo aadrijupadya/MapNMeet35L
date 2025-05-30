@@ -67,6 +67,12 @@ function Home(props) {
 
       {/* Scrolling Image Banner */}
       <div className="banner-container">
+        {/* Mission Statement Overlay */}
+        { !props.user && (
+          <div className="mission-statement">
+            <p>MapNMeet helps UCLA students discover and join spontaneous activities on campus. We connect people in real time for sports, study groups, and more—building community, one meetup at a time.</p>
+          </div>
+        )}
         <div className="scrolling-banner">
           <img src={uclaBanner} alt="UCLA Scrolling Banner 1" />
           <img src={uclaBanner} alt="UCLA Scrolling Banner 2" />
@@ -97,7 +103,7 @@ function Home(props) {
               <button
                 onClick={async () => {
                   await handleLogout();
-                  window.location.reload();
+                  // window.location.reload();
                 }}
               >
                 Logout
