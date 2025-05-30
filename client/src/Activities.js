@@ -44,6 +44,9 @@ export default function Activities(props) {
     const [clickedCoordinates, setClickedCoordinates] = useState(null);
     const [createActivityOpen, setCreateActivityOpen] = useState(false);
     const markerRef = useRef(null);
+    const markerColor = getComputedStyle(document.documentElement)
+        .getPropertyValue('--color-accent')
+        .trim();
 
     useEffect(() => {
         console.log('Activities component props:', props);
@@ -96,19 +99,28 @@ export default function Activities(props) {
                     ],
                 });
 
+            
+
                 map.current.addListener('click', (e) => {
-                    const lat = e.latLng.lat();
-                    const lng = e.latLng.lng();
-                    setClickedCoordinates({ lat, lng });
+                    if (createActivityOpen) {
+                        const pos = e.latLng;
+                        setClickedCoordinates({ lat: pos.lat(), lng: pos.lng() });
+                        
+                        if (markerRef.current) {
+                            markerRef.current.setPosition(pos);
+                        } else {
 
-
-                    if (markerRef.current) {
-                        markerRef.current.setPosition(e.latLng);
-                    } else {
-                        markerRef.current = new window.google.maps.Marker({
-                            position: e.latLng,
+                            markerRef.current = new window.google.maps.Marker({
+                            position: pos,
                             map: map.current,
+                            icon: {
+                                path: 'M0-48c-9.941 0-18 8.059-18 18 0 14.178 18 30 18 30s18-15.822 18-30c0-9.941-8.059-18-18-18z',
+                                fillColor: markerColor,
+                                fillOpacity: 0.8,
+                                scale: 3
+                            }
                         });
+                        }
                     }
                 });
                 return fetch('http://localhost:8000/api/activities');
@@ -126,7 +138,7 @@ export default function Activities(props) {
                 addMarkers(data);
             })
             .catch(err => console.error('Error loading map or events:', err));
-    }, []);
+    }, [createActivityOpen]);
 
     useEffect(() => {
         const filtered = events.filter(event => {
@@ -489,6 +501,10 @@ export default function Activities(props) {
                 <CreateActivity 
                     userId={props.userId}
                     coordinates={clickedCoordinates}
+                    onClose={() => {
+                        setCreateActivityOpen(false);
+                        markerRef.current = null;
+                    }}
                 />
             ) : (
                 <a onClick={() => setCreateActivityOpen(true)} className="create-button" >+</a>

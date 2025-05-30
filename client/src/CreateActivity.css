@@ -1,6 +1,5 @@
 .create-container {
   max-width: 500px;
-  margin: 0 60px auto;
   padding: 30px;
   border-radius: var(--radius);
   box-shadow: var(--shadow);
@@ -100,4 +99,20 @@
 
 .return-button:hover {
   background-color: #45a049;
+}
+
+.close-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--color-text);
+}
+
+.close-btn:hover {
+  color: var(--color-accent);
 }

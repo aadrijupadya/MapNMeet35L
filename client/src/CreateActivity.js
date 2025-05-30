@@ -3,16 +3,24 @@ import './CreateActivity.css';
 import { Link } from 'react-router-dom';
 import { getAddressFromCoords } from './utils/geocoding';
 
-export default function CreateActivity({ userId, coordinates }) {
+export default function CreateActivity({ userId, coordinates, onClose }) {
   const successRef = useRef(null);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const [form, setForm] = useState({
+  const getDefaultDateTime = () => {
+    const now = new Date();
+    // adjust for timezone offset and zero out seconds+ms
+    const local = new Date(now.getTime() - now.getTimezoneOffset()*60000);
+    local.setSeconds(0, 0);
+    return local.toISOString().slice(0,16);
+  };
+
+  const [form, setForm] = useState({  
     title: '',
     description: '',
     location: '',
-    time: '',
-    endTime: '',
+    time: getDefaultDateTime(),
+    endTime: getDefaultDateTime(),
     participantCount: '',
   });
 
@@ -66,6 +74,8 @@ export default function CreateActivity({ userId, coordinates }) {
         endTime: '',
         participantCount: '',
       });
+      alert("Successfully submitted activity!")
+      onClose();
     } catch (err) {
       console.error('Error creating activity:', err);
       setStatus(err.message || 'Error submitting form');
@@ -74,8 +84,10 @@ export default function CreateActivity({ userId, coordinates }) {
 
   return (
     <div className="create-container">
+      <button className="close-btn" onClick={onClose} aria-label="Close">×</button>
       <div className="create-form-wrapper">
         <h2>Create Activity</h2>
+        <h2>Select the location on the map</h2>
         <form onSubmit={handleSubmit} className="create-form">
           <input
             name="title"
