@@ -377,6 +377,14 @@ export default function Activities(props) {
             setEvents(updatedEvents);
             setFilteredEvents(updatedEvents);
 
+            // Update the selectedEvent in the modal if it's open and matches the event
+            setSelectedEvent(prev => {
+                if (prev && (prev._id === eventId || prev.id === eventId)) {
+                    return updatedEvents.find(e => (e._id === eventId || e.id === eventId)) || prev;
+                }
+                return prev;
+            });
+
             const feedback = document.getElementById('sort-feedback');
             if (feedback) {
                 feedback.textContent = leave ? 'Left event' : 'Joined event';
