@@ -1,16 +1,15 @@
 .create-container {
-  max-width: 500px;
   padding: 30px;
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   position: absolute;
   top: 0;
   right: 0;
-  width: 400px;  
+  width: 50vw;  
   height: 100vh;   
   overflow-y: auto; 
   z-index: 10000;
-  background-color: black;
+  background-color: var(--color-bg);
 }
 
 .create-container h2 {
