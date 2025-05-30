@@ -282,31 +282,24 @@ export default function Activities(props) {
     };
 
     const sortEvents = (type) => {
-        const sorted = [...filteredEvents];
-        switch (type) {
-            case 'recent':
-                sorted.sort((a, b) => new Date(b.time) - new Date(a.time));
-                break;
-            case 'upcoming': {
-                const now = new Date();
-                sorted.sort((a, b) => {
-                    const dateA = new Date(a.time);
-                    const dateB = new Date(b.time);
-                    if (dateA > now && dateB > now) return dateA - dateB;
-                    if (dateA > now) return -1;
-                    if (dateB > now) return 1;
-                    return dateB - dateA;
-                });
-                break;
+        let sorted;
+        if (type === 'friends') {
+            sorted = events.filter(event =>
+                event.joinees && props.user && Array.isArray(props.user.friends) &&
+                event.joinees.some(joinee => props.user.friends.includes(joinee._id))
+            );
+        } else {
+            sorted = [...events];
+            switch (type) {
+                case 'upcoming':
+                    sorted.sort((a, b) => new Date(a.time) - new Date(b.time));
+                    break;
+                case 'participants':
+                    sorted.sort((a, b) => ((b.joinees?.length || 0) - (a.joinees?.length || 0)));
+                    break;
+                default:
+                    break;
             }
-            case 'closest':
-                sorted.sort((a, b) => (a.distance || 9999) - (b.distance || 9999));
-                break;
-            case 'participants':
-                sorted.sort((a, b) => ((b.participants?.max) || 0) - ((a.participants?.max) || 0));
-                break;
-            default:
-                break;
         }
         setFilteredEvents(sorted);
         setSortBy(type);
@@ -522,10 +515,9 @@ export default function Activities(props) {
                     )}
                 </div>
                 <div className="sort-options">
-                    <button onClick={() => sortEvents('recent')} className={sortBy === 'recent' ? 'active' : ''}>Most Recent</button>
-                    <button onClick={() => sortEvents('upcoming')} className={sortBy === 'upcoming' ? 'active' : ''}>Upcoming</button>
-                    <button onClick={() => sortEvents('closest')} className={sortBy === 'closest' ? 'active' : ''}>Closest</button>
+                    <button onClick={() => sortEvents('upcoming')} className={sortBy === 'upcoming' ? 'active' : ''}>Upcoming </button>
                     <button onClick={() => sortEvents('participants')} className={sortBy === 'participants' ? 'active' : ''}>Most Participants</button>
+                    <button onClick={() => sortEvents('friends')} className={sortBy === 'friends' ? 'active' : ''}>Friends Only</button>
                 </div>
                 {filteredEvents.map((event) => {
                     const id = event._id || event.id;
