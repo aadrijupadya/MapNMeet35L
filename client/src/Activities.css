@@ -586,3 +586,50 @@
     padding-left: 2rem;
 }
 
+.event-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.add-participant-button,
+.delete-event-button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.add-participant-button {
+    background-color: var(--color-accent);
+    color: #000;
+}
+
+.delete-event-button {
+    background-color: #ff4444;
+    color: white;
+}
+
+.add-participant-button:hover {
+    background-color: #adf;
+    transform: translateY(-1px);
+}
+
+.delete-event-button:hover {
+    background-color: #ff6666;
+    transform: translateY(-1px);
+}
+
+.add-participant-button:active,
+.delete-event-button:active {
+    transform: translateY(1px);
+}
+

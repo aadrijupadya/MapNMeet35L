@@ -495,6 +495,54 @@ export default function Activities(props) {
         }
     };
 
+    const deleteEvent = async (eventId) => {
+        try {
+            const res = await fetch(`http://localhost:8000/api/activities/${eventId}?userId=${props.userId}`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include'
+            });
+
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.error || 'Failed to delete event');
+            }
+
+            // Remove the marker from the map
+            if (markers.current[eventId]) {
+                markers.current[eventId].setMap(null);
+                delete markers.current[eventId];
+            }
+
+            // Update events list
+            const updatedEvents = events.filter(e => e._id !== eventId);
+            setEvents(updatedEvents);
+            setFilteredEvents(updatedEvents);
+
+            // Close modal if the deleted event was being viewed
+            if (selectedEvent && selectedEvent._id === eventId) {
+                setSelectedEvent(null);
+            }
+
+            const feedback = document.getElementById('sort-feedback');
+            if (feedback) {
+                feedback.textContent = 'Event deleted successfully';
+                feedback.style.display = 'block';
+                feedback.style.background = '#4CAF50';
+                setTimeout(() => feedback.style.display = 'none', 2000);
+            }
+        } catch (error) {
+            console.error('Error deleting event:', error);
+            const feedback = document.getElementById('sort-feedback');
+            if (feedback) {
+                feedback.textContent = error.message || 'Failed to delete event';
+                feedback.style.display = 'block';
+                feedback.style.background = '#f44336';
+                setTimeout(() => feedback.style.display = 'none', 2000);
+            }
+        }
+    };
+
     return (
         <div className="activities-page">
             {createActivityOpen ? (
@@ -610,21 +658,35 @@ export default function Activities(props) {
                                 )}
                             </div>
                             <div className="event-time" data-emoji="⏰">{formatDate(event.time)}</div>
-                            {props.userId !== event.createdBy?._id && (
-                                <button
-                                    className="add-participant-button"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        if (event.joinees && event.joinees.some(joinee => joinee._id === props.userId)) {
-                                            toggleEventParticipation(props.userId, id, true);
-                                        } else {
-                                            toggleEventParticipation(props.userId, id, false);
-                                        }
-                                    }}
-                                >
-                                    {event.joinees && event.joinees.some(joinee => joinee._id === props.userId) ? 'Leave' : 'Join'}
-                                </button>
-                            )}
+                            <div className="event-actions">
+                                {props.userId !== event.createdBy?._id ? (
+                                    <button
+                                        className="add-participant-button"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            if (event.joinees && event.joinees.some(joinee => joinee._id === props.userId)) {
+                                                toggleEventParticipation(props.userId, id, true);
+                                            } else {
+                                                toggleEventParticipation(props.userId, id, false);
+                                            }
+                                        }}
+                                    >
+                                        {event.joinees && event.joinees.some(joinee => joinee._id === props.userId) ? 'Leave' : 'Join'}
+                                    </button>
+                                ) : (
+                                    <div className="button-group">
+                                        <button
+                                            className="delete-event-button"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                deleteEvent(id);
+                                            }}
+                                        >
+                                            Delete Event
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     );
                 })}
