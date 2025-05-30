@@ -1,12 +1,17 @@
 .create-container {
   max-width: 500px;
-  margin: 60px auto;
+  margin: 0 60px auto;
   padding: 30px;
-  background-color: var(--color-bg-light);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  font-family: var(--font-main);
-  color: var(--color-text);
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 400px;  
+  height: 100vh;   
+  overflow-y: auto; 
+  z-index: 10000;
+  background-color: black;
 }
 
 .create-container h2 {
@@ -65,19 +70,6 @@
 .status {
   margin-top: 10px;
   font-weight: bold;
-}
-
-.map-box {
-  height: 300px;
-  width: 100%;
-  margin: 12px 0;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-}
-
-.map-instructions {
-  margin-top: 10px;
-  font-weight: 500;
 }
 
 .submit-button, .return-button {

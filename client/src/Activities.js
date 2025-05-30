@@ -3,6 +3,7 @@ import './Activities.css';
 import { formToJSON } from 'axios';
 import { useSearchParams, Link } from 'react-router-dom';
 import { getAddressFromCoords } from './utils/geocoding';
+import CreateActivity from './CreateActivity';
 
 const loadGoogleMapsScript = (apiKey) => {
     if (window.google?.maps) return Promise.resolve();
@@ -40,6 +41,9 @@ export default function Activities(props) {
     const [addresses, setAddresses] = useState({});
     const [showMyEvents, setShowMyEvents] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState(null);
+    const [clickedCoordinates, setClickedCoordinates] = useState(null);
+    const [createActivityOpen, setCreateActivityOpen] = useState(false);
+    const markerRef = useRef(null);
 
     useEffect(() => {
         console.log('Activities component props:', props);
@@ -90,6 +94,22 @@ export default function Activities(props) {
                         { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#515c6d" }] },
                         { featureType: "water", elementType: "labels.text.stroke", stylers: [{ color: "#17263c" }] }
                     ],
+                });
+
+                map.current.addListener('click', (e) => {
+                    const lat = e.latLng.lat();
+                    const lng = e.latLng.lng();
+                    setClickedCoordinates({ lat, lng });
+
+
+                    if (markerRef.current) {
+                        markerRef.current.setPosition(e.latLng);
+                    } else {
+                        markerRef.current = new window.google.maps.Marker({
+                            position: e.latLng,
+                            map: map.current,
+                        });
+                    }
                 });
                 return fetch('http://localhost:8000/api/activities');
             })
@@ -464,7 +484,14 @@ export default function Activities(props) {
 
     return (
         <div className="activities-page">
-            <a href="/create-activity" className="create-button">+</a>
+            {createActivityOpen ? (
+                <CreateActivity 
+                    userId={props.userId}
+                    coordinates={clickedCoordinates}
+                />
+            ) : (
+                <a onClick={() => setCreateActivityOpen(true)} className="create-button" >+</a>
+            )}
             <div id="sort-feedback" style={{
                 position: 'fixed',
                 top: '10px',
