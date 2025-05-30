@@ -53,6 +53,12 @@ export default function Activities(props) {
             console.error('Missing Google Maps API key');
             return;
         }
+        const uclaBounds = {
+            north: 34.0810,
+            south: 34.0580,
+            west: -118.4590,
+            east: -118.4340
+        };
 
         loadGoogleMapsScript(apiKey)
             .then(() => {
@@ -60,6 +66,10 @@ export default function Activities(props) {
                     center: { lat: 34.0689, lng: -118.4452 },
                     mapTypeControl: false,
                     zoom: 15,
+                    restriction: {
+                        latLngBounds: uclaBounds,
+                        strictBounds: true
+                    },
                     styles: [
                         { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
                         { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
@@ -79,7 +89,7 @@ export default function Activities(props) {
                         { featureType: "water", elementType: "geometry", stylers: [{ color: "#17263c" }] },
                         { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#515c6d" }] },
                         { featureType: "water", elementType: "labels.text.stroke", stylers: [{ color: "#17263c" }] }
-                    ]
+                    ],
                 });
                 return fetch('http://localhost:8000/api/activities');
             })
