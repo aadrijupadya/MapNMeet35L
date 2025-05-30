@@ -12,6 +12,12 @@ export default function Profile({ user }) {
   const [activeTab, setActiveTab] = useState('created');
   const [locationNames, setLocationNames] = useState({});
   const [profilePic, setProfilePic] = useState(null);
+  const [showCustomizeModal, setShowCustomizeModal] = useState(false);
+  const [profileData, setProfileData] = useState({
+    bio: user?.bio || '',
+    instagram: user?.instagram || ''
+  });
+  const [updateStatus, setUpdateStatus] = useState({ message: '', type: '' });
 
   const navigate = useNavigate();
 
@@ -49,18 +55,78 @@ export default function Profile({ user }) {
     if (userEvents.length || rsvpdEvents.length) fetchLocationNames();
   }, [userEvents, rsvpdEvents]);
 
-  const formatDate = date =>
-    new Date(date).toLocaleString('en-US', {
+  const formatDate = (date) => {
+    return new Date(date).toLocaleString('en-US', {
       weekday: 'short',
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
     });
+  };
 
-  const handleProfilePicChange = e => {
+  const handleProfilePicChange = (e) => {
     const file = e.target.files[0];
-    if (file) setProfilePic(URL.createObjectURL(file));
+    if (file) {
+      const imageUrl = URL.createObjectURL(file);
+      setProfilePic(imageUrl);
+    }
+  };
+
+  const handleProfileUpdate = async (e) => {
+    e.preventDefault();
+    try {
+      console.log('Attempting to update profile with data:', {
+        userId: user._id,
+        ...profileData
+      });
+
+      const response = await fetch('http://localhost:8000/api/updateProfile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          userId: user._id,
+          ...profileData
+        }),
+      });
+
+      const data = await response.json();
+      console.log('Server response:', data);
+
+      if (response.ok) {
+        // Update the local user object with the new data
+        Object.assign(user, data.user);
+        
+        setUpdateStatus({ message: 'Profile updated successfully!', type: 'success' });
+        // Clear success message after 2 seconds but keep modal open
+        setTimeout(() => {
+          setUpdateStatus({ message: '', type: '' });
+        }, 2000);
+      } else {
+        console.error('Server error:', data.error);
+        setUpdateStatus({ 
+          message: data.error || 'Failed to update profile. Please try again.', 
+          type: 'error' 
+        });
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      setUpdateStatus({ 
+        message: 'Network error. Please check your connection and try again.', 
+        type: 'error' 
+      });
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setProfileData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   const currentItems =
@@ -92,10 +158,61 @@ export default function Profile({ user }) {
         </div>
         <div className="profile-info">
           <h1>{user.name || 'Anonymous User'}</h1>
-          <p className="profile-email">{user.email}</p>
-          {user.contact && <p className="profile-contact">✉️ {user.contact}</p>}
+          <p className="profile-email">✉️ {user.email}</p>
+          {user.contact && user.contact !== user.email && (
+            <p className="profile-contact">📧 Contact: {user.contact}</p>
+          )}
+          {user.instagram && <p className="profile-instagram">📸 @{user.instagram}</p>}
+          {user.bio && <p className="profile-bio">{user.bio}</p>}
+          <button 
+            className="customize-profile-btn"
+            onClick={() => setShowCustomizeModal(true)}
+          >
+            Customize Profile
+          </button>
         </div>
       </div>
+
+      {/* Customize Profile Modal */}
+      {showCustomizeModal && (
+        <div className="modal-overlay" onClick={() => setShowCustomizeModal(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <button className="close-modal" onClick={() => setShowCustomizeModal(false)}>×</button>
+            <h2>Customize Profile</h2>
+            <form onSubmit={handleProfileUpdate}>
+              <div className="form-group">
+                <label htmlFor="instagram">Instagram Handle:</label>
+                <input
+                  type="text"
+                  id="instagram"
+                  name="instagram"
+                  value={profileData.instagram}
+                  onChange={handleInputChange}
+                  placeholder="@username"
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="bio">Bio:</label>
+                <textarea
+                  id="bio"
+                  name="bio"
+                  value={profileData.bio}
+                  onChange={handleInputChange}
+                  placeholder="Tell us about yourself"
+                  maxLength="280"
+                />
+                <small>Maximum 280 characters</small>
+              </div>
+              {updateStatus.message && (
+                <div className={`update-status ${updateStatus.type}`}>
+                  {updateStatus.message}
+                </div>
+              )}
+              <button type="submit" className="save-profile-btn">Save Changes</button>
+            </form>
+          </div>
+        </div>
+      )}
 
       <div className="profile-content">
         <div className="profile-tabs">
@@ -120,61 +237,58 @@ export default function Profile({ user }) {
         </div>
 
         <div className="events-list">
-          {currentItems.map(item =>
-            activeTab === 'friends' ? (
-              <Link
-                to={`/profile/${item.id}`}
-                key={item.id}
-                className="friend-card"
-              >
+          {activeTab === 'friends' ? (
+            friends.map(friend => (
+              <Link key={friend.id} to={`/profile/${friend.id}`} className="friend-card">
                 <div className="friend-avatar">
-                  {item.profilePic ? (
-                    <img src={item.profilePic} alt={item.name} />
+                  {friend.profilePic ? (
+                    <img src={friend.profilePic} alt={friend.name} />
                   ) : (
-                    <span>{item.name[0]}</span>
+                    <span>{friend.name[0].toUpperCase()}</span>
                   )}
                 </div>
                 <div className="friend-info">
-                  <h3>{item.name}</h3>
+                  <h3>{friend.name}</h3>
                 </div>
               </Link>
-            ) : (
-              <div key={item._id} className="event-card">
-                <h3>{item.title}</h3>
-                <p className="event-time">{formatDate(item.time)}</p>
-                <p className="event-location">
-                  {item.location
-                    ? (() => {
-                        try {
-                          const { lat, lng } = JSON.parse(item.location);
-                          const addr = locationNames[item._id];
-                          return addr
-                            ? `${addr} (${lat.toFixed(2)}, ${lng.toFixed(2)})`
-                            : `(${lat.toFixed(2)}, ${lng.toFixed(2)})`;
-                        } catch {
-                          return 'Location not available';
-                        }
-                      })()
-                    : 'Location not available'}
-                </p>
-                <p className="event-participants">
-                  {item.participantCount || 0} participants
-                </p>
+            ))
+          ) : (
+            (activeTab === 'created' ? userEvents : rsvpdEvents).map(event => (
+              <div key={event._id} className="event-card">
+                <h3>{event.title}</h3>
+                <p className="event-time">{formatDate(event.time)}</p>
+                <p className="event-location">{
+                  event.location ? (() => {
+                    try {
+                      const coords = JSON.parse(event.location);
+                      const address = locationNames[event._id];
+                      return address
+                        ? `${address} (${coords.lat.toFixed(2)}, ${coords.lng.toFixed(2)})`
+                        : `(${coords.lat.toFixed(2)}, ${coords.lng.toFixed(2)})`;
+                    } catch {
+                      return 'Location not available';
+                    }
+                  })() : 'Location not available'
+                }</p>
+                <p className="event-participants">{event.participantCount || 0} participants</p>
                 <button
                   className="view-event-btn"
-                  onClick={() => navigate(`/activities?id=${item._id}`)}
+                  onClick={() => navigate(`/activities?id=${event._id}`)}
                 >
                   View Event
                 </button>
               </div>
-            )
+            ))
           )}
-
-          {currentItems.length === 0 && (
+          {activeTab === 'friends' && friends.length === 0 && (
             <div className="no-events">
-              {activeTab === 'created' && 'No created events yet'}
-              {activeTab === 'rsvpd' && "No RSVP'd events yet"}
-              {activeTab === 'friends' && 'No friends yet'}
+              No friends yet
+            </div>
+          )}
+          {(activeTab === 'created' || activeTab === 'rsvpd') && 
+           (activeTab === 'created' ? userEvents : rsvpdEvents).length === 0 && (
+            <div className="no-events">
+              No {activeTab === 'created' ? 'created' : 'RSVP\'d'} events yet
             </div>
           )}
         </div>
