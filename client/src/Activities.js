@@ -95,6 +95,12 @@ export default function Activities(props) {
             })
             .then(res => res.json())
             .then(data => {
+                console.log('Received events data:', data.map(event => ({
+                    id: event._id,
+                    title: event.title,
+                    locationName: event.locationName,
+                    location: event.location
+                })));
                 setEvents(data);
                 setFilteredEvents(data);
                 addMarkers(data);
@@ -117,7 +123,15 @@ export default function Activities(props) {
 
             if (searchIn.title && event.title) matches.push(event.title.toLowerCase().includes(searchLower));
             if (searchIn.description && event.description) matches.push(event.description.toLowerCase().includes(searchLower));
-            if (searchIn.location && event.locationName) matches.push(event.locationName.toLowerCase().includes(searchLower));
+            if (searchIn.location) {
+                console.log('Searching location for event:', {
+                    id: event._id,
+                    locationName: event.locationName,
+                    searchText: searchLower,
+                    hasLocationName: !!event.locationName
+                });
+                if (event.locationName) matches.push(event.locationName.toLowerCase().includes(searchLower));
+            }
             if (searchIn.time) matches.push(formatDate(event.time).toLowerCase().includes(searchLower));
 
             return matches.some(match => match);
@@ -398,6 +412,56 @@ export default function Activities(props) {
         setSelectedEvent(null);
     };
 
+    const removeParticipant = async (eventId, userId) => {
+        try {
+            const res = await fetch('http://localhost:8000/api/addParticipant', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    userId, 
+                    activityId: eventId, 
+                    remove: true 
+                }),
+            });
+
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.error || 'Failed to remove participant');
+            }
+
+            // Refresh events after removal
+            const eventsRes = await fetch('http://localhost:8000/api/activities');
+            const updatedEvents = await eventsRes.json();
+            setEvents(updatedEvents);
+            setFilteredEvents(updatedEvents);
+            
+            // Update selected event if it's the one we modified
+            if (selectedEvent && selectedEvent._id === eventId) {
+                const updatedEvent = updatedEvents.find(e => e._id === eventId);
+                if (updatedEvent) {
+                    setSelectedEvent(updatedEvent);
+                }
+            }
+
+            const feedback = document.getElementById('sort-feedback');
+            if (feedback) {
+                feedback.textContent = 'Participant removed';
+                feedback.style.display = 'block';
+                feedback.style.background = '#4CAF50';
+                setTimeout(() => feedback.style.display = 'none', 2000);
+            }
+        } catch (error) {
+            console.error('Error removing participant:', error);
+            const feedback = document.getElementById('sort-feedback');
+            if (feedback) {
+                feedback.textContent = error.message || 'Failed to remove participant';
+                feedback.style.display = 'block';
+                feedback.style.background = '#f44336';
+                setTimeout(() => feedback.style.display = 'none', 2000);
+            }
+        }
+    };
+
     return (
         <div className="activities-page">
             <a href="/create-activity" className="create-button">+</a>
@@ -503,20 +567,21 @@ export default function Activities(props) {
                                 )}
                             </div>
                             <div className="event-time" data-emoji="⏰">{formatDate(event.time)}</div>
-                            <button
-                                className="add-participant-button"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    if (event.joinees && event.joinees.some(joinee => joinee._id === props.userId)) {
-                                        toggleEventParticipation(props.userId, id, true);
-                                    } else {
-                                        toggleEventParticipation(props.userId, id, false);
-                                    }
-                                }}
-                                disabled={props.userId === event.createdBy?._id}
-                            >
-                                {event.joinees && event.joinees.some(joinee => joinee._id === props.userId) ? 'Leave' : 'Join'}
-                            </button>
+                            {props.userId !== event.createdBy?._id && (
+                                <button
+                                    className="add-participant-button"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (event.joinees && event.joinees.some(joinee => joinee._id === props.userId)) {
+                                            toggleEventParticipation(props.userId, id, true);
+                                        } else {
+                                            toggleEventParticipation(props.userId, id, false);
+                                        }
+                                    }}
+                                >
+                                    {event.joinees && event.joinees.some(joinee => joinee._id === props.userId) ? 'Leave' : 'Join'}
+                                </button>
+                            )}
                         </div>
                     );
                 })}
@@ -580,36 +645,53 @@ export default function Activities(props) {
 
                                 <div className="event-joinees-section">
                                     <h3>Current Participants</h3>
-                                    {selectedEvent.joinees && selectedEvent.joinees.length > 0 ? (
-                                        <ul className="joinees-list">
-                                            {selectedEvent.joinees.map((joinee, index) => (
-                                                <li key={index} className="joinee-item">
-                                                    <span className="joinee-name">{joinee.name}</span>
-                                                    <span className="joinee-contact">({joinee.contact})</span>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    ) : (
-                                        <p className="no-joinees">No participants yet</p>
-                                    )}
+                                    <div className="joinees-list-container">
+                                        {selectedEvent.joinees && selectedEvent.joinees.length > 0 ? (
+                                            <ul className="joinees-list">
+                                                {selectedEvent.joinees.map((joinee, index) => (
+                                                    <li key={index} className="joinee-item">
+                                                        <div className="joinee-info">
+                                                            <span className="joinee-name">{joinee.name}</span>
+                                                            <span className="joinee-contact">({joinee.contact})</span>
+                                                        </div>
+                                                        {props.userId === selectedEvent.createdBy?._id && (
+                                                            <button 
+                                                                className="remove-participant-btn"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    removeParticipant(selectedEvent._id, joinee._id);
+                                                                }}
+                                                                title="Remove participant"
+                                                            >
+                                                                ×
+                                                            </button>
+                                                        )}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        ) : (
+                                            <p className="no-joinees">No participants yet</p>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
 
                             <div className="event-modal-footer">
-                                <button
-                                    className="join-button"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        if (selectedEvent.joinees && selectedEvent.joinees.some(joinee => joinee._id === props.userId)) {
-                                            toggleEventParticipation(props.userId, selectedEvent._id, true);
-                                        } else {
-                                            toggleEventParticipation(props.userId, selectedEvent._id, false);
-                                        }
-                                    }}
-                                    disabled={props.userId === selectedEvent.createdBy?._id}
-                                >
-                                    {selectedEvent.joinees && selectedEvent.joinees.some(joinee => joinee._id === props.userId) ? 'Leave Event' : 'Join Event'}
-                                </button>
+                                {props.userId !== selectedEvent.createdBy?._id && (
+                                    <button
+                                        className="join-button"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            if (selectedEvent.joinees && selectedEvent.joinees.some(joinee => joinee._id === props.userId)) {
+                                                toggleEventParticipation(props.userId, selectedEvent._id, true);
+                                            } else {
+                                                toggleEventParticipation(props.userId, selectedEvent._id, false);
+                                            }
+                                        }}
+                                    >
+                                        {selectedEvent.joinees && selectedEvent.joinees.some(joinee => joinee._id === props.userId) ? 'Leave Event' : 'Join Event'}
+                                    </button>
+                                )}
                             </div>
                         </div>
                     </div>

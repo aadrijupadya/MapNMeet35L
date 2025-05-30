@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './CreateActivity.css';
 import { Link } from 'react-router-dom';
+import { getAddressFromCoords } from './utils/geocoding';
 
 export default function CreateActivity(props) {
   const mapRef = useRef(null);
@@ -77,6 +78,9 @@ export default function CreateActivity(props) {
     }
 
     try {
+      // Get location name before creating activity
+      const locationName = await getAddressFromCoords(coordinates.lat, coordinates.lng);
+
       const res = await fetch('http://localhost:8000/api/activities', {
         method: 'POST',
         headers: { 
@@ -86,6 +90,7 @@ export default function CreateActivity(props) {
         body: JSON.stringify({
           ...form,
           location: JSON.stringify(coordinates),
+          locationName: locationName || '', // Store the location name
           participantCount: parseInt(form.participantCount),
           time: new Date(form.time),
           endTime: new Date(form.endTime),
