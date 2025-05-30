@@ -156,6 +156,23 @@ app.get('/api/auth/google', googleAuth);
 
 app.get('/api/auth/validate', validateSession);
 
+// Get user's friends
+app.get('/api/users/:userId/friends', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userId)
+      .populate('friends', 'name email contact image');
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({ friends: user.friends });
+  } catch (error) {
+    console.error('Error fetching friends:', error);
+    res.status(500).json({ error: 'Failed to fetch friends' });
+  }
+});
+
 // Backend logout endpoint
 app.post('/api/auth/logout', (req, res) => {
   const cookieOptions = {

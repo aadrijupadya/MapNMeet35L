@@ -6,9 +6,7 @@ import { getAddressFromCoords } from './utils/geocoding';
 export default function Profile({ user }) {
   const [userEvents, setUserEvents] = useState([]);
   const [rsvpdEvents, setRsvpdEvents] = useState([]);
-  const [friends] = useState([
-    { id: 'audit-raj', name: 'Audit Raj', profilePic: null }
-  ]);
+  const [friends, setFriends] = useState([]);
   const [activeTab, setActiveTab] = useState('created');
   const [locationNames, setLocationNames] = useState({});
   const [profilePic, setProfilePic] = useState(null);
@@ -26,6 +24,22 @@ export default function Profile({ user }) {
       navigate('/');
       return;
     }
+
+    // Fetch user's friends
+    const fetchFriends = async () => {
+      try {
+        const response = await fetch(`http://localhost:8000/api/users/${user._id}/friends`);
+        if (response.ok) {
+          const data = await response.json();
+          setFriends(data.friends || []);
+        }
+      } catch (error) {
+        console.error('Error fetching friends:', error);
+      }
+    };
+
+    fetchFriends();
+    
     fetch(`http://localhost:8000/api/activities/user/${user._id}`)
       .then(r => r.json())
       .then(events => {
