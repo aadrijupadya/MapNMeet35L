@@ -1,9 +1,9 @@
 :root {
-  --sidebar-bg: #0f172a;
-  --sidebar-text: #cbd5e1;
-  --sidebar-accent: #3b82f6;
-  --sidebar-hover: #1e293b;
-  --sidebar-font: 'Segoe UI', sans-serif;
+  --sidebar-bg:    #000000;
+  --sidebar-text:  #CBD5E1;
+  --sidebar-accent:#FFFFFF;
+  --sidebar-hover: #1A1A1A;
+  --sidebar-font:  'Segoe UI', sans-serif;
 }
 
 .navbar-top {
@@ -16,7 +16,8 @@
   align-items: flex-start;
   justify-content: flex-start;
   z-index: 1001;
-  background: transparent;
+  background: var(--sidebar-bg);
+  color: var(--sidebar-text);
 }
 
 .logo-toggle {
@@ -25,7 +26,7 @@
   margin: 8px 0 0 16px;
   cursor: pointer;
   transition: transform 0.2s ease;
-  background-color: black;
+  background-color: var(--sidebar-bg);
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
   object-fit: contain;
@@ -62,7 +63,7 @@
 .sidebar-header {
   font-size: 20px;
   font-weight: bold;
-  color: white;
+  color: var(--sidebar-text);
   margin-bottom: 20px;
   display: flex;
   align-items: center;
@@ -93,12 +94,17 @@
   text-decoration: none;
   padding: 8px 10px;
   border-radius: 6px;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .sidebar a:hover {
   background-color: var(--sidebar-hover);
-  color: white;
+  color: var(--sidebar-accent);
+}
+
+.sidebar a.active {
+  background-color: var(--sidebar-hover);
+  color: var(--sidebar-accent);
 }
 
 .sidebar-backdrop {
@@ -109,4 +115,7 @@
   width: 100vw;
   background: rgba(0, 0, 0, 0.3);
   z-index: 1000;
+}
+.navbar-top {
+  background: transparent !important;
 }
