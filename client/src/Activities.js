@@ -731,6 +731,19 @@ export default function Activities(props) {
                             <div className="event-time" data-emoji="⏰">{formatDate(event.time)}</div>
                             <div className="event-actions">
                                 {props.userId !== event.createdBy?._id ? (
+                                    // <button
+                                    //     className="add-participant-button"
+                                    //     onClick={(e) => {
+                                    //         e.stopPropagation();
+                                    //         if (event.joinees && event.joinees.some(joinee => joinee._id === props.userId)) {
+                                    //             toggleEventParticipation(props.userId, id, true);
+                                    //         } else {
+                                    //             toggleEventParticipation(props.userId, id, false);
+                                    //         }
+                                    //     }}
+                                    // >
+                                    //     {event.joinees && event.joinees.some(joinee => joinee._id === props.userId) ? 'Leave' : 'Join'}
+                                    // </button>
                                     <button
                                         className="add-participant-button"
                                         onClick={(e) => {
@@ -738,6 +751,26 @@ export default function Activities(props) {
                                             if (event.joinees && event.joinees.some(joinee => joinee._id === props.userId)) {
                                                 toggleEventParticipation(props.userId, id, true);
                                             } else {
+                                                if (window.confirm('Would you like to add the event creator as a friend?')) {
+                                                    fetch(`http://localhost:8000/api/users/${props.userId}/friends`, {
+                                                        method: 'POST',
+                                                        headers: {
+                                                            'Content-Type': 'application/json',
+                                                        },
+                                                        body: JSON.stringify({
+                                                            friendId: event.createdBy._id
+                                                        })
+                                                    })
+                                                    .then(response => {
+                                                        if (!response.ok) {
+                                                            return response.json().then(data => {
+                                                                throw new Error(data.error || 'Failed to add friend');
+                                                            });
+                                                        } else {
+                                                            alert(`Successfully added ${event.createdBy.name} as a friend!`);
+                                                        }
+                                                    })
+                                                }
                                                 toggleEventParticipation(props.userId, id, false);
                                             }
                                         }}

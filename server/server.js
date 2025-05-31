@@ -173,6 +173,45 @@ app.get('/api/users/:userId/friends', async (req, res) => {
   }
 });
 
+// Add friend to user's friends list
+app.post('/api/users/:userId/friends', async (req, res) => {
+  try {
+    const { friendId } = req.body;
+    
+    if (!friendId) {
+      return res.status(400).json({ error: 'friendId is required' });
+    }
+
+    const user = await User.findById(req.params.userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Check if friend exists
+    const friend = await User.findById(friendId);
+    if (!friend) {
+      return res.status(404).json({ error: 'Friend not found' });
+    }
+
+    // Check if already friends
+    if (user.friends.includes(friendId)) {
+      return res.status(400).json({ error: 'Users are already friends' });
+    }
+
+    // Add friend to user's friends array
+    user.friends.push(friendId);
+    await user.save();
+
+    const updatedUser = await User.findById(req.params.userId)
+      .populate('friends', 'name email contact image');
+
+    res.json({ success: true, friends: updatedUser.friends });
+  } catch (error) {
+    console.error('Error adding friend:', error);
+    res.status(500).json({ error: 'Failed to add friend' });
+  }
+});
+
 // Backend logout endpoint
 app.post('/api/auth/logout', (req, res) => {
   const cookieOptions = {
