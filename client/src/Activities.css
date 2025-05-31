@@ -633,3 +633,60 @@
     transform: translateY(1px);
 }
 
+.time-range-filter {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid var(--color-border);
+}
+
+.time-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.time-input-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.time-input-group label {
+    min-width: 45px;
+    color: var(--color-text);
+    font-size: 0.9rem;
+}
+
+.time-input-group input[type="datetime-local"] {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    background: var(--color-background);
+    color: var(--color-text);
+    font-size: 0.9rem;
+}
+
+.time-input-group input[type="datetime-local"]:focus {
+    outline: none;
+    border-color: var(--color-accent);
+}
+
+.clear-time-range {
+    margin-top: 8px;
+    padding: 6px 12px;
+    background: var(--color-border);
+    border: none;
+    border-radius: 4px;
+    color: var(--color-text);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.clear-time-range:hover {
+    background: var(--color-accent);
+    color: white;
+}
+

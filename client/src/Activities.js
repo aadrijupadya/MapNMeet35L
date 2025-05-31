@@ -33,8 +33,11 @@ export default function Activities(props) {
     const [searchIn, setSearchIn] = useState({
         title: true,
         description: true,
-        location: true,
-        time: true
+        location: true
+    });
+    const [timeRange, setTimeRange] = useState({
+        start: '',
+        end: ''
     });
     const [showSearchFilters, setShowSearchFilters] = useState(false);
     const [searchParams] = useSearchParams();
@@ -148,6 +151,13 @@ export default function Activities(props) {
                 if (!isCreatedByUser && !isJoinedByUser) return false;
             }
 
+            // Time range filtering
+            if (timeRange.start || timeRange.end) {
+                const eventTime = new Date(event.time).getTime();
+                if (timeRange.start && new Date(timeRange.start).getTime() > eventTime) return false;
+                if (timeRange.end && new Date(timeRange.end).getTime() < eventTime) return false;
+            }
+
             if (!searchText) return true;
 
             const searchLower = searchText.toLowerCase();
@@ -156,21 +166,42 @@ export default function Activities(props) {
             if (searchIn.title && event.title) matches.push(event.title.toLowerCase().includes(searchLower));
             if (searchIn.description && event.description) matches.push(event.description.toLowerCase().includes(searchLower));
             if (searchIn.location) {
-                console.log('Searching location for event:', {
-                    id: event._id,
-                    locationName: event.locationName,
-                    searchText: searchLower,
-                    hasLocationName: !!event.locationName
-                });
-                if (event.locationName) matches.push(event.locationName.toLowerCase().includes(searchLower));
+                // Search in both locationName and reverse geocoded address
+                const locationMatches = [];
+                
+                // Check locationName if it exists
+                if (event.locationName) {
+                    locationMatches.push(event.locationName.toLowerCase().includes(searchLower));
+                }
+                
+                // Check reverse geocoded address if it exists
+                const address = addresses[event._id];
+                if (address) {
+                    locationMatches.push(address.toLowerCase().includes(searchLower));
+                }
+                
+                // Check coordinates if they exist
+                if (event.location) {
+                    try {
+                        const coords = JSON.parse(event.location);
+                        const coordString = `${coords.lat.toFixed(2)}, ${coords.lng.toFixed(2)}`;
+                        locationMatches.push(coordString.includes(searchLower));
+                    } catch (e) {
+                        console.warn('Invalid location format:', event.location);
+                    }
+                }
+                
+                // If any location match is found, add it to matches
+                if (locationMatches.some(match => match)) {
+                    matches.push(true);
+                }
             }
-            if (searchIn.time) matches.push(formatDate(event.time).toLowerCase().includes(searchLower));
 
             return matches.some(match => match);
         });
         setFilteredEvents(filtered);
         updateMarkers(filtered);
-    }, [searchText, searchIn, events, showMyEvents, props.userId]);
+    }, [searchText, searchIn, events, showMyEvents, props.userId, addresses, timeRange]);
 
     useEffect(() => {
         const eventId = searchParams.get('id');
@@ -543,6 +574,17 @@ export default function Activities(props) {
         }
     };
 
+    const handleTimeRangeChange = (type, value) => {
+        setTimeRange(prev => ({
+            ...prev,
+            [type]: value
+        }));
+    };
+
+    const clearTimeRange = () => {
+        setTimeRange({ start: '', end: '' });
+    };
+
     return (
         <div className="activities-page">
             {createActivityOpen ? (
@@ -593,6 +635,35 @@ export default function Activities(props) {
                                         {filter.charAt(0).toUpperCase() + filter.slice(1)}
                                     </label>
                                 ))}
+                                <div className="time-range-filter">
+                                    <div className="filter-header">Time Range:</div>
+                                    <div className="time-inputs">
+                                        <div className="time-input-group">
+                                            <label>From:</label>
+                                            <input
+                                                type="datetime-local"
+                                                value={timeRange.start}
+                                                onChange={(e) => handleTimeRangeChange('start', e.target.value)}
+                                            />
+                                        </div>
+                                        <div className="time-input-group">
+                                            <label>To:</label>
+                                            <input
+                                                type="datetime-local"
+                                                value={timeRange.end}
+                                                onChange={(e) => handleTimeRangeChange('end', e.target.value)}
+                                            />
+                                        </div>
+                                        {(timeRange.start || timeRange.end) && (
+                                            <button 
+                                                className="clear-time-range"
+                                                onClick={clearTimeRange}
+                                            >
+                                                Clear
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
                         )}
                     </div>
