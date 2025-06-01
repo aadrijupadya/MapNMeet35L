@@ -1,0 +1,15 @@
+.settings-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: var(--sidebar-bg, #000000);
+  color: var(--sidebar-text, #CBD5E1);
+  box-sizing: border-box;
+  margin: 0;
+}
+
+.settings-container h1 {
+  font-size: 2rem;
+  font-weight: 600;
+}
