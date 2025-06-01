@@ -227,4 +227,44 @@ app.post('/api/auth/logout', (req, res) => {
   res.status(200).json({ message: 'Logged out' });
 });
 
+// Update user profile
+app.post('/api/updateProfile', async (req, res) => {
+  const { userId, bio, instagram } = req.body;
+  console.log('Update profile request:', { userId, bio, instagram });
+
+  if (!userId) {
+    console.log('Missing required field: userId');
+    return res.status(400).json({ error: 'userId is required' });
+  }
+
+  try {
+    console.log('Finding user:', userId);
+    const user = await User.findById(userId);
+    console.log('Found user:', user);
+
+    if (!user) {
+      console.log('User not found');
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Update only the fields that are provided
+    const updateData = {};
+    if (bio !== undefined) updateData.bio = bio;
+    if (instagram !== undefined) updateData.instagram = instagram;
+
+    console.log('Updating user with data:', updateData);
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      updateData,
+      { new: true }
+    );
+    console.log('Updated user:', updatedUser);
+
+    return res.status(200).json({ success: true, user: updatedUser });
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
 app.listen(port, () => console.log(`Server running on port ${port}`));
