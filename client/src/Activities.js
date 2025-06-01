@@ -50,6 +50,7 @@ export default function Activities(props) {
     const markerColor = getComputedStyle(document.documentElement)
         .getPropertyValue('--color-accent')
         .trim();
+    const [deleteConfirm, setDeleteConfirm] = useState({ show: false, eventId: null });
 
     useEffect(() => {
         console.log('Activities component props:', props);
@@ -531,7 +532,7 @@ export default function Activities(props) {
             const res = await fetch(`http://localhost:8000/api/activities/${eventId}?userId=${props.userId}`, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
-                credentials: 'include'
+                credentials: 'include',
             });
 
             if (!res.ok) {
@@ -545,8 +546,9 @@ export default function Activities(props) {
                 delete markers.current[eventId];
             }
 
-            // Update events list
-            const updatedEvents = events.filter(e => e._id !== eventId);
+            // Fetch updated events from backend to ensure UI is in sync
+            const eventsRes = await fetch('http://localhost:8000/api/activities');
+            const updatedEvents = await eventsRes.json();
             setEvents(updatedEvents);
             setFilteredEvents(updatedEvents);
 
@@ -731,19 +733,6 @@ export default function Activities(props) {
                             <div className="event-time" data-emoji="⏰">{formatDate(event.time)}</div>
                             <div className="event-actions">
                                 {props.userId !== event.createdBy?._id ? (
-                                    // <button
-                                    //     className="add-participant-button"
-                                    //     onClick={(e) => {
-                                    //         e.stopPropagation();
-                                    //         if (event.joinees && event.joinees.some(joinee => joinee._id === props.userId)) {
-                                    //             toggleEventParticipation(props.userId, id, true);
-                                    //         } else {
-                                    //             toggleEventParticipation(props.userId, id, false);
-                                    //         }
-                                    //     }}
-                                    // >
-                                    //     {event.joinees && event.joinees.some(joinee => joinee._id === props.userId) ? 'Leave' : 'Join'}
-                                    // </button>
                                     <button
                                         className="add-participant-button"
                                         onClick={(e) => {
@@ -783,7 +772,7 @@ export default function Activities(props) {
                                             className="delete-event-button"
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                deleteEvent(id);
+                                                setDeleteConfirm({ show: true, eventId: id });
                                             }}
                                         >
                                             Delete Event
@@ -901,6 +890,33 @@ export default function Activities(props) {
                                         {selectedEvent.joinees && selectedEvent.joinees.some(joinee => joinee._id === props.userId) ? 'Leave Event' : 'Join Event'}
                                     </button>
                                 )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {deleteConfirm.show && (
+                <div className="event-modal-overlay" onClick={() => setDeleteConfirm({ show: false, eventId: null })}>
+                    <div className="event-modal" onClick={e => e.stopPropagation()}>
+                        <div className="event-modal-content" style={{ textAlign: 'center' }}>
+                            <h2>Are you sure you want to delete this event?</h2>
+                            <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginTop: '2rem' }}>
+                                <button
+                                    className="delete-event-button"
+                                    onClick={() => {
+                                        deleteEvent(deleteConfirm.eventId);
+                                        setDeleteConfirm({ show: false, eventId: null });
+                                    }}
+                                >
+                                    Delete
+                                </button>
+                                <button
+                                    className="add-participant-button"
+                                    onClick={() => setDeleteConfirm({ show: false, eventId: null })}
+                                >
+                                    Cancel
+                                </button>
                             </div>
                         </div>
                     </div>
