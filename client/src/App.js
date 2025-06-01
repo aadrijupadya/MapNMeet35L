@@ -9,6 +9,7 @@ import NavBar from './NavBar';
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import './theme.css';
 import Profile from './Profile';
+import Settings from './Settings';
 
 function App() {
   const [user, setUser] = useState();
@@ -71,6 +72,7 @@ function Layout({ user, updateUser }) {
             <Route path="/map" element={<Map />} />
             <Route path="/activities" element={<Activities user={user} userId={user._id} />} />
             <Route path="/profile" element={<Profile user={user} />} />
+             <Route path="/settings"   element={<Settings />} />
           </>
         )}
         {!user && (
