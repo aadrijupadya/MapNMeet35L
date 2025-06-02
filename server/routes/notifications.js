@@ -25,6 +25,8 @@ router.post('/', validateSession, async (req, res) => {
 // Get all notifications for a user
 router.get('/', validateSession, async (req, res) => {
     try {
+        console.log("GET /api/notifications - User:", req.user._id);
+        
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
         const skip = (page - 1) * limit;
@@ -39,10 +41,14 @@ router.get('/', validateSession, async (req, res) => {
             .populate('activityId', 'title')
             .populate('followerId', 'name image'); // Populate follower details
 
+        console.log("Found notifications:", notifications);
+
         const total = await Notification.countDocuments({ 
             userId: req.user._id,
             read: false
         });
+
+        console.log("Total notifications:", total);
 
         res.json({
             notifications,
@@ -51,6 +57,7 @@ router.get('/', validateSession, async (req, res) => {
             totalNotifications: total
         });
     } catch (error) {
+        console.error('Error in GET /api/notifications:', error);
         res.status(500).json({ message: error.message });
     }
 });

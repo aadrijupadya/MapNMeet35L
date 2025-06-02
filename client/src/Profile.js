@@ -59,20 +59,38 @@ export default function Profile({ user }) {
 
     // Fetch notifications
     const fetchNotifications = async () => {
+      console.log("Fetching notifications for user:", user._id);
       setNotificationsLoading(true)
       setNotificationsError(null)
       try {
-        const response = await fetch('http://localhost:8000/api/notifications?page=1&limit=10', {
+        console.log("Making request to notifications endpoint...");
+        const response = await fetch('http://localhost:8000/api/notifications', {
           method: 'GET',
           credentials: 'include', // Important: Send cookies for session validation
           headers: {
             'Content-Type': 'application/json'
           }
         })
+
+        console.log("Response status:", response.status);
+        console.log("Response headers:", Object.fromEntries(response.headers.entries()));
+
+        if (response.status === 401) {
+          throw new Error('Please log in to view notifications')
+        }
+
         if (!response.ok) {
           throw new Error('Failed to fetch notifications')
         }
+
         const data = await response.json()
+        console.log("Notifications response data:", data)
+
+        if (!data.notifications) {
+          console.error("Unexpected response format:", data);
+          throw new Error('Invalid response format from server');
+        }
+
         // Transform the notifications to match our frontend format
         const transformedNotifications = data.notifications.map(n => ({
           id: n._id,
@@ -85,10 +103,11 @@ export default function Profile({ user }) {
           followerName: n.followerId?.name,
           followerImage: n.followerId?.image
         }))
+        console.log("Transformed notifications:", transformedNotifications);
         setNotifications(transformedNotifications)
       } catch (error) {
         console.error('Error fetching notifications:', error)
-        setNotificationsError('Failed to load notifications')
+        setNotificationsError(error.message)
       } finally {
         setNotificationsLoading(false)
       }
