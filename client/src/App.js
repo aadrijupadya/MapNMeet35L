@@ -39,7 +39,9 @@ function App() {
         const response = await fetch('http://localhost:8000/api/auth/validate?refresh=true', {
           method: 'GET',
           credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json'
+          }
         });
 
         if (response.ok) {

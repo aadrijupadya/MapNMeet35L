@@ -19,7 +19,8 @@ function Home(props) {
       // 2. Call backend to clear the HttpOnly cookie
       await fetch('http://localhost:8000/api/auth/logout', {
         method: 'POST',
-        credentials: 'include', // important to send cookies
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' }
       });
   
       // 3. Clear app state

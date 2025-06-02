@@ -149,7 +149,10 @@ export default function Activities(props) {
                         }
                     }
                 });
-                return fetch('http://localhost:8000/api/activities');
+                return fetch('http://localhost:8000/api/activities', {
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' }
+                });
             })
             .then(res => res.json())
             .then(data => {
@@ -170,7 +173,10 @@ export default function Activities(props) {
         const fetchFollowingStatus = async () => {
             if (!props.userId) return;
             try {
-                const response = await fetch(`http://localhost:8000/api/users/${props.userId}/follow`);
+                const response = await fetch(`http://localhost:8000/api/users/${props.userId}/follow`, {
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' }
+                });
                 if (response.ok) {
                     const data = await response.json();
                     const followingMap = {};
@@ -432,6 +438,7 @@ export default function Activities(props) {
 
             const res = await fetch('http://localhost:8000/api/updateContact', {
                 method: 'POST',
+                credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
                     userId,
@@ -463,6 +470,7 @@ export default function Activities(props) {
 
             const res = await fetch('http://localhost:8000/api/addParticipant', {
                 method: 'POST',
+                credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userId, activityId: eventId, remove: leave }),
             });
@@ -472,7 +480,10 @@ export default function Activities(props) {
                 throw new Error(data.error || 'Failed to update participation');
             }
 
-            const eventsRes = await fetch('http://localhost:8000/api/activities');
+            const eventsRes = await fetch('http://localhost:8000/api/activities', {
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' }
+            });
             const updatedEvents = await eventsRes.json();
             setEvents(updatedEvents);
             setFilteredEvents(updatedEvents);
@@ -524,6 +535,7 @@ export default function Activities(props) {
         try {
             const res = await fetch('http://localhost:8000/api/addParticipant', {
                 method: 'POST',
+                credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
                     userId, 
@@ -538,7 +550,10 @@ export default function Activities(props) {
             }
 
             // Refresh events after removal
-            const eventsRes = await fetch('http://localhost:8000/api/activities');
+            const eventsRes = await fetch('http://localhost:8000/api/activities', {
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' }
+            });
             const updatedEvents = await eventsRes.json();
             setEvents(updatedEvents);
             setFilteredEvents(updatedEvents);
@@ -574,8 +589,8 @@ export default function Activities(props) {
         try {
             const res = await fetch(`http://localhost:8000/api/activities/${eventId}?userId=${props.userId}`, {
                 method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
             });
 
             if (!res.ok) {
@@ -590,7 +605,10 @@ export default function Activities(props) {
             }
 
             // Fetch updated events from backend to ensure UI is in sync
-            const eventsRes = await fetch('http://localhost:8000/api/activities');
+            const eventsRes = await fetch('http://localhost:8000/api/activities', {
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' }
+            });
             const updatedEvents = await eventsRes.json();
             setEvents(updatedEvents);
             setFilteredEvents(updatedEvents);
@@ -648,6 +666,7 @@ export default function Activities(props) {
                         });
                         const response = await fetch(`http://localhost:8000/api/users/${props.userId}/follow`, {
                             method: 'POST',
+                            credentials: 'include',
                             headers: {
                                 'Content-Type': 'application/json',
                             },
@@ -662,7 +681,26 @@ export default function Activities(props) {
                                 ...prev,
                                 [joinee._id]: data.isFollowing
                             }));
-                            
+                            if (data.isFollowing) {
+                                // Only create notification for new follows, not unfollows
+                                try {
+                                    await fetch('http://localhost:8000/api/notifications', {
+                                        method: 'POST',
+                                        credentials: 'include',
+                                        headers: {
+                                            'Content-Type': 'application/json'
+                                        },
+                                        body: JSON.stringify({
+                                            userId: joinee._id,
+                                            type: 'new_follower',
+                                            followerId: props.userId,
+                                            message: `${props.user.name} started following you`
+                                        })
+                                    });
+                                } catch (error) {
+                                    console.error('Error creating follow notification:', error);
+                                }
+                            }
                             const feedback = document.getElementById('sort-feedback');
                             if (feedback) {
                                 feedback.textContent = data.isFollowing ? 'Following' : 'Unfollowed';
@@ -887,7 +925,7 @@ export default function Activities(props) {
                                                 setDeleteConfirm({ show: true, eventId: id });
                                             }}
                                         >
-                                            Delete Event
+                                            Cancel Event
                                         </button>
                                     </div>
                                 )}

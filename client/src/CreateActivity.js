@@ -43,8 +43,10 @@ export default function CreateActivity({ userId, coordinates, onClose }) {
 
       const res = await fetch('http://localhost:8000/api/activities', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
           ...form,
           location: JSON.stringify(coordinates),
