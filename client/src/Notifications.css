@@ -126,10 +126,10 @@
 
 .no-notifs {
   text-align: center;
-  padding: 32px;
+  padding: 24px;
   color: var(--color-muted);
   font-style: italic;
-  font-size: 1rem;
+  font-size: 0.95rem;
 }
 
 .delete-notif {

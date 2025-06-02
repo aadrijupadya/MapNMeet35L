@@ -474,6 +474,9 @@
 }
 
 .joinee-info {
+    display: flex;
+    align-items: center;
+    gap: 4px;
     flex: 1;
 }
 
@@ -482,16 +485,44 @@
     color: var(--color-text);
 }
 
-.joinee-contact {
+.joinee-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.follow-icon-button {
+    background: none;
+    border: none;
+    padding: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     color: var(--color-muted);
-    margin-left: 5px;
+    transition: all 0.2s ease;
+    width: 32px;
+    height: 32px;
+}
+
+.follow-icon-button:hover {
+    color: var(--color-accent);
+    transform: scale(1.1);
+}
+
+.follow-icon-button:active {
+    transform: scale(0.95);
+}
+
+.follow-icon {
+    font-size: 1.4rem;
 }
 
 .remove-participant-btn {
     background: none;
     border: none;
     color: #ff4444;
-    font-size: 20px;
+    font-size: 1rem;
     width: 24px;
     height: 24px;
     display: flex;
@@ -501,7 +532,6 @@
     cursor: pointer;
     transition: all 0.2s;
     padding: 0;
-    margin-left: 10px;
 }
 
 .remove-participant-btn:hover {
@@ -511,6 +541,11 @@
 
 .remove-participant-btn:active {
     transform: scale(0.95);
+}
+
+.joinee-contact {
+    color: var(--color-muted);
+    font-size: 0.9rem;
 }
 
 /* Scrollbar styling */
@@ -723,5 +758,9 @@
 .clear-time-range:hover {
     background: var(--color-accent);
     color: white;
+}
+
+.follow-button {
+    display: none;
 }
 

@@ -7,7 +7,8 @@ import { getAddressFromCoords } from './utils/geocoding'
 export default function Profile({ user }) {
   const [userEvents, setUserEvents] = useState([])
   const [rsvpdEvents, setRsvpdEvents] = useState([])
-  const [friends, setFriends] = useState([])
+  const [followers, setFollowers] = useState([])
+  const [following, setFollowing] = useState([])
   const [activeTab, setActiveTab] = useState('created')
   const [locationNames, setLocationNames] = useState({})
   const [showCustomizeModal, setShowCustomizeModal] = useState(false)
@@ -29,29 +30,32 @@ export default function Profile({ user }) {
       return
     }
 
-    const fetchFriends = async () => {
+    const fetchUserData = async () => {
       try {
-        const response = await fetch(
-          `http://localhost:8000/api/users/${user._id}/friends`
+        // Fetch followers and following
+        const followResponse = await fetch(
+          `http://localhost:8000/api/users/${user._id}/follow`
         )
-        if (response.ok) {
-          const data = await response.json()
-          setFriends(data.friends || [])
+        if (followResponse.ok) {
+          const data = await followResponse.json()
+          setFollowers(data.followers || [])
+          setFollowing(data.following || [])
         }
-      } catch {}
+
+        // Fetch events
+        const eventsResponse = await fetch(`http://localhost:8000/api/activities/user/${user._id}`)
+        const events = await eventsResponse.json()
+        setUserEvents(events)
+
+        const rsvpdResponse = await fetch(`http://localhost:8000/api/activities/rsvpd/${user._id}`)
+        const rsvpdEvents = await rsvpdResponse.json()
+        setRsvpdEvents(rsvpdEvents)
+      } catch (error) {
+        console.error('Error fetching user data:', error)
+      }
     }
 
-    fetchFriends()
-
-    fetch(`http://localhost:8000/api/activities/user/${user._id}`)
-      .then((r) => r.json())
-      .then((events) => {
-        setUserEvents(events)
-        return fetch(`http://localhost:8000/api/activities/rsvpd/${user._id}`)
-      })
-      .then((r) => r.json())
-      .then((events) => setRsvpdEvents(events))
-      .catch(console.error)
+    fetchUserData()
 
     // Fetch notifications
     const fetchNotifications = async () => {
@@ -184,7 +188,10 @@ export default function Profile({ user }) {
   }
 
   const currentItems =
-    activeTab === 'created' ? userEvents : activeTab === 'rsvpd' ? rsvpdEvents : friends
+    activeTab === 'created' ? userEvents :
+    activeTab === 'rsvpd' ? rsvpdEvents :
+    activeTab === 'followers' ? followers :
+    activeTab === 'following' ? following : []
 
   const handleDeleteNotification = async (notificationId) => {
     try {
@@ -344,30 +351,37 @@ export default function Profile({ user }) {
             RSVP'd Events ({rsvpdEvents.length})
           </button>
           <button
-            className={activeTab === 'friends' ? 'active' : ''}
-            onClick={() => setActiveTab('friends')}
+            className={activeTab === 'followers' ? 'active' : ''}
+            onClick={() => setActiveTab('followers')}
           >
-            Friends ({friends.length})
+            Followers ({followers.length})
+          </button>
+          <button
+            className={activeTab === 'following' ? 'active' : ''}
+            onClick={() => setActiveTab('following')}
+          >
+            Following ({following.length})
           </button>
         </div>
 
         <div className="events-list">
-          {activeTab === 'friends' ? (
-            friends.map((friend) => (
+          {(activeTab === 'followers' || activeTab === 'following') ? (
+            currentItems.map((person) => (
               <Link
-                key={friend.id}
-                to={`/profile/${friend.id}`}
+                key={person._id}
+                to={`/profile/${person._id}`}
                 className="friend-card"
               >
                 <div className="friend-avatar">
-                  {friend.profilePic ? (
-                    <img src={friend.profilePic} alt={friend.name} />
+                  {person.image ? (
+                    <img src={person.image} alt={person.name} />
                   ) : (
-                    <span>{friend.name[0].toUpperCase()}</span>
+                    <span>{person.name[0].toUpperCase()}</span>
                   )}
                 </div>
                 <div className="friend-info">
-                  <h3>{friend.name}</h3>
+                  <h3>{person.name}</h3>
+                  {person.email && <p className="friend-email">{person.email}</p>}
                 </div>
               </Link>
             ))
@@ -403,8 +417,11 @@ export default function Profile({ user }) {
               </div>
             ))
           )}
-          {activeTab === 'friends' && friends.length === 0 && (
-            <div className="no-events">No friends yet</div>
+          {activeTab === 'followers' && followers.length === 0 && (
+            <div className="no-events">No followers yet</div>
+          )}
+          {activeTab === 'following' && following.length === 0 && (
+            <div className="no-events">Not following anyone yet</div>
           )}
           {(activeTab === 'created' || activeTab === 'rsvpd') &&
             (activeTab === 'created' ? userEvents : rsvpdEvents).length === 0 && (
