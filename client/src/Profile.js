@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import './Profile.css'
 import Notifications from './Notifications'
 import { getAddressFromCoords } from './utils/geocoding'
+import ActivityCard from './components/ActivityCard'
 
 export default function Profile({ user }) {
   const [userEvents, setUserEvents] = useState([])
@@ -383,72 +384,52 @@ export default function Profile({ user }) {
           </button>
         </div>
 
-        <div className="events-list">
-          {(activeTab === 'followers' || activeTab === 'following') ? (
-            currentItems.map((person) => (
-              <Link
-                key={person._id}
-                to={`/profile/${person._id}`}
-                className="friend-card"
-              >
-                <div className="friend-avatar">
-                  {person.image ? (
-                    <img src={person.image} alt={person.name} />
-                  ) : (
-                    <span>{person.name[0].toUpperCase()}</span>
-                  )}
-                </div>
-                <div className="friend-info">
-                  <h3>{person.name}</h3>
-                  {person.email && <p className="friend-email">{person.email}</p>}
-                </div>
-              </Link>
-            ))
-          ) : (
-            (activeTab === 'created' ? userEvents : rsvpdEvents).map((event) => (
-              <div key={event._id} className="event-card">
-                <h3>{event.title}</h3>
-                <p className="event-time">{formatDate(event.time)}</p>
-                <p className="event-location">
-                  {event.location
-                    ? (() => {
-                        try {
-                          const coords = JSON.parse(event.location)
-                          const address = locationNames[event._id]
-                          return address
-                            ? `${address} (${coords.lat.toFixed(2)}, ${coords.lng.toFixed(2)})`
-                            : `(${coords.lat.toFixed(2)}, ${coords.lng.toFixed(2)})`
-                        } catch {
-                          return 'Location not available'
-                        }
-                      })()
-                    : 'Location not available'}
-                </p>
-                <p className="event-participants">
-                  {event.participantCount || 0} participants
-                </p>
-                <button
-                  className="view-event-btn"
-                  onClick={() => navigate(`/activities?id=${event._id}`)}
+        {(activeTab === 'followers' || activeTab === 'following') ? (
+          <div className="events-list">
+            {currentItems.length === 0 ? (
+              <p className="no-events">
+                {activeTab === 'followers' ? 'No followers yet' : 'Not following anyone yet'}
+              </p>
+            ) : (
+              currentItems.map((person) => (
+                <Link
+                  key={person._id}
+                  to={`/profile/${person._id}`}
+                  className="friend-card"
                 >
-                  View Event
-                </button>
-              </div>
-            ))
-          )}
-          {activeTab === 'followers' && followers.length === 0 && (
-            <div className="no-events">No followers yet</div>
-          )}
-          {activeTab === 'following' && following.length === 0 && (
-            <div className="no-events">Not following anyone yet</div>
-          )}
-          {(activeTab === 'created' || activeTab === 'rsvpd') &&
-            (activeTab === 'created' ? userEvents : rsvpdEvents).length === 0 && (
-              <div className="no-events">
+                  <div className="friend-avatar">
+                    {person.image ? (
+                      <img src={person.image} alt={person.name} />
+                    ) : (
+                      <span>{person.name[0].toUpperCase()}</span>
+                    )}
+                  </div>
+                  <div className="friend-info">
+                    <h3>{person.name}</h3>
+                    {person.email && <p className="friend-email">{person.email}</p>}
+                  </div>
+                </Link>
+              ))
+            )}
+          </div>
+        ) : (
+          <>
+            {currentItems.length === 0 ? (
+              <p className="no-events">
                 No {activeTab === 'created' ? 'created' : "RSVP'd"} events yet
+              </p>
+            ) : (
+              <div className="events-list">
+                {currentItems.map((event) => (
+                  <ActivityCard 
+                    key={event._id} 
+                    event={event} 
+                  />
+                ))}
               </div>
             )}
-        </div>
+          </>
+        )}
       </div>
     </div>
   );

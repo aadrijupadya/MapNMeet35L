@@ -122,7 +122,7 @@ export default function Activities(props) {
                                     path: 'M0-48c-9.941 0-18 8.059-18 18 0 14.178 18 30 18 30s18-15.822 18-30c0-9.941-8.059-18-18-18z',
                                     fillColor: markerColor,
                                     fillOpacity: 0.8,
-                                    scale: 3
+                                    scale: 1
                                 }
                             });
                         }

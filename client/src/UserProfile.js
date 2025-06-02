@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import './UserProfile.css';
 import { getAddressFromCoords } from './utils/geocoding';
+import ActivityCard from './components/ActivityCard';
 
 export default function UserProfile() {
   const { userId } = useParams();
@@ -132,26 +133,10 @@ export default function UserProfile() {
             <p className="no-events">No activities created yet</p>
           ) : (
             userEvents.map((event) => (
-              <Link
-                to={`/activities/${event._id}`}
-                key={event._id}
-                className="event-card"
-              >
-                <h3>{event.title}</h3>
-                <p className="event-date">⏰ {formatDate(event.time)}</p>
-                {event.endTime && (
-                  <p className="event-date">🏁 Ends: {formatDate(event.endTime)}</p>
-                )}
-                {locationNames[event._id] && (
-                  <p className="event-location">📍 {locationNames[event._id]}</p>
-                )}
-                {event.locationName && (
-                  <p className="event-location">📍 {event.locationName}</p>
-                )}
-                <p className="event-participants">
-                  👥 {event.participantCount || event.joinees?.length || 0} max participants
-                </p>
-              </Link>
+              <ActivityCard 
+                key={event._id} 
+                event={event} 
+              />
             ))
           )}
         </div>
