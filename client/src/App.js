@@ -9,8 +9,8 @@ import NavBar from './NavBar';
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import './theme.css';
 import Profile from './Profile';
-import Settings from './Settings';
 import UserProfile from './UserProfile';
+import ThemeToggle from './ThemeToggle';
 
 function App() {
   const [user, setUser] = useState();
@@ -67,6 +67,7 @@ function Layout({ user, updateUser }) {
   return (
     <>
       {showNavBar && <NavBar />}
+      <ThemeToggle />
       <Routes>
         {user && (
           <>
@@ -84,7 +85,6 @@ function Layout({ user, updateUser }) {
             <Route path="/activities" element={<Activities user={user} userId={user._id} />} />
             <Route path="/profile" element={<Profile user={user} />} />
             <Route path="/profile/:userId" element={<UserProfile />} />
-            <Route path="/settings" element={<Settings />} />
           </>
         )}
         {!user && (
