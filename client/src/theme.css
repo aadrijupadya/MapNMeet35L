@@ -2,7 +2,7 @@
 :root {
   --font-main: 'Arial', sans-serif;
 
-  /* Colors */
+  /* Colors - Dark Theme (Default) */
   --color-bg: #000000;
   --color-bg-light: #1a1a1a;
   --color-text: #ffffff;
@@ -16,6 +16,19 @@
   --header-height: 60px;
   --radius: 8px;
   --shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* Light Theme Variables */
+.light-theme {
+  --color-bg: #ffffff;
+  --color-bg-light: #f5f5f5;
+  --color-text: #000000;
+  --color-accent: #0066cc;
+  --color-muted: #666666;
+  --color-border: #dddddd;
+  --color-blue: #0066cc;
+  --color-orange: #cc6600;
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 /* ======= GLOBAL RESET ======= */

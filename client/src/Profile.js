@@ -16,7 +16,56 @@ export default function Profile({ user }) {
     instagram: user?.instagram || ''
   })
   const [updateStatus, setUpdateStatus] = useState({ message: '', type: '' })
-  const [notifications, setNotifications] = useState([])
+  const [notifications, setNotifications] = useState([
+    {
+      id: 1,
+      text: "Antonio Quintero started following you",
+      type: "follow",
+      timestamp: new Date().toISOString()
+    },
+    {
+      id: 2,
+      text: "Sarah Johnson joined your event 'Basketball at Wooden'",
+      type: "event_join",
+      timestamp: new Date(Date.now() - 3600000).toISOString() // 1 hour ago
+    },
+    {
+      id: 3,
+      text: "Michael Chen commented on your event 'Study Group at Powell'",
+      type: "comment",
+      timestamp: new Date(Date.now() - 7200000).toISOString() // 2 hours ago
+    },
+    {
+      id: 4,
+      text: "Emily Davis started following you",
+      type: "follow",
+      timestamp: new Date(Date.now() - 10800000).toISOString() // 3 hours ago
+    },
+    {
+      id: 5,
+      text: "Your event 'Soccer Practice' has reached 10 participants!",
+      type: "milestone",
+      timestamp: new Date(Date.now() - 14400000).toISOString() // 4 hours ago
+    },
+    {
+      id: 6,
+      text: "James Wilson requested to join your event 'Movie Night'",
+      type: "join_request",
+      timestamp: new Date(Date.now() - 18000000).toISOString() // 5 hours ago
+    },
+    {
+      id: 7,
+      text: "Lisa Brown started following you",
+      type: "follow",
+      timestamp: new Date(Date.now() - 21600000).toISOString() // 6 hours ago
+    },
+    {
+      id: 8,
+      text: "Your event 'Hiking Trip' is starting in 1 hour",
+      type: "reminder",
+      timestamp: new Date(Date.now() - 25200000).toISOString() // 7 hours ago
+    }
+  ])
 
   const navigate = useNavigate()
   const notifRef = useRef(null)
@@ -145,6 +194,14 @@ export default function Profile({ user }) {
   const currentItems =
     activeTab === 'created' ? userEvents : activeTab === 'rsvpd' ? rsvpdEvents : friends
 
+  const handleDeleteNotification = (notificationId) => {
+    setNotifications(prev => prev.filter(n => n.id !== notificationId));
+  };
+
+  const handleClearAllNotifications = () => {
+    setNotifications([]);
+  };
+
   return (
     <div className="profile-page">
       <div className="profile-header">
@@ -176,7 +233,11 @@ export default function Profile({ user }) {
         </div>
 
         <div ref={notifRef}>
-          <Notifications items={notifications} />
+          <Notifications 
+            items={notifications} 
+            onDeleteNotification={handleDeleteNotification}
+            onClearAll={handleClearAllNotifications}
+          />
         </div>
       </div>
 
@@ -313,5 +374,5 @@ export default function Profile({ user }) {
         </div>
       </div>
     </div>
-  )
+  );
 }

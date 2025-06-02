@@ -14,6 +14,16 @@ import Settings from './Settings';
 function App() {
   const [user, setUser] = useState();
 
+  // Initialize theme from localStorage
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+      document.documentElement.classList.add('light-theme');
+    } else {
+      document.documentElement.classList.remove('light-theme');
+    }
+  }, []);
+
   useEffect(() => {
     const checkSession = async () => {
       try {
