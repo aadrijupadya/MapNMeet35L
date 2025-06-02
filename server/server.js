@@ -237,6 +237,93 @@ app.post('/api/users/:userId/friends', async (req, res) => {
   }
 });
 
+// Follow/Unfollow user
+app.post('/api/users/:userId/follow', async (req, res) => {
+  try {
+    const { targetUserId } = req.body;
+    
+    if (!targetUserId) {
+      return res.status(400).json({ error: 'targetUserId is required' });
+    }
+
+    const user = await User.findById(req.params.userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Check if target user exists
+    const targetUser = await User.findById(targetUserId);
+    if (!targetUser) {
+      return res.status(404).json({ error: 'Target user not found' });
+    }
+
+    // Check if already following
+    const isFollowing = user.following.includes(targetUserId);
+    
+    if (isFollowing) {
+      // Unfollow - use updateOne to avoid validation completely
+      await Promise.all([
+        User.updateOne(
+          { _id: req.params.userId },
+          { $pull: { following: targetUserId } }
+        ),
+        User.updateOne(
+          { _id: targetUserId },
+          { $pull: { followers: req.params.userId } }
+        )
+      ]);
+    } else {
+      // Follow - use updateOne to avoid validation completely
+      await Promise.all([
+        User.updateOne(
+          { _id: req.params.userId },
+          { $addToSet: { following: targetUserId } }
+        ),
+        User.updateOne(
+          { _id: targetUserId },
+          { $addToSet: { followers: req.params.userId } }
+        )
+      ]);
+    }
+
+    // Fetch updated user with populated following/followers
+    const updatedUser = await User.findById(req.params.userId)
+      .populate('following', 'name email image')
+      .populate('followers', 'name email image');
+
+    res.json({ 
+      success: true, 
+      following: updatedUser.following,
+      followers: updatedUser.followers,
+      isFollowing: !isFollowing
+    });
+  } catch (error) {
+    console.error('Error following/unfollowing user:', error);
+    res.status(500).json({ error: 'Failed to follow/unfollow user' });
+  }
+});
+
+// Get user's followers and following
+app.get('/api/users/:userId/follow', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userId)
+      .populate('following', 'name email image')
+      .populate('followers', 'name email image');
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({ 
+      following: user.following,
+      followers: user.followers
+    });
+  } catch (error) {
+    console.error('Error fetching followers/following:', error);
+    res.status(500).json({ error: 'Failed to fetch followers/following' });
+  }
+});
+
 // Backend logout endpoint
 app.post('/api/auth/logout', (req, res) => {
   const cookieOptions = {

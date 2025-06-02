@@ -190,6 +190,15 @@ export default function EditActivity({ activity, userId, onClose, onUpdate, map,
         <h2>Edit Activity</h2>
         <div className="location-instructions">
           <p>Click anywhere on the map to change the location</p>
+          {hasLocationChanged && (
+            <button 
+              type="button" 
+              className="cancel-location-btn"
+              onClick={handleCancelLocation}
+            >
+              Cancel Location Change
+            </button>
+          )}
         </div>
         <form onSubmit={handleSubmit} className="create-form">
           <input
@@ -231,15 +240,6 @@ export default function EditActivity({ activity, userId, onClose, onUpdate, map,
             min="1"
           />
           <div className="form-actions">
-            {hasLocationChanged && (
-              <button 
-                type="button" 
-                className="cancel-location-btn"
-                onClick={handleCancelLocation}
-              >
-                Cancel Location Change
-              </button>
-            )}
             <button type="submit" className="submit-button">
               Save Changes
             </button>
