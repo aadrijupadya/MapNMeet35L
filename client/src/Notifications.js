@@ -2,7 +2,14 @@ import React, { useState, useRef, useEffect } from 'react';
 import { FaBell, FaTimes } from 'react-icons/fa';
 import './Notifications.css';
 
-export default function Notifications({ items = [], onDeleteNotification, onClearAll }) {
+export default function Notifications({ 
+  items = [], 
+  onDeleteNotification, 
+  onClearAll, 
+  loading = false,
+  error = null,
+  onNotificationRead = () => {}
+}) {
   const [open, setOpen] = useState(false);
   const [readNotifications, setReadNotifications] = useState(new Set());
   const dropdownRef = useRef(null);
@@ -49,6 +56,7 @@ export default function Notifications({ items = [], onDeleteNotification, onClea
       newSet.add(notificationId);
       return newSet;
     });
+    onNotificationRead(notificationId);
   };
 
   const handleClearAll = (e) => {
@@ -76,14 +84,18 @@ export default function Notifications({ items = [], onDeleteNotification, onClea
         <div className="notif-dropdown">
           <div className="notif-header">
             <h3>Notifications</h3>
-            {items.length > 0 && (
+            {items.length > 0 && !loading && !error && (
               <button className="clear-all" onClick={handleClearAll}>
                 Clear all
               </button>
             )}
           </div>
           <div className="notif-list">
-            {items.length > 0 ? (
+            {loading ? (
+              <div className="notif-status">Loading notifications...</div>
+            ) : error ? (
+              <div className="notif-status error">{error}</div>
+            ) : items.length > 0 ? (
               items.map((n) => (
                 <div 
                   key={n.id} 
@@ -107,7 +119,7 @@ export default function Notifications({ items = [], onDeleteNotification, onClea
                 </div>
               ))
             ) : (
-              <div className="no-notifs">No notifications</div>
+              <div className="notif-status">No notifications</div>
             )}
           </div>
         </div>

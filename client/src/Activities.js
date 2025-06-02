@@ -5,6 +5,7 @@ import { useSearchParams, Link } from 'react-router-dom';
 import { getAddressFromCoords } from './utils/geocoding';
 import CreateActivity from './CreateActivity';
 import EditActivity from './EditActivity';
+import { FaUserPlus, FaUserCheck } from 'react-icons/fa';
 
 const loadGoogleMapsScript = (apiKey) => {
     if (window.google?.maps) return Promise.resolve();
@@ -53,6 +54,7 @@ export default function Activities(props) {
         .trim();
     const [deleteConfirm, setDeleteConfirm] = useState({ show: false, eventId: null });
     const [editActivity, setEditActivity] = useState(null);
+    const [followingStatus, setFollowingStatus] = useState({});
 
     useEffect(() => {
         console.log('Activities component props:', props);
@@ -142,6 +144,26 @@ export default function Activities(props) {
             })
             .catch(err => console.error('Error loading map or events:', err));
     }, [createActivityOpen, editActivity]);
+
+    useEffect(() => {
+        const fetchFollowingStatus = async () => {
+            if (!props.userId) return;
+            try {
+                const response = await fetch(`http://localhost:8000/api/users/${props.userId}/follow`);
+                if (response.ok) {
+                    const data = await response.json();
+                    const followingMap = {};
+                    data.following.forEach(user => {
+                        followingMap[user._id] = true;
+                    });
+                    setFollowingStatus(followingMap);
+                }
+            } catch (error) {
+                console.error('Error fetching following status:', error);
+            }
+        };
+        fetchFollowingStatus();
+    }, [props.userId]);
 
     useEffect(() => {
         const filtered = events.filter(event => {
@@ -346,10 +368,11 @@ export default function Activities(props) {
 
     const sortEvents = (type) => {
         let sorted;
-        if (type === 'friends') {
+        if (type === 'following') {
             sorted = events.filter(event =>
-                event.joinees && props.user && Array.isArray(props.user.friends) &&
-                event.joinees.some(joinee => props.user.friends.includes(joinee._id))
+                // Show events created by people you follow or your own events
+                (event.createdBy?._id && followingStatus[event.createdBy._id]) || 
+                event.createdBy?._id === props.userId
             );
         } else {
             sorted = [...events];
@@ -586,6 +609,68 @@ export default function Activities(props) {
         setTimeRange({ start: '', end: '' });
     };
 
+    const renderFollowButton = (joinee) => {
+        if (!props.userId || props.userId === joinee._id) return null;
+        
+        const isFollowing = followingStatus[joinee._id];
+        
+        return (
+            <button 
+                className="follow-icon-button"
+                onClick={async (e) => {
+                    e.stopPropagation();
+                    try {
+                        console.log('Follow/Unfollow request:', {
+                            userId: props.userId,
+                            targetUserId: joinee._id,
+                            joineeData: joinee
+                        });
+                        const response = await fetch(`http://localhost:8000/api/users/${props.userId}/follow`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                targetUserId: joinee._id
+                            })
+                        });
+                        const data = await response.json();
+                        console.log('Follow/Unfollow response:', data);
+                        if (response.ok) {
+                            setFollowingStatus(prev => ({
+                                ...prev,
+                                [joinee._id]: data.isFollowing
+                            }));
+                            
+                            const feedback = document.getElementById('sort-feedback');
+                            if (feedback) {
+                                feedback.textContent = data.isFollowing ? 'Following' : 'Unfollowed';
+                                feedback.style.display = 'block';
+                                feedback.style.background = '#4CAF50';
+                                setTimeout(() => feedback.style.display = 'none', 2000);
+                            }
+                        } else {
+                            console.error('Follow/Unfollow error:', data.error);
+                            throw new Error(data.error || 'Failed to follow/unfollow user');
+                        }
+                    } catch (error) {
+                        console.error('Follow/Unfollow error:', error);
+                        const feedback = document.getElementById('sort-feedback');
+                        if (feedback) {
+                            feedback.textContent = error.message || 'Something went wrong';
+                            feedback.style.display = 'block';
+                            feedback.style.background = '#f44336';
+                            setTimeout(() => feedback.style.display = 'none', 2000);
+                        }
+                    }
+                }}
+                title={isFollowing ? "Unfollow user" : "Follow user"}
+            >
+                {isFollowing ? <FaUserCheck className="follow-icon" /> : <FaUserPlus className="follow-icon" />}
+            </button>
+        );
+    };
+
     return (
         <div className="activities-page">
             {createActivityOpen ? (
@@ -680,7 +765,7 @@ export default function Activities(props) {
                 <div className="sort-options">
                     <button onClick={() => sortEvents('upcoming')} className={sortBy === 'upcoming' ? 'active' : ''}>Upcoming </button>
                     <button onClick={() => sortEvents('participants')} className={sortBy === 'participants' ? 'active' : ''}>Most Participants</button>
-                    <button onClick={() => sortEvents('friends')} className={sortBy === 'friends' ? 'active' : ''}>Friends Only</button>
+                    <button onClick={() => sortEvents('following')} className={sortBy === 'following' ? 'active' : ''}>Following Only</button>
                 </div>
                 {filteredEvents.map((event) => {
                     const id = event._id || event.id;
@@ -720,8 +805,25 @@ export default function Activities(props) {
                                     <ul>
                                         {event.joinees.map((joinee, index) => (
                                             <li key={index}>
-                                                <span className="joinee-name">{joinee.name}</span>
-                                                <span className="joinee-contact"> ({joinee.contact})</span>
+                                                <div className="joinee-info">
+                                                    <span className="joinee-name">{joinee.name}</span>
+                                                    <div className="joinee-actions">
+                                                        {renderFollowButton(joinee)}
+                                                        {props.userId === event.createdBy?._id && (
+                                                            <button 
+                                                                className="remove-participant-btn"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    removeParticipant(event._id, joinee._id);
+                                                                }}
+                                                                title="Remove participant"
+                                                            >
+                                                                ×
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                    <span className="joinee-contact">({joinee.contact})</span>
+                                                </div>
                                             </li>
                                         ))}
                                     </ul>
@@ -858,20 +960,23 @@ export default function Activities(props) {
                                                     <li key={index} className="joinee-item">
                                                         <div className="joinee-info">
                                                             <span className="joinee-name">{joinee.name}</span>
+                                                            <div className="joinee-actions">
+                                                                {renderFollowButton(joinee)}
+                                                                {props.userId === selectedEvent.createdBy?._id && (
+                                                                    <button 
+                                                                        className="remove-participant-btn"
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            removeParticipant(selectedEvent._id, joinee._id);
+                                                                        }}
+                                                                        title="Remove participant"
+                                                                    >
+                                                                        ×
+                                                                    </button>
+                                                                )}
+                                                            </div>
                                                             <span className="joinee-contact">({joinee.contact})</span>
                                                         </div>
-                                                        {props.userId === selectedEvent.createdBy?._id && (
-                                                            <button 
-                                                                className="remove-participant-btn"
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    removeParticipant(selectedEvent._id, joinee._id);
-                                                                }}
-                                                                title="Remove participant"
-                                                            >
-                                                                ×
-                                                            </button>
-                                                        )}
                                                     </li>
                                                 ))}
                                             </ul>

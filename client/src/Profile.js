@@ -7,7 +7,8 @@ import { getAddressFromCoords } from './utils/geocoding'
 export default function Profile({ user }) {
   const [userEvents, setUserEvents] = useState([])
   const [rsvpdEvents, setRsvpdEvents] = useState([])
-  const [friends, setFriends] = useState([])
+  const [followers, setFollowers] = useState([])
+  const [following, setFollowing] = useState([])
   const [activeTab, setActiveTab] = useState('created')
   const [locationNames, setLocationNames] = useState({})
   const [showCustomizeModal, setShowCustomizeModal] = useState(false)
@@ -16,56 +17,9 @@ export default function Profile({ user }) {
     instagram: user?.instagram || ''
   })
   const [updateStatus, setUpdateStatus] = useState({ message: '', type: '' })
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      text: "Antonio Quintero started following you",
-      type: "follow",
-      timestamp: new Date().toISOString()
-    },
-    {
-      id: 2,
-      text: "Sarah Johnson joined your event 'Basketball at Wooden'",
-      type: "event_join",
-      timestamp: new Date(Date.now() - 3600000).toISOString() // 1 hour ago
-    },
-    {
-      id: 3,
-      text: "Michael Chen commented on your event 'Study Group at Powell'",
-      type: "comment",
-      timestamp: new Date(Date.now() - 7200000).toISOString() // 2 hours ago
-    },
-    {
-      id: 4,
-      text: "Emily Davis started following you",
-      type: "follow",
-      timestamp: new Date(Date.now() - 10800000).toISOString() // 3 hours ago
-    },
-    {
-      id: 5,
-      text: "Your event 'Soccer Practice' has reached 10 participants!",
-      type: "milestone",
-      timestamp: new Date(Date.now() - 14400000).toISOString() // 4 hours ago
-    },
-    {
-      id: 6,
-      text: "James Wilson requested to join your event 'Movie Night'",
-      type: "join_request",
-      timestamp: new Date(Date.now() - 18000000).toISOString() // 5 hours ago
-    },
-    {
-      id: 7,
-      text: "Lisa Brown started following you",
-      type: "follow",
-      timestamp: new Date(Date.now() - 21600000).toISOString() // 6 hours ago
-    },
-    {
-      id: 8,
-      text: "Your event 'Hiking Trip' is starting in 1 hour",
-      type: "reminder",
-      timestamp: new Date(Date.now() - 25200000).toISOString() // 7 hours ago
-    }
-  ])
+  const [notifications, setNotifications] = useState([])
+  const [notificationsLoading, setNotificationsLoading] = useState(true)
+  const [notificationsError, setNotificationsError] = useState(null)
 
   const navigate = useNavigate()
   const notifRef = useRef(null)
@@ -76,44 +30,86 @@ export default function Profile({ user }) {
       return
     }
 
-    const fetchFriends = async () => {
+    const fetchUserData = async () => {
       try {
-        const response = await fetch(
-          `http://localhost:8000/api/users/${user._id}/friends`
+        // Fetch followers and following
+        const followResponse = await fetch(
+          `http://localhost:8000/api/users/${user._id}/follow`
         )
-        if (response.ok) {
-          const data = await response.json()
-          setFriends(data.friends || [])
+        if (followResponse.ok) {
+          const data = await followResponse.json()
+          setFollowers(data.followers || [])
+          setFollowing(data.following || [])
         }
-      } catch {}
+
+        // Fetch events
+        const eventsResponse = await fetch(`http://localhost:8000/api/activities/user/${user._id}`)
+        const events = await eventsResponse.json()
+        setUserEvents(events)
+
+        const rsvpdResponse = await fetch(`http://localhost:8000/api/activities/rsvpd/${user._id}`)
+        const rsvpdEvents = await rsvpdResponse.json()
+        setRsvpdEvents(rsvpdEvents)
+      } catch (error) {
+        console.error('Error fetching user data:', error)
+      }
     }
 
-    fetchFriends()
-
-    fetch(`http://localhost:8000/api/activities/user/${user._id}`)
-      .then((r) => r.json())
-      .then((events) => {
-        setUserEvents(events)
-        return fetch(`http://localhost:8000/api/activities/rsvpd/${user._id}`)
-      })
-      .then((r) => r.json())
-      .then((events) => setRsvpdEvents(events))
-      .catch(console.error)
+    fetchUserData()
 
     // Fetch notifications
     const fetchNotifications = async () => {
+      setNotificationsLoading(true)
+      setNotificationsError(null)
       try {
-        const res = await fetch(
-          `http://localhost:8000/api/users/${user._id}/notifications`
-        )
-        if (res.ok) {
-          const data = await res.json()
-          setNotifications(data.notifications || [])
+        const response = await fetch('http://localhost:8000/api/notifications?page=1&limit=10', {
+          method: 'GET',
+          credentials: 'include', // Important: Send cookies for session validation
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        if (!response.ok) {
+          throw new Error('Failed to fetch notifications')
         }
-      } catch (err) {
-        console.error('Error fetching notifications:', err)
+        const data = await response.json()
+        // Transform the notifications to match our frontend format
+        const transformedNotifications = data.notifications.map(n => ({
+          id: n._id,
+          text: n.message || generateNotificationText(n),
+          type: n.type,
+          timestamp: n.createdAt,
+          activityId: n.activityId?._id,
+          activityTitle: n.activityId?.title,
+          followerId: n.followerId?._id,
+          followerName: n.followerId?.name,
+          followerImage: n.followerId?.image
+        }))
+        setNotifications(transformedNotifications)
+      } catch (error) {
+        console.error('Error fetching notifications:', error)
+        setNotificationsError('Failed to load notifications')
+      } finally {
+        setNotificationsLoading(false)
       }
     }
+
+    // Helper function to generate notification text based on type and data
+    const generateNotificationText = (notification) => {
+      switch (notification.type) {
+        case 'follow':
+          return `${notification.followerId?.name || 'Someone'} started following you`
+        case 'event_join':
+          return `${notification.followerId?.name || 'Someone'} joined your event '${notification.activityId?.title || 'Unknown event'}'`
+        case 'comment':
+          return `${notification.followerId?.name || 'Someone'} commented on your event '${notification.activityId?.title || 'Unknown event'}'`
+        case 'join_request':
+          return `${notification.followerId?.name || 'Someone'} requested to join your event '${notification.activityId?.title || 'Unknown event'}'`
+        default:
+          return notification.message || 'New notification'
+      }
+    }
+
     fetchNotifications()
   }, [user, navigate])
 
@@ -192,15 +188,64 @@ export default function Profile({ user }) {
   }
 
   const currentItems =
-    activeTab === 'created' ? userEvents : activeTab === 'rsvpd' ? rsvpdEvents : friends
+    activeTab === 'created' ? userEvents :
+    activeTab === 'rsvpd' ? rsvpdEvents :
+    activeTab === 'followers' ? followers :
+    activeTab === 'following' ? following : []
 
-  const handleDeleteNotification = (notificationId) => {
-    setNotifications(prev => prev.filter(n => n.id !== notificationId));
-  };
+  const handleDeleteNotification = async (notificationId) => {
+    try {
+      const response = await fetch(`http://localhost:8000/api/notifications/${notificationId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      if (!response.ok) {
+        throw new Error('Failed to delete notification')
+      }
+      setNotifications(prev => prev.filter(n => n.id !== notificationId))
+    } catch (error) {
+      console.error('Error deleting notification:', error)
+    }
+  }
 
-  const handleClearAllNotifications = () => {
-    setNotifications([]);
-  };
+  const handleClearAllNotifications = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/notifications/mass-delete', {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ filters: {} }) // No additional filters
+      })
+      if (!response.ok) {
+        throw new Error('Failed to clear notifications')
+      }
+      setNotifications([])
+    } catch (error) {
+      console.error('Error clearing notifications:', error)
+    }
+  }
+
+  const handleNotificationRead = async (notificationId) => {
+    try {
+      const response = await fetch(`http://localhost:8000/api/notifications/${notificationId}/read`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      if (!response.ok) {
+        throw new Error('Failed to mark notification as read')
+      }
+    } catch (error) {
+      console.error('Error marking notification as read:', error)
+    }
+  }
 
   return (
     <div className="profile-page">
@@ -237,6 +282,9 @@ export default function Profile({ user }) {
             items={notifications} 
             onDeleteNotification={handleDeleteNotification}
             onClearAll={handleClearAllNotifications}
+            loading={notificationsLoading}
+            error={notificationsError}
+            onNotificationRead={handleNotificationRead}
           />
         </div>
       </div>
@@ -303,30 +351,37 @@ export default function Profile({ user }) {
             RSVP'd Events ({rsvpdEvents.length})
           </button>
           <button
-            className={activeTab === 'friends' ? 'active' : ''}
-            onClick={() => setActiveTab('friends')}
+            className={activeTab === 'followers' ? 'active' : ''}
+            onClick={() => setActiveTab('followers')}
           >
-            Friends ({friends.length})
+            Followers ({followers.length})
+          </button>
+          <button
+            className={activeTab === 'following' ? 'active' : ''}
+            onClick={() => setActiveTab('following')}
+          >
+            Following ({following.length})
           </button>
         </div>
 
         <div className="events-list">
-          {activeTab === 'friends' ? (
-            friends.map((friend) => (
+          {(activeTab === 'followers' || activeTab === 'following') ? (
+            currentItems.map((person) => (
               <Link
-                key={friend.id}
-                to={`/profile/${friend.id}`}
+                key={person._id}
+                to={`/profile/${person._id}`}
                 className="friend-card"
               >
                 <div className="friend-avatar">
-                  {friend.profilePic ? (
-                    <img src={friend.profilePic} alt={friend.name} />
+                  {person.image ? (
+                    <img src={person.image} alt={person.name} />
                   ) : (
-                    <span>{friend.name[0].toUpperCase()}</span>
+                    <span>{person.name[0].toUpperCase()}</span>
                   )}
                 </div>
                 <div className="friend-info">
-                  <h3>{friend.name}</h3>
+                  <h3>{person.name}</h3>
+                  {person.email && <p className="friend-email">{person.email}</p>}
                 </div>
               </Link>
             ))
@@ -362,8 +417,11 @@ export default function Profile({ user }) {
               </div>
             ))
           )}
-          {activeTab === 'friends' && friends.length === 0 && (
-            <div className="no-events">No friends yet</div>
+          {activeTab === 'followers' && followers.length === 0 && (
+            <div className="no-events">No followers yet</div>
+          )}
+          {activeTab === 'following' && following.length === 0 && (
+            <div className="no-events">Not following anyone yet</div>
           )}
           {(activeTab === 'created' || activeTab === 'rsvpd') &&
             (activeTab === 'created' ? userEvents : rsvpdEvents).length === 0 && (

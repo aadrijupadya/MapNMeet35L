@@ -199,3 +199,15 @@
     opacity: 1;
   }
 }
+
+.notif-status {
+  text-align: center;
+  padding: 32px;
+  color: var(--color-muted);
+  font-style: italic;
+  font-size: 1rem;
+}
+
+.notif-status.error {
+  color: #ff4444;
+}

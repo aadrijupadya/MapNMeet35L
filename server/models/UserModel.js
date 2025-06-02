@@ -41,7 +41,11 @@ const userSchema = new mongoose.Schema(
             type: String,
             trim: true,
             validate: {
-              validator: val => /^@?[a-zA-Z0-9._]+$/.test(val),
+              validator: function(val) {
+                // Only validate if the field is being modified and has a value
+                if (!this.isModified('instagram') || !val) return true;
+                return /^@?[a-zA-Z0-9._]+$/.test(val);
+              },
               message: 'Invalid Instagram handle',
             },
           },
@@ -71,13 +75,13 @@ const userSchema = new mongoose.Schema(
               type: mongoose.Schema.Types.ObjectId,
               ref: 'User',
             },
-        ],
+          ],
         following: [
             {
               type: mongoose.Schema.Types.ObjectId,
               ref: 'User',
             },
-        ],
+          ],
         dateJoined: {
             type: Date,
             default: Date.now,
