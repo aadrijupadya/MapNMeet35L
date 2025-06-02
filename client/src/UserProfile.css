@@ -109,12 +109,6 @@
   gap: 0.5rem;
 }
 
-.event-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow);
-  border-color: var(--color-accent);
-}
-
 .event-card h3 {
   margin: 0;
   font-size: 1.1rem;
@@ -133,25 +127,21 @@
   gap: 6px;
 }
 
-.event-date::before { content: "👋"; }
+.event-date::before { content: "⏰"; }
 .event-location::before { content: "📍"; }
 .event-participants::before { content: "👥"; }
 
 .view-event-btn {
   margin-top: 0.5rem;
   padding: 0.6rem;
-  background: var(--color-accent-light);
-  color: var(--color-text);
+  background: var(--color-accent);
+  color: black;
   border: none;
   border-radius: var(--radius);
   font-size: 0.9rem;
   text-align: center;
   text-decoration: none;
   transition: background-color 0.2s ease;
-}
-
-.view-event-btn:hover {
-  background: var(--color-accent);
 }
 
 @media (max-width: 768px) {

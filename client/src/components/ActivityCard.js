@@ -39,7 +39,7 @@ export default function ActivityCard({ event }) {
         {event.joinees?.length || 0} / {event.participantCount || 'unlimited'} participants
       </p>
       <Link 
-        to={`/activities/?id=${event._id}`}
+        to={`/activities?id=${event._id}`}
         className="view-event-btn"
       >
         View Event
