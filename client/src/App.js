@@ -10,6 +10,7 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import './theme.css';
 import Profile from './Profile';
 import Settings from './Settings';
+import UserProfile from './UserProfile';
 
 function App() {
   const [user, setUser] = useState();
@@ -82,18 +83,22 @@ function Layout({ user, updateUser }) {
             <Route path="/map" element={<Map />} />
             <Route path="/activities" element={<Activities user={user} userId={user._id} />} />
             <Route path="/profile" element={<Profile user={user} />} />
-             <Route path="/settings"   element={<Settings />} />
+            <Route path="/profile/:userId" element={<UserProfile />} />
+            <Route path="/settings" element={<Settings />} />
           </>
         )}
         {!user && (
-          <Route
-            path="/"
-            element={
-              <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
-                <Home user={user} updateUser={updateUser} />
-              </GoogleOAuthProvider>
-            }
-          />
+          <>
+            <Route
+              path="/"
+              element={
+                <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
+                  <Home user={user} updateUser={updateUser} />
+                </GoogleOAuthProvider>
+              }
+            />
+            <Route path="/profile/:userId" element={<UserProfile />} />
+          </>
         )}
       </Routes>
     </>
