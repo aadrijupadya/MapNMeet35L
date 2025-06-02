@@ -1,414 +1,453 @@
 .profile-page {
-    max-width: 1200px;
-    margin: 2rem auto;
-    padding: 0 1rem;
-    color: var(--color-text);
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  color: var(--color-text);
 }
 
 .profile-header {
-    display: flex;
-    align-items: center;
-    gap: 2rem;
-    margin-bottom: 2rem;
-    padding: 2rem;
-    background: var(--color-bg-light);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    border: 1px solid var(--color-border);
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  padding: 2rem;
+  background: var(--color-bg-light);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--color-border);
 }
 
-/* Avatar & upload */
+/* Avatar */
 .profile-avatar-container {
-    position: relative;
-    width: 100px;
-    height: 100px;
+  position: relative;
+  width: 100px;
+  height: 100px;
 }
 
 .profile-avatar {
-    width: 100%;
-    height: 100%;
-    background: var(--color-accent);
-    color: #000;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2.5rem;
-    font-weight: bold;
-    box-shadow: var(--shadow);
-    overflow: hidden;
-    position: relative;
+  width: 100%;
+  height: 100%;
+  background: var(--color-accent);
+  color: #000;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  font-weight: bold;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  position: relative;
 }
 
 .profile-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 50%;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
 }
 
-.upload-input {
-    display: none;
-}
-
+/* Remove upload overlay styles */
+.upload-input,
 .upload-overlay {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    transform: translate(50%, 50%);
-    background: var(--color-accent);
-    color: #000;
-    font-size: 1.2rem;
-    width: 28px;
-    height: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    border: 2px solid var(--color-bg-light);
-    cursor: pointer;
-    z-index: 10;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.upload-overlay:hover {
-    background: #fff;
-    color: var(--color-accent);
+    display: none;
 }
 
 /* Profile text */
 .profile-info h1 {
-    margin: 0;
-    font-size: 2rem;
-    color: var(--color-text);
+  margin: 0;
+  font-size: 2rem;
+  color: var(--color-text);
 }
 
 .profile-email,
 .profile-contact {
-    margin: 0.5rem 0;
-    color: var(--color-muted);
-    font-size: 1.1rem;
+  margin: 0.5rem 0;
+  color: var(--color-muted);
+  font-size: 1.1rem;
 }
 
 .profile-bio {
-    margin: 0.5rem 0;
-    color: var(--color-muted);
-    font-size: 1.1rem;
-    font-style: italic;
-    line-height: 1.4;
+  margin: 0.5rem 0;
+  color: var(--color-muted);
+  font-size: 1.1rem;
+  font-style: italic;
+  line-height: 1.4;
+}
+
+/* Notifications bell (placed top-right of .profile-header) */
+.notifications {
+  position: absolute;
+  top: 1rem;
+  right: -35rem;
+  z-index: 10;
+}
+
+.notifications .bell-icon {
+  font-size: 1.6rem;
+  cursor: pointer;
+  color: var(--color-text);
+  transition: color 0.2s ease;
+}
+
+.notifications .bell-icon:hover {
+  color: var(--color-accent);
+}
+
+.notifications .notif-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: var(--color-bg-light);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  width: 240px;
+  max-height: 300px;
+  overflow-y: auto;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.notifications .notif-dropdown li {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.95rem;
+  line-height: 1.3;
+}
+
+.notifications .notif-dropdown li:last-child {
+  border-bottom: none;
+}
+
+.notifications .notif-dropdown li:hover {
+  background: var(--color-border);
+  cursor: pointer;
+}
+
+.notifications .notif-dropdown .no-notifs {
+  text-align: center;
+  padding: 1rem;
+  color: var(--color-muted);
+  font-style: italic;
+  font-size: 0.95rem;
 }
 
 /* Tabs */
 .profile-content {
-    background: var(--color-bg-light);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    padding: 1.5rem;
-    border: 1px solid var(--color-border);
+  background: var(--color-bg-light);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+  border: 1px solid var(--color-border);
 }
 
 .profile-tabs {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 2rem;
-    border-bottom: 1px solid var(--color-border);
-    padding-bottom: 1rem;
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 1rem;
 }
 
 .profile-tabs button {
-    padding: 0.75rem 1.5rem;
-    border: none;
-    background: var(--color-border);
-    font-size: 1rem;
-    color: var(--color-text);
-    cursor: pointer;
-    border-radius: var(--radius);
-    transition: all 0.2s ease;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  background: var(--color-border);
+  font-size: 1rem;
+  color: var(--color-text);
+  cursor: pointer;
+  border-radius: var(--radius);
+  transition: all 0.2s ease;
 }
 
 .profile-tabs button:hover {
-    background: var(--color-accent);
-    color: #000;
+  background: var(--color-accent);
+  color: #000;
 }
 
 .profile-tabs button.active {
-    background: var(--color-accent);
-    color: #000;
-    font-weight: 500;
+  background: var(--color-accent);
+  color: #000;
+  font-weight: 500;
 }
 
 /* Generic event list */
 .events-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
 }
 
 /* Event card */
 .event-card {
-    background: var(--color-bg);
-    border-radius: var(--radius);
-    padding: 1.5rem;
-    transition: transform 0.2s ease;
-    border: 1px solid var(--color-border);
+  background: var(--color-bg);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  transition: transform 0.2s ease;
+  border: 1px solid var(--color-border);
 }
 
 .event-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
 }
 
 .event-card h3 {
-    margin: 0 0 1rem 0;
-    color: var(--color-text);
-    font-size: 1.2rem;
+  margin: 0 0 1rem 0;
+  color: var(--color-text);
+  font-size: 1.2rem;
 }
 
 .event-time,
 .event-location,
 .event-participants {
-    margin: 0.5rem 0;
-    color: var(--color-muted);
-    font-size: 0.95rem;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+  margin: 0.5rem 0;
+  color: var(--color-muted);
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.event-time::before { content: "⏰"; }
+.event-time::before     { content: "⏰"; }
 .event-location::before { content: "📍"; }
 .event-participants::before { content: "👥"; }
 
 /* View button (events) */
 .view-event-btn {
-    padding: 0.75rem 1rem;
-    background: var(--color-accent);
-    color: #000;
-    border: none;
-    border-radius: var(--radius);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-weight: 500;
-    text-decoration: none;
+  padding: 0.75rem 1rem;
+  background: var(--color-accent);
+  color: #000;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  text-decoration: none;
 }
 
 .view-event-btn:hover {
-    background: #adf;
-    transform: translateY(-1px);
-    color: #000;
+  background: #adf;
+  transform: translateY(-1px);
+  color: #000;
 }
 
 /* Friend card (now clickable link) */
 .friend-card {
-    display: flex;
-    align-items: center;
-    background: var(--color-bg);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius);
-    padding: 1rem;
-    box-shadow: var(--shadow);
-    transition: transform 0.2s ease;
-    text-decoration: none;
-    color: inherit;
+  display: flex;
+  align-items: center;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  box-shadow: var(--shadow);
+  transition: transform 0.2s ease;
+  text-decoration: none;
+  color: inherit;
 }
 
 .friend-card:hover {
-    transform: translateY(-2px);
+  transform: translateY(-2px);
 }
 
 .friend-avatar {
-    flex-shrink: 0;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    overflow: hidden;
-    background: var(--color-accent);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.8rem;
-    color: #000;
-    margin-right: 1rem;
+  flex-shrink: 0;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--color-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  color: #000;
+  margin-right: 1rem;
 }
 
 .friend-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .friend-info h3 {
-    margin: 0;
-    font-size: 1.2rem;
+  margin: 0;
+  font-size: 1.2rem;
 }
 
 /* Empty state */
 .no-events {
-    grid-column: 1 / -1;
-    text-align: center;
-    padding: 2rem;
-    color: var(--color-muted);
-    font-size: 1.1rem;
-    background: var(--color-bg);
-    border-radius: var(--radius);
-    border: 1px solid var(--color-border);
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 2rem;
+  color: var(--color-muted);
+  font-size: 1.1rem;
+  background: var(--color-bg);
+  border-radius: var(--radius);
+  border: 1px solid var(--color-border);
 }
 
 /* Scrollbar */
 .profile-page::-webkit-scrollbar {
-    width: 8px;
+  width: 8px;
 }
 
 .profile-page::-webkit-scrollbar-track {
-    background: var(--color-bg);
+  background: var(--color-bg);
 }
 
 .profile-page::-webkit-scrollbar-thumb {
-    background-color: var(--color-accent);
-    border-radius: 4px;
+  background-color: var(--color-accent);
+  border-radius: 4px;
 }
 
 /* Mobile */
 @media (max-width: 768px) {
-    .profile-header {
-        flex-direction: column;
-        text-align: center;
-        gap: 1rem;
-    }
+  .profile-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
 
-    .profile-tabs {
-        flex-direction: column;
-    }
+  .profile-tabs {
+    flex-direction: column;
+  }
 
-    .profile-tabs button {
-        width: 100%;
-    }
+  .profile-tabs button {
+    width: 100%;
+  }
 
-    .events-list {
-        grid-template-columns: 1fr;
-    }
+  .events-list {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Modal Styles */
 .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.7);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    backdrop-filter: blur(5px);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
 }
 
 .modal-content {
-    background-color: var(--color-bg-light);
-    border-radius: 12px;
-    width: 90%;
-    max-width: 500px;
-    padding: 2rem;
-    position: relative;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    border: 1px solid var(--color-border);
+  background-color: var(--color-bg-light);
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  padding: 2rem;
+  position: relative;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--color-border);
 }
 
 .modal-content h2 {
-    margin: 0 0 1.5rem 0;
-    color: var(--color-text);
-    font-size: 1.8rem;
+  margin: 0 0 1.5rem 0;
+  color: var(--color-text);
+  font-size: 1.8rem;
 }
 
 .close-modal {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: none;
-    border: none;
-    color: var(--color-text);
-    font-size: 1.5rem;
-    cursor: pointer;
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    transition: background-color 0.2s;
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  color: var(--color-text);
+  font-size: 1.5rem;
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
 }
 
 .close-modal:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .form-group {
-    margin-bottom: 1.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .form-group label {
-    display: block;
-    margin-bottom: 0.5rem;
-    color: var(--color-text);
-    font-weight: 500;
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--color-text);
+  font-weight: 500;
 }
 
 .form-group input,
 .form-group textarea {
-    width: 100%;
-    padding: 0.75rem;
-    border: 1px solid var(--color-border);
-    border-radius: 6px;
-    background-color: var(--color-bg);
-    color: var(--color-text);
-    font-size: 1rem;
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-size: 1rem;
 }
 
 .form-group textarea {
-    min-height: 100px;
-    resize: vertical;
+  min-height: 100px;
+  resize: vertical;
 }
 
 .form-group small {
-    display: block;
-    margin-top: 0.5rem;
-    color: var(--color-muted);
-    font-size: 0.9rem;
+  display: block;
+  margin-top: 0.5rem;
+  color: var(--color-muted);
+  font-size: 0.9rem;
 }
 
 .update-status {
-    margin: 1rem 0;
-    padding: 0.75rem;
-    border-radius: 6px;
-    font-weight: 500;
+  margin: 1rem 0;
+  padding: 0.75rem;
+  border-radius: 6px;
+  font-weight: 500;
 }
 
 .update-status.success {
-    background-color: rgba(76, 175, 80, 0.1);
-    color: #4CAF50;
-    border: 1px solid #4CAF50;
+  background-color: rgba(76, 175, 80, 0.1);
+  color: #4CAF50;
+  border: 1px solid #4CAF50;
 }
 
 .update-status.error {
-    background-color: rgba(244, 67, 54, 0.1);
-    color: #F44336;
-    border: 1px solid #F44336;
+  background-color: rgba(244, 67, 54, 0.1);
+  color: #F44336;
+  border: 1px solid #F44336;
 }
 
 .save-profile-btn {
-    width: 100%;
-    padding: 0.75rem;
-    background-color: var(--color-accent);
-    color: #000;
-    border: none;
-    border-radius: 6px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
+  width: 100%;
+  padding: 0.75rem;
+  background-color: var(--color-accent);
+  color: #000;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .save-profile-btn:hover {
-    background-color: #adf;
-    transform: translateY(-1px);
+  background-color: #adf;
+  transform: translateY(-1px);
 }

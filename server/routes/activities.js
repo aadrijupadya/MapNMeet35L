@@ -157,4 +157,61 @@ router.get('/all', async (req, res) => {
   }
 });
 
+// Update an activity
+router.put('/:activityId', async (req, res) => {
+  try {
+    // Check if user is authenticated
+    if (!req.cookies.jwt) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const activity = await Activity.findById(req.params.activityId)
+      .populate('createdBy', 'name email');
+
+    if (!activity) {
+      return res.status(404).json({ error: 'Activity not found' });
+    }
+
+    // Check if the user is the creator of the activity
+    if (activity.createdBy._id.toString() !== req.body.userId) {
+      return res.status(403).json({ error: 'Not authorized to update this activity' });
+    }
+
+    // Prepare update data
+    const updateData = {
+      title: req.body.title,
+      description: req.body.description,
+      time: new Date(req.body.time),
+      endTime: new Date(req.body.endTime),
+      participantCount: parseInt(req.body.participantCount),
+    };
+
+    // Only update location if it's provided
+    if (req.body.location) {
+      updateData.location = req.body.location;
+      updateData.locationName = req.body.locationName;
+    }
+
+    // Update the activity
+    const updatedActivity = await Activity.findByIdAndUpdate(
+      req.params.activityId,
+      { $set: updateData },
+      { new: true, runValidators: true }
+    ).populate('createdBy', 'name email')
+     .populate('joinees', 'name contact');
+
+    if (!updatedActivity) {
+      return res.status(404).json({ error: 'Activity not found after update' });
+    }
+
+    res.json(updatedActivity);
+  } catch (err) {
+    console.error('Error updating activity:', err);
+    if (err.name === 'ValidationError') {
+      return res.status(400).json({ error: err.message });
+    }
+    res.status(500).json({ error: 'Failed to update activity' });
+  }
+});
+
 export default router;

@@ -8,15 +8,6 @@ const NavBar = () => {
 
   return (
     <>
-      <div className="navbar-top">
-        <img
-          src={logo}
-          alt="MapNMeet Logo"
-          className="logo-toggle"
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-        />
-      </div>
-
       <div className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
           <img src={logo} alt="MapNMeet Logo" className="sidebar-logo" />
@@ -29,11 +20,25 @@ const NavBar = () => {
           <Link to="/about" onClick={() => setSidebarOpen(false)}>About</Link>
           <Link to="/activities" onClick={() => setSidebarOpen(false)}>Activities</Link>
           <Link to="/profile" onClick={() => setSidebarOpen(false)}>Profile</Link>
-          <Link to="/settings"  onClick={() => setSidebarOpen(false)}>Settings</Link>
+          <Link to="/settings" onClick={() => setSidebarOpen(false)}>Settings</Link>
         </nav>
       </div>
 
-      {sidebarOpen && <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} />}
+      <div className="navbar-top">
+        <img
+          src={logo}
+          alt="MapNMeet Logo"
+          className="logo-toggle"
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+        />
+      </div>
+
+      {sidebarOpen && (
+        <div
+          className="sidebar-backdrop"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
     </>
   );
 };

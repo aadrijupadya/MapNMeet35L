@@ -4,6 +4,7 @@ import { formToJSON } from 'axios';
 import { useSearchParams, Link } from 'react-router-dom';
 import { getAddressFromCoords } from './utils/geocoding';
 import CreateActivity from './CreateActivity';
+import EditActivity from './EditActivity';
 
 const loadGoogleMapsScript = (apiKey) => {
     if (window.google?.maps) return Promise.resolve();
@@ -51,6 +52,7 @@ export default function Activities(props) {
         .getPropertyValue('--color-accent')
         .trim();
     const [deleteConfirm, setDeleteConfirm] = useState({ show: false, eventId: null });
+    const [editActivity, setEditActivity] = useState(null);
 
     useEffect(() => {
         console.log('Activities component props:', props);
@@ -103,27 +105,24 @@ export default function Activities(props) {
                     ],
                 });
 
-            
-
                 map.current.addListener('click', (e) => {
-                    if (createActivityOpen) {
+                    if (createActivityOpen || editActivity) {
                         const pos = e.latLng;
                         setClickedCoordinates({ lat: pos.lat(), lng: pos.lng() });
                         
                         if (markerRef.current) {
                             markerRef.current.setPosition(pos);
                         } else {
-
                             markerRef.current = new window.google.maps.Marker({
-                            position: pos,
-                            map: map.current,
-                            icon: {
-                                path: 'M0-48c-9.941 0-18 8.059-18 18 0 14.178 18 30 18 30s18-15.822 18-30c0-9.941-8.059-18-18-18z',
-                                fillColor: markerColor,
-                                fillOpacity: 0.8,
-                                scale: 3
-                            }
-                        });
+                                position: pos,
+                                map: map.current,
+                                icon: {
+                                    path: 'M0-48c-9.941 0-18 8.059-18 18 0 14.178 18 30 18 30s18-15.822 18-30c0-9.941-8.059-18-18-18z',
+                                    fillColor: markerColor,
+                                    fillOpacity: 0.8,
+                                    scale: 3
+                                }
+                            });
                         }
                     }
                 });
@@ -142,7 +141,7 @@ export default function Activities(props) {
                 addMarkers(data);
             })
             .catch(err => console.error('Error loading map or events:', err));
-    }, [createActivityOpen]);
+    }, [createActivityOpen, editActivity]);
 
     useEffect(() => {
         const filtered = events.filter(event => {
@@ -769,6 +768,15 @@ export default function Activities(props) {
                                 ) : (
                                     <div className="button-group">
                                         <button
+                                            className="edit-event-button"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setEditActivity(event);
+                                            }}
+                                        >
+                                            Edit Event
+                                        </button>
+                                        <button
                                             className="delete-event-button"
                                             onClick={(e) => {
                                                 e.stopPropagation();
@@ -921,6 +929,39 @@ export default function Activities(props) {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {editActivity && (
+                <EditActivity
+                    activity={editActivity}
+                    userId={props.userId}
+                    onClose={() => {
+                        setEditActivity(null);
+                        if (markerRef.current) {
+                            markerRef.current.setMap(null);
+                            markerRef.current = null;
+                        }
+                    }}
+                    onUpdate={(updatedActivity) => {
+                        setEvents(prevEvents => 
+                            prevEvents.map(event => 
+                                event._id === updatedActivity._id ? updatedActivity : event
+                            )
+                        );
+                        setFilteredEvents(prevEvents => 
+                            prevEvents.map(event => 
+                                event._id === updatedActivity._id ? updatedActivity : event
+                            )
+                        );
+                        setEditActivity(null);
+                        if (markerRef.current) {
+                            markerRef.current.setMap(null);
+                            markerRef.current = null;
+                        }
+                    }}
+                    map={map.current}
+                    markerRef={markerRef}
+                />
             )}
         </div>
     );

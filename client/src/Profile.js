@@ -1,73 +1,101 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import './Profile.css';
-import { getAddressFromCoords } from './utils/geocoding';
+import React, { useState, useEffect, useRef } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
+import './Profile.css'
+import Notifications from './Notifications'
+import { getAddressFromCoords } from './utils/geocoding'
 
 export default function Profile({ user }) {
-  const [userEvents, setUserEvents] = useState([]);
-  const [rsvpdEvents, setRsvpdEvents] = useState([]);
-  const [friends, setFriends] = useState([]);
-  const [activeTab, setActiveTab] = useState('created');
-  const [locationNames, setLocationNames] = useState({});
-  const [profilePic, setProfilePic] = useState(null);
-  const [showCustomizeModal, setShowCustomizeModal] = useState(false);
+  const [userEvents, setUserEvents] = useState([])
+  const [rsvpdEvents, setRsvpdEvents] = useState([])
+  const [friends, setFriends] = useState([])
+  const [activeTab, setActiveTab] = useState('created')
+  const [locationNames, setLocationNames] = useState({})
+  const [showCustomizeModal, setShowCustomizeModal] = useState(false)
   const [profileData, setProfileData] = useState({
     bio: user?.bio || '',
     instagram: user?.instagram || ''
-  });
-  const [updateStatus, setUpdateStatus] = useState({ message: '', type: '' });
+  })
+  const [updateStatus, setUpdateStatus] = useState({ message: '', type: '' })
+  const [notifications, setNotifications] = useState([])
 
-  const navigate = useNavigate();
+  const navigate = useNavigate()
+  const notifRef = useRef(null)
 
   useEffect(() => {
     if (!user) {
-      navigate('/');
-      return;
+      navigate('/')
+      return
     }
 
-    // Fetch user's friends
     const fetchFriends = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/api/users/${user._id}/friends`);
+        const response = await fetch(
+          `http://localhost:8000/api/users/${user._id}/friends`
+        )
         if (response.ok) {
-          const data = await response.json();
-          setFriends(data.friends || []);
+          const data = await response.json()
+          setFriends(data.friends || [])
         }
-      } catch (error) {
-        console.error('Error fetching friends:', error);
-      }
-    };
+      } catch {}
+    }
 
-    fetchFriends();
-    
+    fetchFriends()
+
     fetch(`http://localhost:8000/api/activities/user/${user._id}`)
-      .then(r => r.json())
-      .then(events => {
-        setUserEvents(events);
-        return fetch(`http://localhost:8000/api/activities/rsvpd/${user._id}`);
+      .then((r) => r.json())
+      .then((events) => {
+        setUserEvents(events)
+        return fetch(`http://localhost:8000/api/activities/rsvpd/${user._id}`)
       })
-      .then(r => r.json())
-      .then(events => setRsvpdEvents(events))
-      .catch(console.error);
-  }, [user, navigate]);
+      .then((r) => r.json())
+      .then((events) => setRsvpdEvents(events))
+      .catch(console.error)
+
+    // Fetch notifications
+    const fetchNotifications = async () => {
+      try {
+        const res = await fetch(
+          `http://localhost:8000/api/users/${user._id}/notifications`
+        )
+        if (res.ok) {
+          const data = await res.json()
+          setNotifications(data.notifications || [])
+        }
+      } catch (err) {
+        console.error('Error fetching notifications:', err)
+      }
+    }
+    fetchNotifications()
+  }, [user, navigate])
 
   useEffect(() => {
     const fetchLocationNames = async () => {
-      const all = [...userEvents, ...rsvpdEvents];
-      const map = {};
+      const all = [...userEvents, ...rsvpdEvents]
+      const map = {}
       for (const ev of all) {
         if (ev.location) {
           try {
-            const { lat, lng } = JSON.parse(ev.location);
-            const addr = await getAddressFromCoords(lat, lng);
-            if (addr) map[ev._id] = addr;
+            const { lat, lng } = JSON.parse(ev.location)
+            const addr = await getAddressFromCoords(lat, lng)
+            if (addr) map[ev._id] = addr
           } catch {}
         }
       }
-      setLocationNames(map);
-    };
-    if (userEvents.length || rsvpdEvents.length) fetchLocationNames();
-  }, [userEvents, rsvpdEvents]);
+      setLocationNames(map)
+    }
+    if (userEvents.length || rsvpdEvents.length) fetchLocationNames()
+  }, [userEvents, rsvpdEvents])
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (notifRef.current && !notifRef.current.contains(e.target)) {
+        setNotifications((prev) => [...prev]) // no-op just to force re-render
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   const formatDate = (date) => {
     return new Date(date).toLocaleString('en-US', {
@@ -76,99 +104,58 @@ export default function Profile({ user }) {
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
-    });
-  };
-
-  const handleProfilePicChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setProfilePic(imageUrl);
-    }
-  };
+    })
+  }
 
   const handleProfileUpdate = async (e) => {
-    e.preventDefault();
+    e.preventDefault()
     try {
-      console.log('Attempting to update profile with data:', {
-        userId: user._id,
-        ...profileData
-      });
-
       const response = await fetch('http://localhost:8000/api/updateProfile', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({
-          userId: user._id,
-          ...profileData
-        }),
-      });
-
-      const data = await response.json();
-      console.log('Server response:', data);
-
+        body: JSON.stringify({ userId: user._id, ...profileData })
+      })
+      const data = await response.json()
       if (response.ok) {
-        // Update the local user object with the new data
-        Object.assign(user, data.user);
-        
-        setUpdateStatus({ message: 'Profile updated successfully!', type: 'success' });
-        // Clear success message after 2 seconds but keep modal open
+        Object.assign(user, data.user)
+        setUpdateStatus({ message: 'Profile updated successfully!', type: 'success' })
         setTimeout(() => {
-          setUpdateStatus({ message: '', type: '' });
-        }, 2000);
+          setUpdateStatus({ message: '', type: '' })
+        }, 2000)
       } else {
-        console.error('Server error:', data.error);
-        setUpdateStatus({ 
-          message: data.error || 'Failed to update profile. Please try again.', 
-          type: 'error' 
-        });
+        setUpdateStatus({
+          message: data.error || 'Failed to update profile. Please try again.',
+          type: 'error'
+        })
       }
-    } catch (error) {
-      console.error('Error updating profile:', error);
-      setUpdateStatus({ 
-        message: 'Network error. Please check your connection and try again.', 
-        type: 'error' 
-      });
+    } catch {
+      setUpdateStatus({
+        message: 'Network error. Please check your connection and try again.',
+        type: 'error'
+      })
     }
-  };
+  }
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setProfileData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
+    const { name, value } = e.target
+    setProfileData((prev) => ({ ...prev, [name]: value }))
+  }
 
   const currentItems =
-    activeTab === 'created'
-      ? userEvents
-      : activeTab === 'rsvpd'
-      ? rsvpdEvents
-      : friends;
+    activeTab === 'created' ? userEvents : activeTab === 'rsvpd' ? rsvpdEvents : friends
 
   return (
     <div className="profile-page">
       <div className="profile-header">
         <div className="profile-avatar-container">
           <div className="profile-avatar">
-            {profilePic ? (
-              <img src={profilePic} alt="Profile" className="profile-img" />
+            {user.image ? (
+              <img src={user.image} alt="Profile" className="profile-img" />
             ) : (
               <span>{user.name ? user.name[0].toUpperCase() : 'U'}</span>
             )}
           </div>
-          <label htmlFor="profilePicUpload" className="upload-overlay">+</label>
-          <input
-            type="file"
-            accept="image/*"
-            id="profilePicUpload"
-            onChange={handleProfilePicChange}
-            className="upload-input"
-          />
         </div>
         <div className="profile-info">
           <h1>{user.name || 'Anonymous User'}</h1>
@@ -176,22 +163,32 @@ export default function Profile({ user }) {
           {user.contact && user.contact !== user.email && (
             <p className="profile-contact">📧 Contact: {user.contact}</p>
           )}
-          {user.instagram && <p className="profile-instagram">📸 @{user.instagram}</p>}
+          {user.instagram && (
+            <p className="profile-instagram">📸 @{user.instagram}</p>
+          )}
           {user.bio && <p className="profile-bio">{user.bio}</p>}
-          <button 
+          <button
             className="customize-profile-btn"
             onClick={() => setShowCustomizeModal(true)}
           >
             Customize Profile
           </button>
         </div>
+
+        <div ref={notifRef}>
+          <Notifications items={notifications} />
+        </div>
       </div>
 
-      {/* Customize Profile Modal */}
       {showCustomizeModal && (
         <div className="modal-overlay" onClick={() => setShowCustomizeModal(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <button className="close-modal" onClick={() => setShowCustomizeModal(false)}>×</button>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="close-modal"
+              onClick={() => setShowCustomizeModal(false)}
+            >
+              ×
+            </button>
             <h2>Customize Profile</h2>
             <form onSubmit={handleProfileUpdate}>
               <div className="form-group">
@@ -222,7 +219,9 @@ export default function Profile({ user }) {
                   {updateStatus.message}
                 </div>
               )}
-              <button type="submit" className="save-profile-btn">Save Changes</button>
+              <button type="submit" className="save-profile-btn">
+                Save Changes
+              </button>
             </form>
           </div>
         </div>
@@ -252,8 +251,12 @@ export default function Profile({ user }) {
 
         <div className="events-list">
           {activeTab === 'friends' ? (
-            friends.map(friend => (
-              <Link key={friend.id} to={`/profile/${friend.id}`} className="friend-card">
+            friends.map((friend) => (
+              <Link
+                key={friend.id}
+                to={`/profile/${friend.id}`}
+                className="friend-card"
+              >
                 <div className="friend-avatar">
                   {friend.profilePic ? (
                     <img src={friend.profilePic} alt={friend.name} />
@@ -267,24 +270,28 @@ export default function Profile({ user }) {
               </Link>
             ))
           ) : (
-            (activeTab === 'created' ? userEvents : rsvpdEvents).map(event => (
+            (activeTab === 'created' ? userEvents : rsvpdEvents).map((event) => (
               <div key={event._id} className="event-card">
                 <h3>{event.title}</h3>
                 <p className="event-time">{formatDate(event.time)}</p>
-                <p className="event-location">{
-                  event.location ? (() => {
-                    try {
-                      const coords = JSON.parse(event.location);
-                      const address = locationNames[event._id];
-                      return address
-                        ? `${address} (${coords.lat.toFixed(2)}, ${coords.lng.toFixed(2)})`
-                        : `(${coords.lat.toFixed(2)}, ${coords.lng.toFixed(2)})`;
-                    } catch {
-                      return 'Location not available';
-                    }
-                  })() : 'Location not available'
-                }</p>
-                <p className="event-participants">{event.participantCount || 0} participants</p>
+                <p className="event-location">
+                  {event.location
+                    ? (() => {
+                        try {
+                          const coords = JSON.parse(event.location)
+                          const address = locationNames[event._id]
+                          return address
+                            ? `${address} (${coords.lat.toFixed(2)}, ${coords.lng.toFixed(2)})`
+                            : `(${coords.lat.toFixed(2)}, ${coords.lng.toFixed(2)})`
+                        } catch {
+                          return 'Location not available'
+                        }
+                      })()
+                    : 'Location not available'}
+                </p>
+                <p className="event-participants">
+                  {event.participantCount || 0} participants
+                </p>
                 <button
                   className="view-event-btn"
                   onClick={() => navigate(`/activities?id=${event._id}`)}
@@ -295,18 +302,16 @@ export default function Profile({ user }) {
             ))
           )}
           {activeTab === 'friends' && friends.length === 0 && (
-            <div className="no-events">
-              No friends yet
-            </div>
+            <div className="no-events">No friends yet</div>
           )}
-          {(activeTab === 'created' || activeTab === 'rsvpd') && 
-           (activeTab === 'created' ? userEvents : rsvpdEvents).length === 0 && (
-            <div className="no-events">
-              No {activeTab === 'created' ? 'created' : 'RSVP\'d'} events yet
-            </div>
-          )}
+          {(activeTab === 'created' || activeTab === 'rsvpd') &&
+            (activeTab === 'created' ? userEvents : rsvpdEvents).length === 0 && (
+              <div className="no-events">
+                No {activeTab === 'created' ? 'created' : "RSVP'd"} events yet
+              </div>
+            )}
         </div>
       </div>
     </div>
-  );
+  )
 }

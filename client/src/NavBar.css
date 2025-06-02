@@ -39,6 +39,34 @@
   transform: scale(1.1);
 }
 
+.topbar-settings {
+  margin-left: auto;
+  margin-right: 16px;
+  color: var(--sidebar-text);
+  text-decoration: none;
+  align-self: center;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.topbar-settings:visited {
+  color: var(--sidebar-text);
+  text-decoration: none;
+}
+
+.topbar-settings:hover {
+  color: var(--sidebar-accent);
+  text-decoration: none;
+}
+
+.topbar-settings:focus,
+.topbar-settings:active {
+  color: var(--sidebar-accent);
+  text-decoration: none;
+  outline: none;
+}
+
 .sidebar {
   position: fixed;
   top: 0;
