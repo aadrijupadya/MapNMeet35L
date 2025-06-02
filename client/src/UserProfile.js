@@ -16,7 +16,10 @@ export default function UserProfile() {
     const fetchUserProfile = async () => {
       try {
         // Fetch user data
-        const userResponse = await fetch(`http://localhost:8000/api/users/${userId}`);
+        const userResponse = await fetch(`http://localhost:8000/api/users/${userId}`, {
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' }
+        });
         if (!userResponse.ok) {
           throw new Error('User not found');
         }
@@ -24,7 +27,10 @@ export default function UserProfile() {
         setProfileUser(userData);
 
         // Fetch user's created events
-        const eventsResponse = await fetch(`http://localhost:8000/api/activities/user/${userId}`);
+        const eventsResponse = await fetch(`http://localhost:8000/api/activities/user/${userId}`, {
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' }
+        });
         if (eventsResponse.ok) {
           const eventsData = await eventsResponse.json();
           setUserEvents(eventsData);

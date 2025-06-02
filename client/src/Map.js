@@ -51,7 +51,10 @@ export default function Map() {
 
         infoWindowRef.current = new window.google.maps.InfoWindow();
 
-        return fetch('http://localhost:8000/api/activities');
+        return fetch('http://localhost:8000/api/activities', {
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' }
+        });
       })
       .then((res) => res.json())
       .then((data) => {

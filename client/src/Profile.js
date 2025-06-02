@@ -35,7 +35,11 @@ export default function Profile({ user }) {
       try {
         // Fetch followers and following
         const followResponse = await fetch(
-          `http://localhost:8000/api/users/${user._id}/follow`
+          `http://localhost:8000/api/users/${user._id}/follow`,
+          {
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' }
+          }
         )
         if (followResponse.ok) {
           const data = await followResponse.json()
@@ -44,11 +48,17 @@ export default function Profile({ user }) {
         }
 
         // Fetch events
-        const eventsResponse = await fetch(`http://localhost:8000/api/activities/user/${user._id}`)
+        const eventsResponse = await fetch(`http://localhost:8000/api/activities/user/${user._id}`, {
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' }
+        })
         const events = await eventsResponse.json()
         setUserEvents(events)
 
-        const rsvpdResponse = await fetch(`http://localhost:8000/api/activities/rsvpd/${user._id}`)
+        const rsvpdResponse = await fetch(`http://localhost:8000/api/activities/rsvpd/${user._id}`, {
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' }
+        })
         const rsvpdEvents = await rsvpdResponse.json()
         setRsvpdEvents(rsvpdEvents)
       } catch (error) {

@@ -154,11 +154,10 @@ export default function EditActivity({ activity, userId, onClose, onUpdate, map,
 
       const res = await fetch(`http://localhost:8000/api/activities/${activity._id}`, {
         method: 'PUT',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
         credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(updateData),
       });
 
