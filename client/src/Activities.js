@@ -841,26 +841,6 @@ export default function Activities(props) {
                                             if (event.joinees && event.joinees.some(joinee => joinee._id === props.userId)) {
                                                 toggleEventParticipation(props.userId, id, true);
                                             } else {
-                                                if (window.confirm('Would you like to add the event creator as a friend?')) {
-                                                    fetch(`http://localhost:8000/api/users/${props.userId}/friends`, {
-                                                        method: 'POST',
-                                                        headers: {
-                                                            'Content-Type': 'application/json',
-                                                        },
-                                                        body: JSON.stringify({
-                                                            friendId: event.createdBy._id
-                                                        })
-                                                    })
-                                                    .then(response => {
-                                                        if (!response.ok) {
-                                                            return response.json().then(data => {
-                                                                throw new Error(data.error || 'Failed to add friend');
-                                                            });
-                                                        } else {
-                                                            alert(`Successfully added ${event.createdBy.name} as a friend!`);
-                                                        }
-                                                    })
-                                                }
                                                 toggleEventParticipation(props.userId, id, false);
                                             }
                                         }}
