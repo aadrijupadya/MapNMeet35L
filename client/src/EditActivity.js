@@ -171,6 +171,27 @@ export default function EditActivity({ activity, userId, onClose, onUpdate, map,
       
       // Call the onUpdate callback with the updated activity
       onUpdate(data);
+
+      // Create notifications for all joinees about the activity update
+      const notificationPromises = activity.joinees?.map(joinee => 
+        fetch('http://localhost:8000/api/notifications', {
+          method: 'POST',
+          credentials: 'include', 
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            userId: joinee._id,
+            type: 'activity_update',
+            activityId: activity._id,
+            message: `The activity "${form.title}" has been updated`
+          })
+        })
+      );
+
+      if (notificationPromises?.length) {
+        await Promise.all(notificationPromises);
+      }
       
       // Close the modal after a short delay
       setTimeout(() => {

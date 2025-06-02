@@ -114,6 +114,7 @@ export default function Profile({ user }) {
           followerName: n.followerId?.name,
           followerImage: n.followerId?.image
         }))
+        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // Sort by timestamp, newest first
         console.log("Transformed notifications:", transformedNotifications);
         setNotifications(transformedNotifications)
       } catch (error) {
