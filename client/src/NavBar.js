@@ -20,7 +20,6 @@ const NavBar = () => {
           <Link to="/about" onClick={() => setSidebarOpen(false)}>About</Link>
           <Link to="/activities" onClick={() => setSidebarOpen(false)}>Activities</Link>
           <Link to="/profile" onClick={() => setSidebarOpen(false)}>Profile</Link>
-          <Link to="/settings" onClick={() => setSidebarOpen(false)}>Settings</Link>
         </nav>
       </div>
 

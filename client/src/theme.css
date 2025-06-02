@@ -29,6 +29,12 @@
   --color-blue: #0066cc;
   --color-orange: #cc6600;
   --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --event-card-bg: #ffffff;
+  --event-card-hover: #f0f0f0;
+  --event-modal-bg: #ffffff;
+  --event-description-bg: #f5f5f5;
+  --event-detail-bg: #f5f5f5;
+  --event-joinees-bg: #f5f5f5;
 }
 
 /* ======= GLOBAL RESET ======= */

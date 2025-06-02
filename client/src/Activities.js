@@ -824,6 +824,7 @@ export default function Activities(props) {
                                 </span>
                             </div>
                             <div className="event-title">{event.title}</div>
+                            <div className="event-time" data-emoji="⏰">{formatDate(event.time)} - {formatDate(event.endTime)}</div>
                             <div className="event-location" data-emoji="📍">{
                                 event.location ? (() => {
                                     try {
@@ -837,7 +838,8 @@ export default function Activities(props) {
                                     }
                                 })() : 'Location not available'
                             }</div>
-                            <div className="event-participants" data-emoji="👥">{event.participantCount ? `${event.participantCount} participants` : 'No participants set'}</div>
+                            <div className="event-participants" data-emoji="👥">{event.joinees?.length || 0} / {event.participantCount || 'unlimited'} participants
+                            </div>
                             <div className="event-joinees">
                                 {event.joinees && event.joinees.length > 0 ? (
                                     <ul>
@@ -869,7 +871,6 @@ export default function Activities(props) {
                                     <div className="no-joinees">No participants yet</div>
                                 )}
                             </div>
-                            <div className="event-time" data-emoji="⏰">{formatDate(event.time)}</div>
                             <div className="event-actions">
                                 {props.userId !== event.createdBy?._id ? (
                                     <button
@@ -879,27 +880,6 @@ export default function Activities(props) {
                                             if (event.joinees && event.joinees.some(joinee => joinee._id === props.userId)) {
                                                 toggleEventParticipation(props.userId, id, true);
                                             } else {
-                                                if (window.confirm('Would you like to add the event creator as a friend?')) {
-                                                    fetch(`http://localhost:8000/api/users/${props.userId}/friends`, {
-                                                        method: 'POST',
-                                                        credentials: 'include',
-                                                        headers: {
-                                                            'Content-Type': 'application/json',
-                                                        },
-                                                        body: JSON.stringify({
-                                                            friendId: event.createdBy._id
-                                                        })
-                                                    })
-                                                    .then(response => {
-                                                        if (!response.ok) {
-                                                            return response.json().then(data => {
-                                                                throw new Error(data.error || 'Failed to add friend');
-                                                            });
-                                                        } else {
-                                                            alert(`Successfully added ${event.createdBy.name} as a friend!`);
-                                                        }
-                                                    })
-                                                }
                                                 toggleEventParticipation(props.userId, id, false);
                                             }
                                         }}

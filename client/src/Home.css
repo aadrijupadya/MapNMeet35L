@@ -14,13 +14,13 @@ body, html {
 /* Header */
 .header {
   position: relative;
-  background-color: black;
+  background-color: var(--color-bg);
   display: flex;
   justify-content: center;
   align-items: flex-start;
   padding: 10px 0;
-  color: white;
-  height: 60px;
+  color: var(--color-text);
+  height: var(--header-height);
   z-index: 2;
   width: 100%;
 }
@@ -29,16 +29,21 @@ body, html {
 .logo-wrapper {
   position: absolute;
   top: -40px;
-  background-color: black;
-  border-radius: 8px;
+  background-color: var(--color-bg);
+  border-radius: var(--radius);
   padding: 10px;
   height: 200px;
   width: 200px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--shadow);
   z-index: 3;
+}
+
+/* Light theme specific style for logo wrapper */
+html.light-theme .logo-wrapper {
+    background-color: #000000;
 }
 
 .logo-large {

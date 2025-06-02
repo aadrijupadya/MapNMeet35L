@@ -42,17 +42,18 @@
     flex: 1;
     position: relative;
     padding: 10px;
-    background: #1a1a1a;
+    background: var(--color-bg-light);
     border-radius: 8px;
+    border: 1px solid var(--color-border);
 }
 
 .search-input {
     width: 100%;
     padding: 12px 15px;
-    border: 1px solid #333;
+    border: 1px solid var(--color-border);
     border-radius: 6px;
-    background: #242424;
-    color: #fff;
+    background: var(--color-bg);
+    color: var(--color-text);
     font-size: 16px;
     transition: all 0.3s ease;
 }
@@ -60,7 +61,7 @@
 .search-input:focus {
     outline: none;
     border-color: var(--color-accent);
-    box-shadow: 0 0 0 2px rgba(255, 180, 0, 0.2);
+    box-shadow: 0 0 0 2px rgba(77, 148, 255, 0.2);
 }
 
 .search-input::placeholder {
@@ -72,13 +73,13 @@
     top: 100%;
     left: 10px;
     right: 10px;
-    background: #242424;
-    border: 1px solid #333;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
     border-radius: 6px;
     padding: 15px;
     margin-top: 5px;
     z-index: 1000;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--shadow);
 }
 
 .filter-header {
@@ -92,7 +93,7 @@
     display: flex;
     align-items: center;
     padding: 8px 0;
-    color: #fff;
+    color: var(--color-text);
     cursor: pointer;
     font-size: 14px;
     user-select: none;
@@ -142,13 +143,14 @@
     border-radius: var(--radius);
     padding: 15px;
     margin-bottom: 15px;
-    background-color: #252525;
-    transition: transform 0.2s ease;
+    background-color: var(--event-card-bg, var(--color-bg));
+    transition: transform 0.2s ease, background-color 0.2s ease;
 }
 
 .event-post:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--shadow);
+    background-color: var(--event-card-hover, var(--color-bg-light));
 }
 
 .event-author {
@@ -223,7 +225,7 @@
     text-decoration: none;
     box-shadow: var(--shadow);
     transition: background-color 0.2s ease, transform 0.2s ease;
-    z-index: 2000;
+    z-index: 1001;
 }
 
 .create-button:hover {
@@ -244,7 +246,7 @@
     border-radius: 20px;
     font-weight: bold;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-    z-index: 1000;
+    z-index: 2000;
     display: none;
 }
 
@@ -256,17 +258,21 @@
 }
 
 .events-container::-webkit-scrollbar-track {
-    background: #252525;
+    background: var(--color-bg-light);
 }
 
 .events-container::-webkit-scrollbar-thumb {
-    background-color: var(--color-accent);
+    background-color: var(--color-border);
     border-radius: 4px;
 }
 
+.events-container::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-muted);
+}
+
 .event-post.highlighted {
-    border: 2px solid #adf;
-    background-color: #2c2c2c;
+    border: 2px solid var(--color-accent);
+    background-color: var(--event-card-hover, var(--color-bg-light));
     transform: scale(1.02);
     transition: all 0.2s ease;
 }
@@ -335,14 +341,14 @@
 }
 
 .event-modal {
-    background-color: #1a1a1a;
+    background-color: var(--event-modal-bg, var(--color-bg));
     border-radius: 12px;
     width: 90%;
     max-width: 600px;
     max-height: 90vh;
     overflow-y: auto;
     position: relative;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--shadow);
     border: 1px solid var(--color-border);
 }
 
@@ -391,7 +397,7 @@
 }
 
 .event-description {
-    background-color: #252525;
+    background-color: var(--event-description-bg, var(--color-bg-light));
     padding: 1rem;
     border-radius: 8px;
 }
@@ -420,7 +426,7 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.5rem;
-    background-color: #252525;
+    background-color: var(--event-detail-bg, var(--color-bg-light));
     border-radius: 6px;
 }
 
@@ -435,7 +441,7 @@
 }
 
 .event-joinees-section {
-    background-color: #252525;
+    background-color: var(--event-joinees-bg, var(--color-bg-light));
     padding: 1rem;
     border-radius: 8px;
 }
@@ -583,8 +589,8 @@
 
 .join-button {
     padding: 0.8rem 1.5rem;
-    background-color: var(--color-accent);
-    color: #000;
+    background-color: #4d94ff;
+    color: white;
     border: none;
     border-radius: 6px;
     font-weight: 500;
@@ -593,7 +599,7 @@
 }
 
 .join-button:hover:not(:disabled) {
-    background-color: #adf;
+    background-color: #66a3ff;
     transform: translateY(-1px);
 }
 
@@ -609,12 +615,16 @@
 }
 
 .event-modal::-webkit-scrollbar-track {
-    background: #1a1a1a;
+    background: var(--color-bg-light);
 }
 
 .event-modal::-webkit-scrollbar-thumb {
-    background-color: var(--color-accent);
+    background-color: var(--color-border);
     border-radius: 4px;
+}
+
+.event-modal::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-muted);
 }
 
 .event-joinees ul {
@@ -634,8 +644,8 @@
 
 .edit-event-button {
     padding: 8px 16px;
-    background-color: var(--color-accent);
-    color: #000;
+    background-color: #4d94ff;
+    color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
@@ -645,7 +655,7 @@
 }
 
 .edit-event-button:hover {
-    background-color: #ffd700;
+    background-color: #66a3ff;
     transform: translateY(-1px);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
@@ -679,8 +689,8 @@
 }
 
 .add-participant-button {
-    background-color: var(--color-accent);
-    color: #000;
+    background-color: #4d94ff;
+    color: white;
 }
 
 .delete-event-button {

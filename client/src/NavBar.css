@@ -26,46 +26,18 @@
   margin: 8px 0 0 16px;
   cursor: pointer;
   transition: transform 0.2s ease;
-  background-color: var(--sidebar-bg);
+  background-color: #000000;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   object-fit: contain;
   object-position: top center;
-  padding-top: 0;
-  padding-bottom: 8px;
+  padding: 8px;
 }
 
 .logo-toggle:hover {
   transform: scale(1.1);
 }
 
-.topbar-settings {
-  margin-left: auto;
-  margin-right: 16px;
-  color: var(--sidebar-text);
-  text-decoration: none;
-  align-self: center;
-  font-size: 1rem;
-  font-weight: 500;
-  transition: color 0.2s ease;
-}
-
-.topbar-settings:visited {
-  color: var(--sidebar-text);
-  text-decoration: none;
-}
-
-.topbar-settings:hover {
-  color: var(--sidebar-accent);
-  text-decoration: none;
-}
-
-.topbar-settings:focus,
-.topbar-settings:active {
-  color: var(--sidebar-accent);
-  text-decoration: none;
-  outline: none;
-}
 
 .sidebar {
   position: fixed;
@@ -101,6 +73,10 @@
 .sidebar-logo {
   height: 50px;
   width: auto;
+  background-color: #000000;
+  border-radius: 8px;
+  padding: 6px;
+  object-fit: contain;
 }
 
 .sidebar-section {
