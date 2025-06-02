@@ -3,6 +3,7 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import activitiesRouter from './routes/activities.js';
+import usersRouter from './routes/users.js';
 // import authController from './controllers/authController.js'; TODO: Fix this import
 // const authController = require('./controllers/authController');
 import { googleAuth } from './controllers/authController.js'; // include the .js extension
@@ -38,6 +39,7 @@ mongoose.connect(process.env.MONGO_URI)
 // });
 
 app.use('/api/activities', activitiesRouter);
+app.use('/api/users', usersRouter);
 
 app.post('/api/addParticipant', async (req, res) => {
   const userID = req.body.userId
