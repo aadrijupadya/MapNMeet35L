@@ -10,7 +10,6 @@ export default function Profile({ user }) {
   const [friends, setFriends] = useState([])
   const [activeTab, setActiveTab] = useState('created')
   const [locationNames, setLocationNames] = useState({})
-  const [profilePic, setProfilePic] = useState(null)
   const [showCustomizeModal, setShowCustomizeModal] = useState(false)
   const [profileData, setProfileData] = useState({
     bio: user?.bio || '',
@@ -108,14 +107,6 @@ export default function Profile({ user }) {
     })
   }
 
-  const handleProfilePicChange = (e) => {
-    const file = e.target.files[0]
-    if (file) {
-      const imageUrl = URL.createObjectURL(file)
-      setProfilePic(imageUrl)
-    }
-  }
-
   const handleProfileUpdate = async (e) => {
     e.preventDefault()
     try {
@@ -159,22 +150,12 @@ export default function Profile({ user }) {
       <div className="profile-header">
         <div className="profile-avatar-container">
           <div className="profile-avatar">
-            {profilePic ? (
-              <img src={profilePic} alt="Profile" className="profile-img" />
+            {user.image ? (
+              <img src={user.image} alt="Profile" className="profile-img" />
             ) : (
               <span>{user.name ? user.name[0].toUpperCase() : 'U'}</span>
             )}
           </div>
-          <label htmlFor="profilePicUpload" className="upload-overlay">
-            +
-          </label>
-          <input
-            type="file"
-            accept="image/*"
-            id="profilePicUpload"
-            onChange={handleProfilePicChange}
-            className="upload-input"
-          />
         </div>
         <div className="profile-info">
           <h1>{user.name || 'Anonymous User'}</h1>

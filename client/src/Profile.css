@@ -18,7 +18,7 @@
   border: 1px solid var(--color-border);
 }
 
-/* Avatar & upload */
+/* Avatar */
 .profile-avatar-container {
   position: relative;
   width: 100px;
@@ -48,33 +48,10 @@
   border-radius: 50%;
 }
 
-.upload-input {
-  display: none;
-}
-
+/* Remove upload overlay styles */
+.upload-input,
 .upload-overlay {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  transform: translate(50%, 50%);
-  background: var(--color-accent);
-  color: #000;
-  font-size: 1.2rem;
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  border: 2px solid var(--color-bg-light);
-  cursor: pointer;
-  z-index: 10;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.upload-overlay:hover {
-  background: #fff;
-  color: var(--color-accent);
+    display: none;
 }
 
 /* Profile text */
