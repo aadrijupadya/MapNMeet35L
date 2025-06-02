@@ -14,16 +14,24 @@ import ThemeToggle from './ThemeToggle';
 
 function App() {
   const [user, setUser] = useState();
+  const [isLightMode, setIsLightMode] = useState(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      return savedTheme === 'light';
+    }
+    return window.matchMedia('(prefers-color-scheme: light)').matches;
+  });
 
   // Initialize theme from localStorage
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'light') {
+    if (isLightMode) {
       document.documentElement.classList.add('light-theme');
+      document.documentElement.classList.remove('dark-theme');
     } else {
       document.documentElement.classList.remove('light-theme');
+      document.documentElement.classList.add('dark-theme');
     }
-  }, []);
+  }, [isLightMode]);
 
   useEffect(() => {
     const checkSession = async () => {
@@ -53,12 +61,12 @@ function App() {
 
   return (
     <Router>
-      <Layout user={user} updateUser={updateUser} />
+      <Layout user={user} updateUser={updateUser} isLightMode={isLightMode} setIsLightMode={setIsLightMode} />
     </Router>
   );
 }
 
-function Layout({ user, updateUser }) {
+function Layout({ user, updateUser, isLightMode, setIsLightMode }) {
   const location = useLocation();
 
   // Show NavBar if not on the home page, or if on the home page and user is logged in
@@ -67,7 +75,7 @@ function Layout({ user, updateUser }) {
   return (
     <>
       {showNavBar && <NavBar />}
-      <ThemeToggle />
+      <ThemeToggle isLightMode={isLightMode} setIsLightMode={setIsLightMode} />
       <Routes>
         {user && (
           <>
@@ -82,7 +90,7 @@ function Layout({ user, updateUser }) {
             <Route path="/about" element={<About />} />
             <Route path="/create-activity" element={<CreateActivity userId={user._id} />} />
             <Route path="/map" element={<Map />} />
-            <Route path="/activities" element={<Activities user={user} userId={user._id} />} />
+            <Route path="/activities" element={<Activities user={user} userId={user._id} isLightMode={isLightMode} />} />
             <Route path="/profile" element={<Profile user={user} />} />
             <Route path="/profile/:userId" element={<UserProfile />} />
           </>
