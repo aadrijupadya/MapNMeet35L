@@ -28,7 +28,7 @@ function App() {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const response = await fetch('http://localhost:8000/api/auth/validate', {
+        const response = await fetch('http://localhost:8000/api/auth/validate?refresh=true', {
           method: 'GET',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },

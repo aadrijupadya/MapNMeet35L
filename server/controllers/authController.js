@@ -28,10 +28,14 @@ const createSendToken = (user, statusCode, res) => {
         expires: new Date(Date.now() + +process.env.JWT_COOKIE_EXPIRES_IN),
         httpOnly: true,
         path: '/',
-        sameSite: 'lax', // This is more permissive for development
-        secure: process.env.NODE_ENV === 'production',
-        domain: process.env.NODE_ENV === 'production' ? process.env.DOMAIN : 'localhost'
+        // sameSite: "none",
+        secure: false,
     };
+
+    if (process.env.NODE_ENV === 'production') {
+        cookieOptions.secure = true;
+        cookieOptions.sameSite = 'none';
+    }
 
     user.password = undefined;
 
@@ -107,38 +111,35 @@ export const googleAuth = catchAsync(async (req, res, next) => {
 
 
 export const validateSession = async (req, res, next) => {
-    try {
-        console.log("Validating session...");
-        console.log("Cookies received:", req.cookies);
-        
-        const token = req.cookies.jwt;
-        if (!token) {
-            console.log("No JWT cookie found");
-            return res.status(401).json({ message: 'Not logged in' });
-        }
-
-        console.log("JWT token found, verifying...");
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        console.log("Decoded token:", decoded);
-
-        const user = await User.findById(decoded.id);
-        if (!user) {
-            console.log("User not found for ID:", decoded.id);
-            return res.status(401).json({ message: 'User not found' });
-        }
-
-        console.log("User found:", user._id);
-        req.user = user;
-
-        // If this is middleware (has next), call next()
-        if (next) {
-            next();
-        } else {
-            // If this is an endpoint, send response
-            res.status(200).json({ user });
-        }
-    } catch (error) {
-        console.error("Session validation error:", error);
-        return res.status(401).json({ message: 'Invalid or expired session' });
+    console.log("Validating session...");
+    console.log("Cookies received:", req.cookies);
+    
+    const token = req.cookies.jwt;
+    if (!token) {
+        console.log("No JWT cookie found");
+        return res.status(401).json({ message: 'Not logged in' });
     }
+
+    console.log("JWT token found, verifying...");
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log("Decoded token:", decoded);
+
+    const user = await User.findById(decoded.id);
+    if (!user) {
+        console.log("User not found for ID:", decoded.id);
+        return res.status(401).json({ message: 'User not found' });
+    }
+
+    console.log("User found:", user._id);
+    req.user = user;
+
+    console.log("next: ", next)
+
+    if (next && !req.query.refresh) {
+        next()
+    } else {
+        res.status(200).json({ user });
+    }
+
+
 };

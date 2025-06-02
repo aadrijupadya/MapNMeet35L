@@ -80,7 +80,7 @@
 .notifications {
   position: absolute;
   top: 1rem;
-  right: -35rem;
+  right: 1rem;
   z-index: 10;
 }
 

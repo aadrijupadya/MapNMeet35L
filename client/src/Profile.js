@@ -64,7 +64,7 @@ export default function Profile({ user }) {
       setNotificationsError(null)
       try {
         console.log("Making request to notifications endpoint...");
-        const response = await fetch('http://localhost:8000/api/notifications', {
+        const response = await fetch('http://localhost:8000/api/notifications?page=1&limit=10', {
           method: 'GET',
           credentials: 'include', // Important: Send cookies for session validation
           headers: {
