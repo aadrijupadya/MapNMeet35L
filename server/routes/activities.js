@@ -1,6 +1,7 @@
 import express from 'express';
 import Activity from '../models/Activity.js';
 import User from '../models/UserModel.js';
+import Notification from '../models/notification.js';
 
 const router = express.Router();
 
@@ -44,7 +45,7 @@ router.post('/', async (req, res) => {
 
 router.get('/', async (req, res) => {
   try {
-    const activities = await Activity.find()
+    const activities = await Activity.find({ cancelled: { $ne: true } })
       .populate('joinees', 'name contact')
       .populate({
         path: 'createdBy',
@@ -60,7 +61,10 @@ router.get('/', async (req, res) => {
 // Get activities created by a specific user
 router.get('/user/:userId', async (req, res) => {
   try {
-    const activities = await Activity.find({ createdBy: req.params.userId })
+    const activities = await Activity.find({ 
+      createdBy: req.params.userId,
+      cancelled: { $ne: true }
+    })
       .populate('joinees', 'name contact')
       .populate({
         path: 'createdBy',
@@ -76,7 +80,10 @@ router.get('/user/:userId', async (req, res) => {
 // Get activities that a user has RSVP'd to
 router.get('/rsvpd/:userId', async (req, res) => {
   try {
-    const activities = await Activity.find({ joinees: req.params.userId })
+    const activities = await Activity.find({ 
+      joinees: req.params.userId,
+      cancelled: { $ne: true }
+    })
       .populate('joinees', 'name contact')
       .populate({
         path: 'createdBy',
@@ -89,7 +96,7 @@ router.get('/rsvpd/:userId', async (req, res) => {
   }
 });
 
-// Delete an activity
+// Cancel an activity (soft delete)
 router.delete('/:activityId', async (req, res) => {
   try {
     // Check if user is authenticated
@@ -98,7 +105,8 @@ router.delete('/:activityId', async (req, res) => {
     }
 
     const activity = await Activity.findById(req.params.activityId)
-      .populate('createdBy', 'name email');
+      .populate('createdBy', 'name email')
+      .populate('joinees', '_id name'); // Added _id to preserve the ID after population
 
     if (!activity) {
       return res.status(404).json({ error: 'Activity not found' });
@@ -109,19 +117,43 @@ router.delete('/:activityId', async (req, res) => {
       return res.status(403).json({ error: 'Not authorized to delete this activity' });
     }
 
-    // Remove the activity from all users' activities arrays
-    await User.updateMany(
-      { activities: req.params.activityId },
-      { $pull: { activities: req.params.activityId } }
-    );
+    // Soft delete the activity
+    activity.cancelled = true;
+    activity.cancelledAt = new Date();
+    await activity.save();
 
-    // Delete the activity
-    await Activity.findByIdAndDelete(req.params.activityId);
+    // Create cancellation notifications for all participants
+    const notifications = activity.joinees.map(joinee => ({
+      userId: joinee._id,
+      type: 'activity_cancelled',
+      activityId: activity._id,
+      message: `The activity "${activity.title}" has been cancelled by the organizer`
+    }));
 
-    res.json({ message: 'Activity deleted successfully' });
+    if (notifications.length > 0) {
+      await Notification.insertMany(notifications);
+    }
+
+    res.json({ message: 'Activity cancelled successfully' });
   } catch (err) {
-    console.error('Error deleting activity:', err);
-    res.status(500).json({ error: 'Failed to delete activity' });
+    console.error('Error cancelling activity:', err);
+    res.status(500).json({ error: 'Failed to cancel activity' });
+  }
+});
+
+// Get all activities (including cancelled ones) - for admin purposes if needed
+router.get('/all', async (req, res) => {
+  try {
+    const activities = await Activity.find()
+      .populate('joinees', 'name contact')
+      .populate({
+        path: 'createdBy',  // Specifies which field to populate (createdBy reference)
+        select: 'name email', // Only include name and email fields from the User document
+        model: 'User' // Explicitly states which model to use for population
+      });
+    res.json(activities);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch activities' });
   }
 });
 
