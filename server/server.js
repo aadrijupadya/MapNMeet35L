@@ -3,6 +3,7 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import activitiesRouter from './routes/activities.js';
+import notificationsRouter from './routes/notifications.js';
 // import authController from './controllers/authController.js'; TODO: Fix this import
 // const authController = require('./controllers/authController');
 import { googleAuth } from './controllers/authController.js'; // include the .js extension
@@ -11,6 +12,7 @@ import { validateSession } from './controllers/authController.js';
 import cookieParser from 'cookie-parser';
 import Activity from './models/Activity.js';
 import User from "./models/UserModel.js"
+import Notification from './models/notification.js';
 
 dotenv.config();
 
@@ -38,6 +40,7 @@ mongoose.connect(process.env.MONGO_URI)
 // });
 
 app.use('/api/activities', activitiesRouter);
+app.use('/api/notifications', notificationsRouter);
 
 app.post('/api/addParticipant', async (req, res) => {
   const userID = req.body.userId
@@ -51,7 +54,7 @@ app.post('/api/addParticipant', async (req, res) => {
 
   try {
     // Fetch the activity to check joinees and participant count
-    const activity = await Activity.findById(activityID);
+    const activity = await Activity.findById(activityID).populate('createdBy', 'name');
 
     if (!activity) {
       console.log("ACTIVITY_NOT_FOUND");
@@ -101,6 +104,17 @@ app.post('/api/addParticipant', async (req, res) => {
         { $addToSet: { activities: activityID } },
         { new: true }
       );
+
+      // Create notification for activity creator
+      if (activity.createdBy._id.toString() !== userID) {
+        const notification = new Notification({
+          userId: activity.createdBy._id,
+          type: 'new_participant',
+          activityId: activityID,
+          message: `${user.name} joined your activity "${activity.title}"`
+        });
+        await notification.save();
+      }
 
       console.log("Successfully added user to activity");
     }
@@ -173,7 +187,7 @@ app.get('/api/users/:userId/friends', async (req, res) => {
   }
 });
 
-// Add friend to user's friends list
+// Add friend (follow user)
 app.post('/api/users/:userId/friends', async (req, res) => {
   try {
     const { friendId } = req.body;
@@ -201,6 +215,15 @@ app.post('/api/users/:userId/friends', async (req, res) => {
     // Add friend to user's friends array
     user.friends.push(friendId);
     await user.save();
+
+    // Create notification for the person being followed
+    const notification = new Notification({
+      userId: friendId,
+      type: 'new_follower',
+      followerId: user._id,
+      message: `${user.name} started following you`
+    });
+    await notification.save();
 
     const updatedUser = await User.findById(req.params.userId)
       .populate('friends', 'name email contact image');

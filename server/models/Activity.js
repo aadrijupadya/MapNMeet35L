@@ -22,7 +22,14 @@ const ActivitySchema = new mongoose.Schema({
       ref: 'User',
     },
   ],
-  
+  cancelled: {
+    type: Boolean,
+    default: false
+  },
+  cancelledAt: {
+    type: Date,
+    default: null
+  },
   createdAt: { 
     type: Date, 
     default: Date.now,
@@ -41,7 +48,6 @@ const ActivitySchema = new mongoose.Schema({
     },
     expires: 0 // expire exactly at `expiresAt`
   },
-  
 });
 
 export default mongoose.model('Activity', ActivitySchema);
