@@ -26,10 +26,7 @@ export default function ActivityCard({ event }) {
   return (
     <div className="event-card">
       <h3>{event.title}</h3>
-      <p className="event-date">{formatDate(event.time)}</p>
-      {event.endTime && (
-        <p className="event-date">Ends: {formatDate(event.endTime)}</p>
-      )}
+      <p className="event-date">{formatDate(event.time)} - {formatDate(event.endTime)}</p>
       {event.locationName ? (
         <p className="event-location">{event.locationName}</p>
       ) : (

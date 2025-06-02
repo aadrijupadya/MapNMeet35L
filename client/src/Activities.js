@@ -786,6 +786,7 @@ export default function Activities(props) {
                                 </span>
                             </div>
                             <div className="event-title">{event.title}</div>
+                            <div className="event-time" data-emoji="⏰">{formatDate(event.time)} - {formatDate(event.endTime)}</div>
                             <div className="event-location" data-emoji="📍">{
                                 event.location ? (() => {
                                     try {
@@ -799,7 +800,8 @@ export default function Activities(props) {
                                     }
                                 })() : 'Location not available'
                             }</div>
-                            <div className="event-participants" data-emoji="👥">{event.participantCount ? `${event.participantCount} participants` : 'No participants set'}</div>
+                            <div className="event-participants" data-emoji="👥">{event.joinees?.length || 0} / {event.participantCount || 'unlimited'} participants
+                            </div>
                             <div className="event-joinees">
                                 {event.joinees && event.joinees.length > 0 ? (
                                     <ul>
@@ -831,7 +833,6 @@ export default function Activities(props) {
                                     <div className="no-joinees">No participants yet</div>
                                 )}
                             </div>
-                            <div className="event-time" data-emoji="⏰">{formatDate(event.time)}</div>
                             <div className="event-actions">
                                 {props.userId !== event.createdBy?._id ? (
                                     <button
