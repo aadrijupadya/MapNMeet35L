@@ -16,56 +16,9 @@ export default function Profile({ user }) {
     instagram: user?.instagram || ''
   })
   const [updateStatus, setUpdateStatus] = useState({ message: '', type: '' })
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      text: "Antonio Quintero started following you",
-      type: "follow",
-      timestamp: new Date().toISOString()
-    },
-    {
-      id: 2,
-      text: "Sarah Johnson joined your event 'Basketball at Wooden'",
-      type: "event_join",
-      timestamp: new Date(Date.now() - 3600000).toISOString() // 1 hour ago
-    },
-    {
-      id: 3,
-      text: "Michael Chen commented on your event 'Study Group at Powell'",
-      type: "comment",
-      timestamp: new Date(Date.now() - 7200000).toISOString() // 2 hours ago
-    },
-    {
-      id: 4,
-      text: "Emily Davis started following you",
-      type: "follow",
-      timestamp: new Date(Date.now() - 10800000).toISOString() // 3 hours ago
-    },
-    {
-      id: 5,
-      text: "Your event 'Soccer Practice' has reached 10 participants!",
-      type: "milestone",
-      timestamp: new Date(Date.now() - 14400000).toISOString() // 4 hours ago
-    },
-    {
-      id: 6,
-      text: "James Wilson requested to join your event 'Movie Night'",
-      type: "join_request",
-      timestamp: new Date(Date.now() - 18000000).toISOString() // 5 hours ago
-    },
-    {
-      id: 7,
-      text: "Lisa Brown started following you",
-      type: "follow",
-      timestamp: new Date(Date.now() - 21600000).toISOString() // 6 hours ago
-    },
-    {
-      id: 8,
-      text: "Your event 'Hiking Trip' is starting in 1 hour",
-      type: "reminder",
-      timestamp: new Date(Date.now() - 25200000).toISOString() // 7 hours ago
-    }
-  ])
+  const [notifications, setNotifications] = useState([])
+  const [notificationsLoading, setNotificationsLoading] = useState(true)
+  const [notificationsError, setNotificationsError] = useState(null)
 
   const navigate = useNavigate()
   const notifRef = useRef(null)
@@ -102,18 +55,57 @@ export default function Profile({ user }) {
 
     // Fetch notifications
     const fetchNotifications = async () => {
+      setNotificationsLoading(true)
+      setNotificationsError(null)
       try {
-        const res = await fetch(
-          `http://localhost:8000/api/users/${user._id}/notifications`
-        )
-        if (res.ok) {
-          const data = await res.json()
-          setNotifications(data.notifications || [])
+        const response = await fetch('http://localhost:8000/api/notifications?page=1&limit=10', {
+          method: 'GET',
+          credentials: 'include', // Important: Send cookies for session validation
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        if (!response.ok) {
+          throw new Error('Failed to fetch notifications')
         }
-      } catch (err) {
-        console.error('Error fetching notifications:', err)
+        const data = await response.json()
+        // Transform the notifications to match our frontend format
+        const transformedNotifications = data.notifications.map(n => ({
+          id: n._id,
+          text: n.message || generateNotificationText(n),
+          type: n.type,
+          timestamp: n.createdAt,
+          activityId: n.activityId?._id,
+          activityTitle: n.activityId?.title,
+          followerId: n.followerId?._id,
+          followerName: n.followerId?.name,
+          followerImage: n.followerId?.image
+        }))
+        setNotifications(transformedNotifications)
+      } catch (error) {
+        console.error('Error fetching notifications:', error)
+        setNotificationsError('Failed to load notifications')
+      } finally {
+        setNotificationsLoading(false)
       }
     }
+
+    // Helper function to generate notification text based on type and data
+    const generateNotificationText = (notification) => {
+      switch (notification.type) {
+        case 'follow':
+          return `${notification.followerId?.name || 'Someone'} started following you`
+        case 'event_join':
+          return `${notification.followerId?.name || 'Someone'} joined your event '${notification.activityId?.title || 'Unknown event'}'`
+        case 'comment':
+          return `${notification.followerId?.name || 'Someone'} commented on your event '${notification.activityId?.title || 'Unknown event'}'`
+        case 'join_request':
+          return `${notification.followerId?.name || 'Someone'} requested to join your event '${notification.activityId?.title || 'Unknown event'}'`
+        default:
+          return notification.message || 'New notification'
+      }
+    }
+
     fetchNotifications()
   }, [user, navigate])
 
@@ -194,13 +186,59 @@ export default function Profile({ user }) {
   const currentItems =
     activeTab === 'created' ? userEvents : activeTab === 'rsvpd' ? rsvpdEvents : friends
 
-  const handleDeleteNotification = (notificationId) => {
-    setNotifications(prev => prev.filter(n => n.id !== notificationId));
-  };
+  const handleDeleteNotification = async (notificationId) => {
+    try {
+      const response = await fetch(`http://localhost:8000/api/notifications/${notificationId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      if (!response.ok) {
+        throw new Error('Failed to delete notification')
+      }
+      setNotifications(prev => prev.filter(n => n.id !== notificationId))
+    } catch (error) {
+      console.error('Error deleting notification:', error)
+    }
+  }
 
-  const handleClearAllNotifications = () => {
-    setNotifications([]);
-  };
+  const handleClearAllNotifications = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/notifications/mass-delete', {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ filters: {} }) // No additional filters
+      })
+      if (!response.ok) {
+        throw new Error('Failed to clear notifications')
+      }
+      setNotifications([])
+    } catch (error) {
+      console.error('Error clearing notifications:', error)
+    }
+  }
+
+  const handleNotificationRead = async (notificationId) => {
+    try {
+      const response = await fetch(`http://localhost:8000/api/notifications/${notificationId}/read`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      if (!response.ok) {
+        throw new Error('Failed to mark notification as read')
+      }
+    } catch (error) {
+      console.error('Error marking notification as read:', error)
+    }
+  }
 
   return (
     <div className="profile-page">
@@ -237,6 +275,9 @@ export default function Profile({ user }) {
             items={notifications} 
             onDeleteNotification={handleDeleteNotification}
             onClearAll={handleClearAllNotifications}
+            loading={notificationsLoading}
+            error={notificationsError}
+            onNotificationRead={handleNotificationRead}
           />
         </div>
       </div>
