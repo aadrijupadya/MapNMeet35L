@@ -235,7 +235,7 @@
     text-decoration: none;
     box-shadow: var(--shadow);
     transition: background-color 0.2s ease, transform 0.2s ease;
-    z-index: 1001;
+    z-index: 3200;
 }
 
 .create-button:hover {
