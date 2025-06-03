@@ -849,9 +849,13 @@ export default function Activities(props) {
                         >
                             <div className="event-creator">
                                 <span className="creator-label">Created by:</span>
-                                <span className="creator-name">
-                                    {event.createdBy?.name || event.creator || 'Anonymous'}
-                                </span>
+                                {event.createdBy?._id ? (
+                                    <Link to={`/profile/${event.createdBy._id}`} className="creator-name">
+                                        {event.createdBy.name}
+                                    </Link>
+                                ) : (
+                                    <span className="creator-name">{event.creator || 'Anonymous'}</span>
+                                )}
                                 <span className="creator-email">
                                     ({event.createdBy?.email || event.contact || 'No email'})
                                 </span>
@@ -879,7 +883,13 @@ export default function Activities(props) {
                                         {event.joinees.map((joinee, index) => (
                                             <li key={index}>
                                                 <div className="joinee-info">
-                                                    <span className="joinee-name">{joinee.name}</span>
+                                                    <span className="joinee-name">
+                                                        {joinee._id && (
+                                                            <Link to={`/profile/${joinee._id}`} className="joinee-name-link" onClick={e => e.stopPropagation()}>
+                                                                {joinee.name}
+                                                            </Link>
+                                                        )}
+                                                    </span>
                                                     <div className="joinee-actions">
                                                         {renderFollowButton(joinee)}
                                                         {props.userId === event.createdBy?._id && (
@@ -957,9 +967,13 @@ export default function Activities(props) {
                                 <h2>{selectedEvent.title}</h2>
                                 <div className="event-creator">
                                     <span className="creator-label">Created by:</span>
-                                    <span className="creator-name">
-                                        {selectedEvent.createdBy?.name || selectedEvent.creator || 'Anonymous'}
-                                    </span>
+                                    {selectedEvent.createdBy?._id ? (
+                                        <Link to={`/profile/${selectedEvent.createdBy._id}`} className="creator-name">
+                                            {selectedEvent.createdBy.name}
+                                        </Link>
+                                    ) : (
+                                        <span className="creator-name">{selectedEvent.creator || 'Anonymous'}</span>
+                                    )}
                                     <span className="creator-email">
                                         ({selectedEvent.createdBy?.email || selectedEvent.contact || 'No email'})
                                     </span>
@@ -1011,7 +1025,13 @@ export default function Activities(props) {
                                                 {selectedEvent.joinees.map((joinee, index) => (
                                                     <li key={index} className="joinee-item">
                                                         <div className="joinee-info">
-                                                            <span className="joinee-name">{joinee.name}</span>
+                                                            <span className="joinee-name">
+                                                                {joinee._id && (
+                                                                    <Link to={`/profile/${joinee._id}`} className="joinee-name-link" onClick={e => e.stopPropagation()}>
+                                                                        {joinee.name}
+                                                                    </Link>
+                                                                )}
+                                                            </span>
                                                             <div className="joinee-actions">
                                                                 {renderFollowButton(joinee)}
                                                                 {props.userId === selectedEvent.createdBy?._id && (

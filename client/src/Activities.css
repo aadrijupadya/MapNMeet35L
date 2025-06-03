@@ -205,9 +205,18 @@
     margin-right: 4px;
 }
 
-.creator-name {
-    font-weight: 500;
-    color: var(--color-text);
+.creator-name,
+.joinee-name-link {
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.2s;
+}
+
+.creator-name:hover,
+.joinee-name-link:hover {
+    color: var(--color-accent, #adf);
+    text-decoration: underline;
 }
 
 .creator-email {
