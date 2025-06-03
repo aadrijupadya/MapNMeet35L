@@ -4,6 +4,8 @@ import './Profile.css'
 import Notifications from './Notifications'
 import { getAddressFromCoords } from './utils/geocoding'
 import ActivityCard from './components/ActivityCard'
+import ProfileAvatar from './components/ProfileAvatar'
+import './components/ProfileAvatar.css'
 
 export default function Profile({ user }) {
   const [userEvents, setUserEvents] = useState([])
@@ -282,13 +284,7 @@ export default function Profile({ user }) {
     <div className="profile-page">
       <div className="profile-header">
         <div className="profile-avatar-container">
-          <div className="profile-avatar">
-            {user.image ? (
-              <img src={user.image} alt="Profile" className="profile-img" />
-            ) : (
-              <span>{user.name ? user.name[0].toUpperCase() : 'U'}</span>
-            )}
-          </div>
+          <ProfileAvatar user={user} size="large" />
         </div>
         <div className="profile-info">
           <h1>{user.name || 'Anonymous User'}</h1>
@@ -409,11 +405,7 @@ export default function Profile({ user }) {
                   className="friend-card"
                 >
                   <div className="friend-avatar">
-                    {person.image ? (
-                      <img src={person.image} alt={person.name} />
-                    ) : (
-                      <span>{person.name[0].toUpperCase()}</span>
-                    )}
+                    <ProfileAvatar user={person} size="small" />
                   </div>
                   <div className="friend-info">
                     <h3>{person.name}</h3>

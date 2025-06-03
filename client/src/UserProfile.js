@@ -3,6 +3,8 @@ import { useParams, Link } from 'react-router-dom';
 import './UserProfile.css';
 import { getAddressFromCoords } from './utils/geocoding';
 import ActivityCard from './components/ActivityCard';
+import ProfileAvatar from './components/ProfileAvatar';
+import './components/ProfileAvatar.css';
 
 export default function UserProfile() {
   const { userId } = useParams();
@@ -114,13 +116,7 @@ export default function UserProfile() {
     <div className="profile-page">
       <div className="profile-header">
         <div className="profile-avatar-container">
-          <div className="profile-avatar">
-            {profileUser.image ? (
-              <img src={profileUser.image} alt="Profile" className="profile-img" />
-            ) : (
-              <span>{profileUser.name ? profileUser.name[0].toUpperCase() : 'U'}</span>
-            )}
-          </div>
+          <ProfileAvatar user={profileUser} size="large" />
         </div>
         <div className="profile-info">
           <h1>{profileUser.name || 'Anonymous User'}</h1>

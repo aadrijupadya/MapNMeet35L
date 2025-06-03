@@ -1,0 +1,50 @@
+/* Base avatar styles - makes it look like a nice circle with a subtle shadow */
+.profile-avatar {
+  background: var(--color-accent);  /* Uses our app's accent color for the fallback */
+  color: #000;                      /* Black text for good contrast */
+  border-radius: 50%;               /* Makes it perfectly circular */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  box-shadow: var(--shadow);        /* Adds depth with our app's shadow style */
+  overflow: hidden;                 /* Keeps the image inside the circle */
+  position: relative;
+}
+
+/* Make sure the profile image fills the circle nicely */
+.profile-avatar .profile-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;               /* Maintains aspect ratio while filling space */
+  border-radius: 50%;              /* Keeps the image circular */
+}
+
+/* Different sizes for different contexts */
+.profile-avatar.w-10 {             /* Small - for friend lists, comments */
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.profile-avatar.w-16 {             /* Medium - default size */
+  width: 4rem;
+  height: 4rem;
+}
+
+.profile-avatar.w-24 {             /* Large - for profile headers */
+  width: 6rem;
+  height: 6rem;
+}
+
+/* Text sizes that match the avatar sizes */
+.profile-avatar.text-lg {          /* Small text for small avatars */
+  font-size: 1.25rem;
+}
+
+.profile-avatar.text-2xl {         /* Medium text for medium avatars */
+  font-size: 1.5rem;
+}
+
+.profile-avatar.text-3xl {         /* Large text for large avatars */
+  font-size: 1.875rem;
+} 

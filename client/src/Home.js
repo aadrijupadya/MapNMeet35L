@@ -5,6 +5,8 @@ import uclaBanner from './assets/Banner.png'; // your stitched UCLA image
 import { useNavigate } from 'react-router-dom';
 import { useGoogleLogin, googleLogout } from "@react-oauth/google";
 import axios from 'axios';
+import ProfileAvatar from './components/ProfileAvatar';
+import './components/ProfileAvatar.css';
 
 function Home(props) {
   const [showAbout, setShowAbout] = useState(false);
@@ -80,21 +82,12 @@ function Home(props) {
         </div>
         <div className="banner-overlay">
           <div>
-                {props.user && props.user.image && (
-                <img
-                  src={props.user.image}
-                  alt="User Profile"
-                  style={{
-                  width: "100px",
-                  height: "100px",
-                  borderRadius: "50%",
-                  margin: "10px",
-                  }}
-                />
-                )}
-                <p>{props.user && props.user.name}</p>
-                <p>{props.user && props.user.email}</p>
-              </div>
+            {props.user && (
+              <ProfileAvatar user={props.user} size="large" />
+            )}
+            <p>{props.user && props.user.name}</p>
+            <p>{props.user && props.user.email}</p>
+          </div>
         </div>
 
         {/* Buttons Below the Mission Statement */}
