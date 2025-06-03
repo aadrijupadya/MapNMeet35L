@@ -6,6 +6,7 @@ import { getAddressFromCoords } from './utils/geocoding';
 import CreateActivity from './CreateActivity';
 import EditActivity from './EditActivity';
 import { FaUserPlus, FaUserCheck } from 'react-icons/fa';
+import ReactDOMServer from 'react-dom/server';
 
 const loadGoogleMapsScript = (apiKey) => {
     if (window.google?.maps) return Promise.resolve();
@@ -56,6 +57,9 @@ export default function Activities(props) {
     const [editActivity, setEditActivity] = useState(null);
     const [followingStatus, setFollowingStatus] = useState({});
     const searchInputRef = useRef(null);
+    const [popupInfo, setPopupInfo] = useState(null);
+    const [popupHovered, setPopupHovered] = useState(false);
+    let popupHideTimeout = useRef();
 
     useEffect(() => {
         console.log('Activities component props:', props);
@@ -336,29 +340,27 @@ export default function Activities(props) {
                 }
             });
 
-            const infoWindow = new window.google.maps.InfoWindow({
-              content: `
-                <div style="
-                  font-size: 12px;
-                  font-weight: bold;
-                  padding: 4px 8px;
-                  max-width: 150px;
-                  white-space: nowrap;
-                  background-color: blue;
-                  color: white;
-                  border-radius: 6px;
-                ">
-                  ${event.title}
-                </div>
-              `
+            marker.addListener('mouseover', (e) => {
+                if (!map.current) return;
+                const projection = map.current.getProjection();
+                if (!projection) return;
+                const latLng = marker.getPosition();
+                const worldCoordinate = projection.fromLatLngToPoint(latLng);
+                const mapDiv = map.current.getDiv();
+                const bounds = map.current.getBounds();
+                const topRight = projection.fromLatLngToPoint(bounds.getNorthEast());
+                const bottomLeft = projection.fromLatLngToPoint(bounds.getSouthWest());
+                const mapWidth = mapDiv.offsetWidth;
+                const mapHeight = mapDiv.offsetHeight;
+                const x = (worldCoordinate.x - bottomLeft.x) / (topRight.x - bottomLeft.x) * mapWidth;
+                const y = (worldCoordinate.y - topRight.y) / (bottomLeft.y - topRight.y) * mapHeight;
+                setPopupInfo({ event, x, y });
+                clearTimeout(popupHideTimeout.current);
             });
-            
-            marker.addListener('mouseover', () => {
-                infoWindow.open(map.current, marker);
-            });
-
             marker.addListener('mouseout', () => {
-                infoWindow.close();
+                popupHideTimeout.current = setTimeout(() => {
+                    if (!popupHovered) setPopupInfo(null);
+                }, 100);
             });
         });
     };
@@ -754,8 +756,11 @@ export default function Activities(props) {
                 borderRadius: '4px',
                 display: 'none'
             }} />
-            <div className="map-container">
+            <div className="map-container" style={{ position: 'relative' }}>
                 <div ref={mapRef} style={{ height: '100%', width: '100%' }} />
+                {popupInfo && (
+                    <MapPopup event={popupInfo.event} x={popupInfo.x} y={popupInfo.y} onClose={() => setPopupInfo(null)} setPopupHovered={setPopupHovered} />
+                )}
             </div>
             <div className="events-container">
                 <div className="filter-controls">
@@ -1140,6 +1145,46 @@ export default function Activities(props) {
                     markerRef={markerRef}
                 />
             )}
+        </div>
+    );
+}
+
+function MapPopup({ event, x, y, onClose, setPopupHovered }) {
+    if (!event) return null;
+    const description = event.description ? (event.description.length > 40 ? event.description.slice(0, 40) + '…' : event.description) : null;
+    return (
+        <div
+            style={{
+                position: 'absolute',
+                left: x,
+                top: y - 48,
+                transform: 'translate(-50%, -100%)',
+                background: '#fff',
+                color: '#222',
+                borderRadius: '14px',
+                boxShadow: '0 4px 18px rgba(0,0,0,0.18)',
+                padding: '18px 28px 14px 28px',
+                minWidth: 180,
+                maxWidth: 260,
+                fontWeight: 500,
+                fontSize: 15,
+                textAlign: 'center',
+                zIndex: 4000,
+                pointerEvents: 'auto',
+                userSelect: 'none',
+                borderTop: '4px solid #4d94ff',
+            }}
+            onMouseEnter={() => setPopupHovered(true)}
+            onMouseLeave={() => {
+                setPopupHovered(false);
+                setTimeout(onClose, 100);
+            }}
+        >
+            <div style={{ fontWeight: 700, fontSize: 17, marginBottom: 4 }}>{event.title}</div>
+            {description && <div style={{ color: '#888', fontSize: 13, marginBottom: 6 }}>{description}</div>}
+            <div style={{ color: '#4d94ff', fontSize: 13, fontWeight: 600 }}>
+                👥 {event.joinees?.length || 0} / {event.participantCount || 'unlimited'}
+            </div>
         </div>
     );
 }
