@@ -62,9 +62,6 @@ const About = () => {
           <li>
             <strong>Community Driven</strong> - Built by and for the community
           </li>
-          <li>
-            <strong>Always Evolving</strong> - Regular updates and new features based on user feedback
-          </li>
         </ul>
       </section>
     </div>

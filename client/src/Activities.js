@@ -758,8 +758,14 @@ export default function Activities(props) {
             </div>
             <div className="events-container">
                 <div className="filter-controls">
-                    <div className="search-container" onBlur={handleSearchBlur} tabIndex="0">
+                    <div
+                        className="search-container"
+                        onClick={() => document.getElementById('main-search-input')?.focus()}
+                        tabIndex="0"
+                        onBlur={handleSearchBlur}
+                    >
                         <input
+                            id="main-search-input"
                             type="text"
                             placeholder="Search activities..."
                             value={searchText}

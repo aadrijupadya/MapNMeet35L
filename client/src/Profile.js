@@ -194,7 +194,7 @@ export default function Profile({ user }) {
       })
       const data = await response.json()
       if (response.ok) {
-        Object.assign(user, data.user)
+        Object.assign(user, { ...data.user, image: user.image })
         setUpdateStatus({ message: 'Profile updated successfully!', type: 'success' })
         setTimeout(() => {
           setUpdateStatus({ message: '', type: '' })
