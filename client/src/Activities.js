@@ -55,6 +55,7 @@ export default function Activities(props) {
     const [deleteConfirm, setDeleteConfirm] = useState({ show: false, eventId: null });
     const [editActivity, setEditActivity] = useState(null);
     const [followingStatus, setFollowingStatus] = useState({});
+    const searchInputRef = useRef(null);
 
     useEffect(() => {
         console.log('Activities component props:', props);
@@ -760,12 +761,17 @@ export default function Activities(props) {
                 <div className="filter-controls">
                     <div
                         className="search-container"
-                        onClick={() => document.getElementById('main-search-input')?.focus()}
                         tabIndex="0"
+                        onMouseDown={e => {
+                            if (e.target === e.currentTarget) {
+                                searchInputRef.current?.focus();
+                            }
+                        }}
                         onBlur={handleSearchBlur}
                     >
                         <input
                             id="main-search-input"
+                            ref={searchInputRef}
                             type="text"
                             placeholder="Search activities..."
                             value={searchText}
