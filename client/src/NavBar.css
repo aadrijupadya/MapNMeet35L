@@ -10,20 +10,34 @@
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
+  width: max-content;
   height: 64px;
-  display: flex;
-  align-items: flex-start;
-  justify-content: flex-start;
+  background: transparent;
   z-index: 1001;
-  background: var(--sidebar-bg);
-  color: var(--sidebar-text);
+  display: flex;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  padding: 0 24px;
+  margin-top: 16px;
+  pointer-events: none;
+}
+
+/* Prevent any overlay or pseudo-element from blocking clicks */
+.navbar-top::before,
+.navbar-top::after {
+  pointer-events: none;
+}
+
+.logo-toggle,
+.navbar-top button,
+.navbar-btn {
+  pointer-events: auto;
 }
 
 .logo-toggle {
   height: 72px;
   width: 72px;
-  margin: 8px 0 0 16px;
+  margin: 16px 0 12px 16px;
   cursor: pointer;
   transition: transform 0.2s ease;
   background-color: #000000;
@@ -38,6 +52,9 @@
   transform: scale(1.1);
 }
 
+.logo-toggle img {
+  margin-top: -6px;
+}
 
 .sidebar {
   position: fixed;
@@ -121,6 +138,7 @@
   z-index: 1000;
 }
 
-.navbar-top {
-  background: transparent !important;
+/* Move navbar button lower */
+.navbar-top button, .navbar-btn {
+  margin-top: 80px !important;
 }
