@@ -12,6 +12,9 @@ Before you begin, ensure you have the following installed:
 
 ## Setup Instructions
 
+### 0. IMPORTANT: CONNECT TO EDUROAM OR UCLA_WIFI OR UCLA VPN, run into CORS problems otherwise (if you use UCLA_WEB or non UCLA authenticated wifi) This
+is to ensure only UCLA students can use our application, for security purposes. In addition, when signing into the application, use your UCLA email.
+
 ### 1. Clone the Repository
 ```bash
 git clone https://github.com/aadrijupadya/MapNMeet35L.git
@@ -115,7 +118,6 @@ The client will start on http://localhost:3000
 ### Activities
 - GET `/api/activities` - Get all activities
 - POST `/api/activities` - Create new activity
--
 
 ## Troubleshooting
 
@@ -123,6 +125,7 @@ The client will start on http://localhost:3000
 1. **MongoDB Connection Error**
    - Ensure MongoDB is running
    - Check your connection string in server/.env
+   - Make sure Wifi/VPN is properly set up as in step zero.
 
 2. **Google Maps Not Loading**
    - Verify your Google Maps API key in client/.env
@@ -140,5 +143,9 @@ If you encounter any issues not covered here, please:
 4. Check if MongoDB is running
 
 ## Contributing
-This is a course project for CS 35L at UCLA. For any questions or issues, please contact the repository owner.
+This is a course project for CS 35L at UCLA. For any questions or issues, please contact the developers for this project at aadriju01@g.ucla.edu, 
+dtritasavit@g.ucla.edu, akhileshb@g.ucla.edu, antquin36@g.ucla.edu, adraj@g.ucla.edu.
+
+## Note for CS 35L Submission
+For grading purposes, the submission tarball will include the necessary `.env` files with actual values. These files are not included in the git repository for security reasons, but are provided in the submission to allow graders to run the application locally.
 
