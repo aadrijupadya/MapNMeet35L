@@ -37,6 +37,15 @@
   --event-joinees-bg: #f5f5f5;
 }
 
+/* Banner overlay specific styles */
+.light-theme .banner-overlay {
+  text-shadow: none;
+}
+
+.light-theme .banner-overlay p {
+  color: #000000;
+}
+
 /* ======= GLOBAL RESET ======= */
 * {
   margin: 0;

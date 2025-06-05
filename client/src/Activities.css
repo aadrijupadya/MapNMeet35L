@@ -200,6 +200,12 @@
     margin-bottom: 8px;
 }
 
+/* Ensure creator name and email are black in light mode */
+.light-theme .event-creator,
+.light-theme .creator-name {
+    color: #000000 !important;
+}
+
 .creator-label {
     color: var(--color-accent);
     margin-right: 4px;
@@ -207,7 +213,7 @@
 
 .creator-name,
 .joinee-name-link {
-    color: #fff;
+    color: var(--color-text);
     text-decoration: none;
     font-weight: bold;
     transition: color 0.2s;
