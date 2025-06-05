@@ -6,9 +6,7 @@ MapNMeet35L is a web application that helps UCLA students connect and organize a
 
 Before you begin, ensure you have the following installed:
 - [Node.js](https://nodejs.org/) (v14 or higher)
-- [MongoDB](https://www.mongodb.com/try/download/community) (v6 or higher)
-- [Git](https://git-scm.com/downloads)
-- A Google Cloud Platform account (for Maps API and OAuth)
+- [Git](https://git-scm.com/downloads) (If you are cloning or developing )
 - A UCLA email and access to UCLA_WIFI/eduroam/UCLA VPN connection
 
 ## Setup Instructions
@@ -71,38 +69,45 @@ REACT_APP_GOOGLE_CLIENT_ID=your_google_client_id
 
 ### 3. Install Dependencies
 
-#### Server Dependencies
+You must install dependencies in three locations:
+
+1. **Root dependencies** (required for some scripts and shared libraries):
 ```bash
-cd ../server
 npm install
 ```
 
-#### Client Dependencies
+2. **Server dependencies:**
+```bash
+cd server
+npm install
+```
+
+3. **Client dependencies:**
 ```bash
 cd ../client
 npm install
 ```
 
-### 4. Database Setup
-1. Make sure MongoDB is running on your system
-2. The application will automatically create necessary collections when it starts
+### 4. Database Setup (Only if you are using your own .env files (not using the provided tarball) )
+
+1. Make sure MongoDB is running on your system (or that your MongoDB Atlas connection string is correct in your server/.env).
+2. The application will automatically create necessary collections when it starts.
 
 ### 5. Running the Application
 
-#### Start the Server
+#### Start the Server (from the root (MapNMeet35L) directory)
 ```bash
 cd ../server
 node server.js
 ```
-The server will start on http://localhost:8000
+(The server will start on http://localhost:8000.)
 
-#### Start the Client
-In a new terminal:
+#### Start the Client (in a new terminal, from the root (MapNMeet35L) directory)
 ```bash
 cd ../client
 npm start
 ```
-The client will start on http://localhost:3000
+(The client will start on http://localhost:3000.)
 
 ## Features
 - User authentication with Google OAuth
