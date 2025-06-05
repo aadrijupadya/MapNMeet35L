@@ -151,7 +151,6 @@ button:hover, .btn:hover {
 .banner-overlay {
   position: absolute;
   top: 25%;
-  left: 25%;
   width: 50%;
   height: 50%;
   display: flex;
