@@ -60,8 +60,10 @@ export default function Notifications({
   };
 
   const handleClearAll = (e) => {
+    console.log('Clear all button clicked');
     e.stopPropagation();
     if (onClearAll) {
+      console.log('Calling onClearAll prop');
       onClearAll();
     }
     setOpen(false);

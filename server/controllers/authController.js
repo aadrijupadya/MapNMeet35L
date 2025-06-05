@@ -111,8 +111,8 @@ export const googleAuth = catchAsync(async (req, res, next) => {
 
 
 export const validateSession = async (req, res, next) => {
-    console.log("Validating session...");
-    console.log("Cookies received:", req.cookies);
+    // console.log("Validating session...");
+    // console.log("Cookies received:", req.cookies);
     
     const token = req.cookies.jwt;
     if (!token) {
@@ -120,9 +120,9 @@ export const validateSession = async (req, res, next) => {
         return res.status(401).json({ message: 'Not logged in' });
     }
 
-    console.log("JWT token found, verifying...");
+    // console.log("JWT token found, verifying...");
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log("Decoded token:", decoded);
+    // console.log("Decoded token:", decoded);
 
     const user = await User.findById(decoded.id);
     if (!user) {
@@ -133,10 +133,9 @@ export const validateSession = async (req, res, next) => {
     console.log("User found:", user._id);
     req.user = user;
 
-    console.log("next: ", next)
-
     if (next && !req.query.refresh) {
         next()
+        console.log("next: ", next)
     } else {
         res.status(200).json({ user });
     }

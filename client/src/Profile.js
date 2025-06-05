@@ -245,21 +245,32 @@ export default function Profile({ user }) {
   }
 
   const handleClearAllNotifications = async () => {
+    console.log('Attempting to clear all notifications...');
     try {
+      console.log('Making request to clear notifications...');
       const response = await fetch('http://localhost:8000/api/notifications/mass-delete', {
-        method: 'DELETE',
+        method: 'POST',
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ filters: {} }) // No additional filters
+        body: JSON.stringify({
+          filters: {
+            read: false // Only delete unread notifications
+          }
+        })
       })
+      console.log('Clear notifications response:', response);
+      
       if (!response.ok) {
         throw new Error('Failed to clear notifications')
       }
+      const data = await response.json()
+      console.log('Cleared notifications response data:', data)
       setNotifications([])
     } catch (error) {
       console.error('Error clearing notifications:', error)
+      setNotificationsError('Failed to clear notifications')
     }
   }
 

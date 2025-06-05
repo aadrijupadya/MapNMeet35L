@@ -4,6 +4,76 @@ import { validateSession } from '../controllers/authController.js';
 
 const router = express.Router();
 
+// Mass delete notifications (with optional filters)
+router.post('/mass-delete', validateSession, async (req, res) => {
+    console.log('=== MASS DELETE ENDPOINT HIT ===');
+    console.log('Request body:', req.body);
+    console.log('User:', req.user);
+    
+    try {
+        if (!req.body || !req.body.filters) {
+            console.error('Mass delete error: Invalid request body');
+            return res.status(400).json({ message: 'Invalid request body' });
+        }
+
+        const filter = {
+            userId: req.user._id,
+            ...req.body.filters
+        };
+
+        console.log('Mass delete filter:', filter);
+
+        const result = await Notification.deleteMany(filter);
+        console.log('Mass delete result:', result);
+        
+        res.json({
+            message: 'Notifications deleted',
+            deletedCount: result.deletedCount
+        });
+    } catch (error) {
+        console.error('Mass delete error:', error);
+        console.error('Error stack:', error.stack);
+        res.status(500).json({ 
+            message: 'Internal server error',
+            error: error.message 
+        });
+    }
+});
+
+// Get all notifications for a user
+router.get('/', validateSession, async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        const notifications = await Notification.find({ 
+            userId: req.user._id,
+            read: false // Only fetch unread notifications
+        })
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
+            .populate('activityId', 'title')
+            .populate('followerId', 'name image');
+
+        const total = await Notification.countDocuments({ 
+            userId: req.user._id,
+            read: false
+        });
+
+        res.json({
+            notifications,
+            currentPage: page,
+            totalPages: Math.ceil(total / limit),
+            totalNotifications: total
+        });
+    } catch (error) {
+        console.error('Error in GET /api/notifications:', error);
+        res.status(500).json({ message: error.message });
+    }
+});
+
 // Create a new notification
 router.post('/', validateSession, async (req, res) => {
     try {
@@ -22,46 +92,6 @@ router.post('/', validateSession, async (req, res) => {
     }
 });
 
-// Get all notifications for a user
-router.get('/', validateSession, async (req, res) => {
-    try {
-        console.log("GET /api/notifications - User:", req.user._id);
-        
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
-        const skip = (page - 1) * limit;
-
-        const notifications = await Notification.find({ 
-            userId: req.user._id,
-            read: false // Only fetch unread notifications
-        })
-            .sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(limit)
-            .populate('activityId', 'title')
-            .populate('followerId', 'name image'); // Populate follower details
-
-        console.log("Found notifications:", notifications);
-
-        const total = await Notification.countDocuments({ 
-            userId: req.user._id,
-            read: false
-        });
-
-        console.log("Total notifications:", total);
-
-        res.json({
-            notifications,
-            currentPage: page,
-            totalPages: Math.ceil(total / limit),
-            totalNotifications: total
-        });
-    } catch (error) {
-        console.error('Error in GET /api/notifications:', error);
-        res.status(500).json({ message: error.message });
-    }
-});
-
 // Delete a single notification
 router.delete('/:id', validateSession, async (req, res) => {
     try {
@@ -76,25 +106,6 @@ router.delete('/:id', validateSession, async (req, res) => {
 
         await notification.deleteOne();
         res.json({ message: 'Notification deleted' });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-});
-
-// Mass delete notifications (with optional filters)
-router.delete('/mass-delete', validateSession, async (req, res) => {
-    try {
-        const filter = {
-            userId: req.user._id,
-            ...req.body.filters // Additional filters like read status, type, etc.
-        };
-
-        const result = await Notification.deleteMany(filter);
-        
-        res.json({
-            message: 'Notifications deleted',
-            deletedCount: result.deletedCount
-        });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
