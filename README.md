@@ -16,13 +16,16 @@ Before you begin, ensure you have the following installed:
 ### 0. IMPORTANT: CONNECT TO EDUROAM OR UCLA_WIFI OR UCLA VPN, run into CORS problems otherwise (if you use UCLA_WEB or non UCLA authenticated wifi) 
 This is to ensure only UCLA students can use our application, for security purposes. In addition, when signing into the application, use your UCLA email.
 
-### 1. Clone the Repository
+## Note for CS 35L Tarball Submission
+For grading purposes, the submission tarball will include the necessary `.env` files with actual values. These files are not included in the git repository for security reasons, but are provided in the submission to allow graders to run the application locally.
+
+### 1. Clone the Repository (If don't have tarball)
 ```bash
 git clone https://github.com/aadrijupadya/MapNMeet35L.git
 cd MapNMeet35L
 ```
 
-### 2. Environment Setup
+### 2. Environment Setup (Note, this can be ignored if you have tarball with .env files)
 
 #### Server Environment
 1. Navigate to the server directory:
@@ -147,6 +150,5 @@ If you encounter any issues not covered here, please:
 This is a course project for CS 35L at UCLA. For any questions or issues, please contact the developers for this project at aadriju01@g.ucla.edu, 
 dtritasavit@g.ucla.edu, akhileshb@g.ucla.edu, antquin36@g.ucla.edu, adraj@g.ucla.edu.
 
-## Note for CS 35L Submission
-For grading purposes, the submission tarball will include the necessary `.env` files with actual values. These files are not included in the git repository for security reasons, but are provided in the submission to allow graders to run the application locally.
+
 
