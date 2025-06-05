@@ -195,9 +195,57 @@
 }
 
 .event-creator {
-    font-size: 0.9rem;
-    color: var(--color-muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
     margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+
+.creator-label {
+    color: var(--color-accent);
+    margin-right: 4px;
+}
+
+.creator-name,
+.joinee-name-link {
+    color: var(--color-text);
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.2s;
+}
+
+.creator-name:hover,
+.joinee-name-link:hover {
+    color: var(--color-accent);
+    text-decoration: underline;
+}
+
+.creator-email {
+    color: var(--color-muted);
+    margin-right: 8px;
+}
+
+.follow-icon-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 8px;
+    border: 1px solid var(--color-accent);
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--color-accent);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.follow-icon-button:hover {
+    background: var(--color-accent);
+    color: #000;
+}
+
+.follow-icon-button .follow-icon {
+    font-size: 1rem;
 }
 
 /* Ensure creator name and email are black in light mode */

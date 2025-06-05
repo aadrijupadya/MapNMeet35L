@@ -864,6 +864,7 @@ export default function Activities(props) {
                                 <span className="creator-email">
                                     ({event.createdBy?.email || event.contact || 'No email'})
                                 </span>
+                                {renderFollowButton(event.createdBy)}
                             </div>
                             <div className="event-title">{event.title}</div>
                             <div className="event-time" data-emoji="⏰">{formatDate(event.time)} - {formatDate(event.endTime)}</div>
