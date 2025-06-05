@@ -9,11 +9,12 @@ Before you begin, ensure you have the following installed:
 - [MongoDB](https://www.mongodb.com/try/download/community) (v6 or higher)
 - [Git](https://git-scm.com/downloads)
 - A Google Cloud Platform account (for Maps API and OAuth)
+- A UCLA email and access to UCLA_WIFI/eduroam/UCLA VPN connection
 
 ## Setup Instructions
 
-### 0. IMPORTANT: CONNECT TO EDUROAM OR UCLA_WIFI OR UCLA VPN, run into CORS problems otherwise (if you use UCLA_WEB or non UCLA authenticated wifi) This
-is to ensure only UCLA students can use our application, for security purposes. In addition, when signing into the application, use your UCLA email.
+### 0. IMPORTANT: CONNECT TO EDUROAM OR UCLA_WIFI OR UCLA VPN, run into CORS problems otherwise (if you use UCLA_WEB or non UCLA authenticated wifi) 
+This is to ensure only UCLA students can use our application, for security purposes. In addition, when signing into the application, use your UCLA email.
 
 ### 1. Clone the Repository
 ```bash
